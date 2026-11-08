@@ -20,3 +20,11 @@ A learning-and-portfolio project: a document Q&A assistant (RAG) with access con
 - `docs/PROCESS-LOG.md` — chronological log of how the repo was built, including corrections
 - `docs/DATA-CONTRACT.md` — data and permission contract (draft)
 - `data/corpus/` — synthetic documents (fictional company); `eval/` — question set and consistency check
+
+## Quick start (stage 0)
+```
+uv sync
+uv run pytest
+uv run python -m lrh ask "xin chào"   # stub adapter
+python eval/validate.py                 # corpus and question-set consistency
+```

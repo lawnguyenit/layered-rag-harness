@@ -1,0 +1,23 @@
+[project]
+name = "layered-rag-harness"
+version = "0.0.1"
+description = "RAG document Q&A with access control, built layer by layer and measured on a fixed question set"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.7,<3",
+    "tzdata>=2024.1",  # zoneinfo trên Windows cần gói này (mốc reset hạn mức theo giờ Thái Bình Dương)
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lrh"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

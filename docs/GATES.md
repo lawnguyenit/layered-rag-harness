@@ -11,8 +11,8 @@ Số đo:
 - [ ] Độ trễ và chi phí mỗi lượt
 Production:
 - [ ] Khóa API chỉ ở phía server, đọc từ .env
-- [ ] Trần chi tiêu (SPEND_CAP_USD) được thực thi trong code
-- [ ] Chạy bằng một lệnh, phụ thuộc ghim phiên bản
+- [x] Trần chi tiêu (SPEND_CAP_USD) được thực thi trong code (SpendGuard, tests/test_throttled.py; chưa nối vào cấu hình .env)
+- [ ] Chạy bằng một lệnh, phụ thuộc ghim phiên bản (uv.lock đã có; chưa kiểm `uv sync` trên máy chủ repo)
 - [ ] Trang thành phần: adapter mô hình, harness
 
 ## Giai đoạn 1: RAG
