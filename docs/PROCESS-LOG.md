@@ -61,3 +61,11 @@ A chronological record of how this repository was built: what changed, why, and 
 - Latency is not explained by thinking: MINIMAL still took 9-30 s for 1-15 output tokens; identical calls varied by up to 2x. Probably free-tier queueing (inference, not verified).
 - 2 of 16 valid calls returned `500 INTERNAL`. The throttle only retried 429, so each 500 would have become a failed question in the baseline. **Fixed (B-003):** 500/502/503/504 map to a new `TransientError`, which the throttle retries with exponential backoff. 52 tests pass; disabling the fix makes the two new throttle tests fail. The embedder is not yet wrapped by the throttle, and httpx timeouts are not yet mapped.
 **Open decision (owner):** whether the baseline runs with default thinking (HIGH) or MINIMAL. If the level becomes configurable, it must be part of the cache key.
+
+**Experiment: thinking level HIGH vs MINIMAL on all 40 questions (same day).** Owner asked to try both before deciding. Condition: each question sent with every document the asker may read (simulates perfect retrieval plus the tier-1 permission filter), a draft system prompt, `gemma-4-31b-it`, temperature 0. Not the stage-0 baseline. Scripts: `eval/compare_thinking.py`, `eval/summarize_compare.py`; write-up `docs/lab/thinking-level.md`.
+- Rule grading: 32/40 at both levels, no leaks. Hand reading by the agent (not yet checked by the owner): HIGH 38/40, MINIMAL 36/40.
+- Real differences: on C-005 (not in the documents), MINIMAL answered with an off-topic FAQ line instead of "not found"; on G-003 (English question), MINIMAL replied in Vietnamese. HIGH made neither mistake.
+- Cost: MINIMAL used 22 output tokens on average against 417, median latency 18.2 s against 27.3 s, p90 28.6 s against 55.8 s.
+- Each level still lost one question to `500 INTERNAL` after three retries (2-4-8 s backoff); retries are not yet split between 429 and 5xx.
+- Question-set defects found by reading the failures: A-007, B-005 and B-006 have key facts that a correct answer need not contain. They must be fixed before the baseline run.
+**Open decision (owner):** thinking level for the measured track. Agent proposal: HIGH.
