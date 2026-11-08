@@ -24,7 +24,7 @@ Về tên mô hình (sửa 2026-11-08): bản đọc trang giá lúc đầu ch�
 Trang rate-limits cũng ghi: tầng Free không có hạn mức chi tiêu; số RPM/TPM/RPD chỉ xem được trong AI Studio (trang cá nhân, cần đăng nhập); "hạn mức không được đảm bảo"; mô hình preview/thử nghiệm bị giới hạn chặt hơn; Tier 1 cần liên kết tài khoản thanh toán.
 
 ## 2b. Hạn mức tầng Free của tài khoản chủ repo (ảnh chụp AI Studio, 2026-11-08 ~20:30 giờ VN)
-Nguồn: ảnh chủ repo gửi. Số có thể đổi, Google ghi hạn mức "không được đảm bảo". Chưa thấy các dòng gemini-3.1-flash-lite, gemini-3.5-flash, gemini-embedding-2 (ảnh bị cắt).
+Nguồn: ảnh chủ repo gửi. Số có thể đổi, Google ghi hạn mức "không được đảm bảo". Chưa thấy các dòng gemini-3.1-flash-lite và gemini-3.5-flash (nằm giữa hai ảnh, chưa chụp). Dòng Gemini 4 Argon: 0/0/0.
 | Mô hình | RPM | TPM | RPD |
 |---|---|---|---|
 | Gemini 3.8 Flash | 5 | 250K | 20 |
@@ -32,11 +32,14 @@ Nguồn: ảnh chủ repo gửi. Số có thể đổi, Google ghi hạn mức "
 | Gemini 2.5 Flash | 5 | 250K | 20 |
 | Gemini 2.5 Flash Lite | 10 | 250K | 20 |
 | Gemini 2.5 Flash TTS | 3 | 10K | 10 |
+| Gemini Embedding 1 và Gemini Embedding 2 (ảnh thứ hai, cùng ngày) | 100 | 30K | 1.000 |
 | Gemini 2.5 Pro, 3.1 Pro, 2 Flash, 2 Flash Lite | 0 | 0 | 0 (không dùng được ở Free) |
 Hạn mức theo từng mô hình. RPD reset 00:00 giờ Thái Bình Dương = 15:00 giờ VN khi PST (UTC-8, tức mùa đông), 14:00 khi PDT; đây là phép tính múi giờ, không có trong trang.
 Gemini 3.8 Flash có tầng Free (đã xác nhận bằng ảnh), chốt làm mô hình mặc định.
 
-**Hệ quả:** 20 lượt/ngày/mô hình. Bộ 40 câu cần ≥2 ngày cho MỘT lần chạy sinh, chưa tính lần chấm; vòng lặp công cụ tốn 1 lượt cho mỗi bước. Quy tắc bắt buộc cho giai đoạn 0:
+**Embedding:** 30K token/phút nghĩa là nhập 200K token tối thiểu ≈ 7 phút (phép tính, chưa đo); 1.000 lượt/ngày đủ cho vài trăm đoạn nếu không gộp, mỗi câu hỏi truy vấn tốn 1 lượt. Chưa biết một lượt gọi gộp nhiều đoạn có tính là 1 RPD không [chưa kiểm]. Nhập tài liệu phải theo lô có giới hạn tốc độ theo TPM.
+
+**Hệ quả sinh văn bản:** 20 lượt/ngày/mô hình. Bộ 40 câu cần ≥2 ngày cho MỘT lần chạy sinh, chưa tính lần chấm; vòng lặp công cụ tốn 1 lượt cho mỗi bước. Quy tắc bắt buộc cho giai đoạn 0:
 1. Adapter giả (stub) xác định để kiểm đường ống và bộ kiểm hợp đồng, không tốn lượt thật.
 2. Bộ nhớ đệm phản hồi theo (model_id, hash prompt); chạy lại không gọi lại.
 3. Chạy đo có checkpoint và tiếp tục qua nhiều ngày; không tính 429 là câu trả lời.
