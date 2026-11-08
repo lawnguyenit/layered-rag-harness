@@ -18,6 +18,7 @@ Kế hoạch đầy đủ: docs/PLAN.md. Cổng giai đoạn: docs/GATES.md.
 - Ghi số giờ thật của mỗi giai đoạn vào docs/PLAN.md (mục Nhật ký giờ). Đây không phải hạn chót.
 - Mọi dữ kiện kiểm chứng được (giá, phiên bản, giới hạn dịch vụ) phải có nguồn và ngày kiểm. Chưa kiểm thì ghi "chưa kiểm", không đoán.
 - Mỗi thành phần có một trang trong docs/components/ theo mẫu _TEMPLATE.md.
+- Mỗi đợt làm có chủ đề: thêm một mục vào docs/PROCESS-LOG.md (ngày, đổi gì, vì sao, commit/bằng chứng). Sửa sai thì ghi thành dòng riêng, không viết lại lịch sử. Viết tiếng Anh cho người xem repo; không ghi thông tin cá nhân, khóa hay ID tài khoản.
 
 ## Kiểm thử
 - Agent viết code không tự chấm code đó. Việc kiểm thử do một agent riêng chạy, đọc yêu cầu từ docs và test, không đọc lý lẽ của agent viết code.

@@ -4,6 +4,8 @@ Agent đọc file này ở đầu mỗi phiên. Trước khi đóng giai đoạn
 Định nghĩa chỉ số là kiến thức chung, chưa đối chiếu từng nguồn [chưa kiểm]. Nếu dùng mô hình làm giám khảo để chấm, phải đối chiếu một mẫu chấm tay.
 
 ## Giai đoạn 0: mô hình + system prompt
+Trước khi viết corpus và bộ câu hỏi:
+- [ ] docs/DATA-CONTRACT.md được chủ repo duyệt (vai trò, quy ước nhóm E, định dạng bản ghi)
 Số đo:
 - [ ] Tỉ lệ đúng trên bộ câu hỏi cố định (chấm tay) = điểm gốc
 - [ ] Độ trễ và chi phí mỗi lượt

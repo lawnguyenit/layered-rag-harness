@@ -82,6 +82,7 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 | Bảo trì | [đã chốt] là tiêu chí chính khi thêm mảnh | |
 | Ai viết lõi | [đề xuất] chủ repo tự gõ vòng lặp lõi và lọc quyền | Để giải thích được khi bị hỏi |
 | Số đo | [đã chốt] không dồn hết từ đầu, nhắc đúng giai đoạn | Gắn vào cổng từng giai đoạn trong docs/GATES.md |
+| Bước 0.0 hợp đồng dữ liệu và quyền trước corpus (docs/DATA-CONTRACT.md) | [đề xuất] | Chủ repo chỉ ra corpus và câu hỏi phụ thuộc vào nhãn quyền chưa được định nghĩa |
 | Frontend | [đề xuất] CLI trước, web tối thiểu sau | Framework chọn theo bằng chứng job, không theo cảm tính |
 
 ## 6. Rủi ro và điểm mù chưa xử lý
