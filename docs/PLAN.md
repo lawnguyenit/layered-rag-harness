@@ -6,7 +6,7 @@ Ký hiệu: [đã chốt] chủ repo xác nhận; [đề xuất] chờ chủ rep
 ## 1. Mục tiêu: hai đường
 - **Đường 1, sản phẩm (portfolio)**: một ngăn xếp, đi sâu, có số đo. Chứng minh được lớp nào sửa lỗi nào.
 - **Đường 2, phòng thí nghiệm (để hiểu toàn bộ production)**: thay mảnh trong cùng repo (adapter), mỗi thí nghiệm một trang ghi trong docs/lab/. Không chặn đường 1. [đã chốt: chủ repo muốn thử nhiều loại để hiểu cái toàn vẹn của production, không phải để apply vào từng mảng]
-- Không phải mục tiêu: train LLM từ đầu (chỉ là thí nghiệm riêng ở đường 2); đưa lên mạng công khai ở giai đoạn đầu.
+- Không phải mục tiêu: train hoặc chạy mô hình cục bộ (chủ repo bỏ hướng này 2026-11-08; kế hoạch chỉ dùng API, xem docs/PROVIDERS.md); đưa lên mạng công khai ở giai đoạn đầu.
 
 ## 2. Bằng chứng chọn ngăn xếp (mẫu Upwork 2026-11-08)
 Đếm tay trên khoảng 17 mô tả job (3 truy vấn: RAG; LLM + vector + knowledge base; agent + tool + MCP; kết quả truy vấn thứ ba chưa đếm). Số gần đúng, mẫu thiên về từ khóa tìm, không đại diện cả thị trường. [chưa kiểm ở quy mô lớn]
@@ -98,7 +98,7 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 **Có dấu vết, chưa phải bằng chứng đã cài:** các dự án cũ trong Freelancer có Dockerfile (python:3.11-slim, python:3.13-slim, uv 0.10.6), docker-compose với postgres:18-alpine và n8n; dùng Streamlit, pandas, openpyxl, rapidfuzz, Playwright, pytest, python-dotenv, requests, lxml, customtkinter; hướng dẫn Cloudflare Tunnel. Việc có file Docker không chứng minh Docker Desktop đang chạy trên máy.
 **Chưa biết (chờ chạy `scripts/probe-env.ps1`, kết quả ở `data/private/env-report.txt`):** Docker và daemon, WSL, bản Python/uv/Node/Git, PostgreSQL/pgvector local, driver NVIDIA/CUDA, Ollama, Visual Studio Build Tools, thư viện AI đã cài, cổng đang bị chiếm.
 **Giới hạn của agent:** máy ảo của agent là Linux 2 CPU, 3,8 GB RAM, không GPU, không Docker, không thấy máy Windows. Tác vụ GPU, Docker, gọi API thật phải chạy trên máy chủ repo.
-**Hệ quả:** mô hình mở 7B Q4 chạy cục bộ được (4-6 GB VRAM theo hướng dẫn Ollama); 13B không vừa; QLoRA 3B-8B đạt mức VRAM tối thiểu theo tài liệu Unsloth (3,5/5/6 GB), chưa đo thực tế trên máy này.
+**Hệ quả (lịch sử, hướng AI cục bộ đã bỏ):** mô hình mở 7B Q4 chạy cục bộ được (4-6 GB VRAM theo hướng dẫn Ollama); 13B không vừa; QLoRA 3B-8B đạt mức VRAM tối thiểu theo tài liệu Unsloth (3,5/5/6 GB), chưa đo thực tế trên máy này.
 
 ## 7. Chưa biết
 - Số giờ thật cho từng giai đoạn (ghi vào Nhật ký giờ).
