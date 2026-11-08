@@ -24,6 +24,7 @@ Về tên mô hình (sửa 2026-11-08): bản đọc trang giá lúc đầu ch�
 Trang rate-limits cũng ghi: tầng Free không có hạn mức chi tiêu; số RPM/TPM/RPD chỉ xem được trong AI Studio (trang cá nhân, cần đăng nhập); "hạn mức không được đảm bảo"; mô hình preview/thử nghiệm bị giới hạn chặt hơn; Tier 1 cần liên kết tài khoản thanh toán.
 
 ## 2b. Hạn mức tầng Free của tài khoản chủ repo (ảnh chụp AI Studio, 2026-11-08 ~20:30 giờ VN)
+Nguồn chuẩn: `Brain/Accounts/Gemini-API.md` (vault); bảng dưới chỉ là bản sao tại thời điểm chụp. Khi lệch, vault đúng hơn. Chủ repo báo khi AI Studio đổi, agent cập nhật cả hai.
 Nguồn: ảnh chủ repo gửi. Số có thể đổi, Google ghi hạn mức "không được đảm bảo". Chưa thấy các dòng gemini-3.1-flash-lite và gemini-3.5-flash (nằm giữa hai ảnh, chưa chụp). Dòng Gemini 4 Argon: 0/0/0.
 | Mô hình | RPM | TPM | RPD |
 |---|---|---|---|
@@ -42,7 +43,7 @@ Gemini 3.8 Flash có tầng Free (đã xác nhận bằng ảnh).
 **Gemma 4 qua Gemini API (ảnh thứ ba): đây là API chạy trên máy chủ Google, không phải AI cục bộ.** ID mô hình và hỗ trợ gọi hàm, system instruction, thinking: trang Google (ghi "tài liệu này đã lỗi thời, xem gemma.ai") và một bài blog bên thứ ba; context 256K chỉ từ bài blog. Chưa kiểm: JSON schema, cách trả kết quả hàm về mô hình, chính sách dữ liệu của tầng Free cho Gemma (giả định giống tầng Free chung: Google dùng nội dung để cải thiện sản phẩm), chất lượng tiếng Việt, chất lượng so với 3.8 Flash.
 Giới hạn thật là **16K token/phút**: một câu RAG ~4K token vào thì tối đa ~4 câu/phút, 40 câu ≈ 10 phút; một yêu cầu vượt 16K token có thể bị từ chối (suy luận). Ngân sách ngữ cảnh RAG mỗi câu đặt ≤ ~8K token.
 
-**Phân vai đề xuất (chờ chủ repo xác nhận):** mô hình đo chính và chạy phát triển = `gemma-4-31b-it` (14.400 lượt/ngày giải quyết điểm nghẽn); Gemini 3.8 Flash = đường tham chiếu, chạy tập con câu hỏi (20 lượt/ngày) để so chất lượng. Mỗi kết quả ghi rõ mô hình; hai đường không gộp số.
+**Phân vai (chủ repo xác nhận 2026-11-08 20:56: dùng chủ yếu Gemma):** mô hình đo chính và chạy phát triển = `gemma-4-31b-it` (14.400 lượt/ngày giải quyết điểm nghẽn); Gemini 3.8 Flash = đường tham chiếu, chạy tập con câu hỏi (20 lượt/ngày) để so chất lượng. Mỗi kết quả ghi rõ mô hình; hai đường không gộp số.
 
 **Embedding:** 30K token/phút nghĩa là nhập 200K token tối thiểu ≈ 7 phút (phép tính, chưa đo); 1.000 lượt/ngày đủ cho vài trăm đoạn nếu không gộp, mỗi câu hỏi truy vấn tốn 1 lượt. Chưa biết một lượt gọi gộp nhiều đoạn có tính là 1 RPD không [chưa kiểm]. Nhập tài liệu phải theo lô có giới hạn tốc độ theo TPM.
 
