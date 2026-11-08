@@ -20,7 +20,8 @@ Dòng Claude chỉ để tham khảo, không dùng trong kế hoạch miễn ph�
 | Embedding | gemini-embedding-2 | Có (không có batch) | $0,20 (batch $0,10) |
 | Embedding dự phòng | gemini-embedding-001 | Có | $0,15 (batch $0,075) |
 
-Điểm khác với giả định cũ: trang giá Gemini **không có "3.8 Flash" hay "3.5 Flash-Lite"**. Tài liệu từng nhắc 3.8 Flash là bản ổn định, nhưng chưa thấy mục giá hay trạng thái miễn phí cho nó. Điều "3.8 đang miễn phí" là chưa xác nhận: kiểm trong AI Studio trước khi dựa vào. Mặc định dùng 3.1 Flash-Lite.
+Về tên mô hình (sửa 2026-11-08): bản đọc trang giá lúc đầu chỉ phủ 100.000/106.069 ký tự và không thấy "3.8 Flash" hay "3.5 Flash-Lite", nên kết luận "trang giá không có" là chưa đủ căn cứ. Trang rate-limits (bản chủ repo đính kèm) liệt kê Gemini 3.8 Flash, 3.6 Flash, 3.5 Flash-Lite, 3.1 Flash Lite trong bảng Batch, tức các mô hình này tồn tại. Chúng có tầng miễn phí hay không, và giá, vẫn **chưa xác nhận**: kiểm trong AI Studio. Mặc định dùng 3.1 Flash-Lite.
+Trang rate-limits cũng ghi: tầng Free không có hạn mức chi tiêu; số RPM/TPM/RPD chỉ xem được trong AI Studio (trang cá nhân, cần đăng nhập); "hạn mức không được đảm bảo"; mô hình preview/thử nghiệm bị giới hạn chặt hơn; Tier 1 cần liên kết tài khoản thanh toán.
 
 ## 3. Ước lượng chi phí một lần chạy bộ đo (40 câu)
 Giả định, không phải số đo: mỗi câu 4.000 token vào (đoạn truy xuất), 500 token ra; chưa tính lần gọi chấm điểm (nhân khoảng 2 nếu chấm bằng mô hình).
