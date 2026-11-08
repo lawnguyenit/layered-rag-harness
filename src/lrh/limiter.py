@@ -16,6 +16,12 @@ from lrh.contracts import GenerateRequest, GenerateResult, ModelAdapter, estimat
 LA = ZoneInfo("America/Los_Angeles")
 
 
+def next_pacific_midnight(now: float) -> float:
+    """Mốc reset RPD kế tiếp (epoch giây): 00:00 giờ Thái Bình Dương, theo tài liệu Google (chưa quan sát thực tế)."""
+    day = datetime.fromtimestamp(now, LA).date()
+    return datetime.combine(day + timedelta(days=1), dtime.min, tzinfo=LA).timestamp()
+
+
 class Clock(Protocol):
     def now(self) -> float: ...
     def sleep(self, seconds: float) -> None: ...
@@ -57,9 +63,7 @@ class RateLimiter:
             self._day_count = 0
 
     def next_reset(self, now: float) -> float:
-        day = datetime.fromtimestamp(now, LA).date()
-        nxt = datetime.combine(day + timedelta(days=1), dtime.min, tzinfo=LA)
-        return nxt.timestamp()
+        return next_pacific_midnight(now)
 
     def acquire(self, est_tokens: int) -> Reservation:
         lim = self.limits

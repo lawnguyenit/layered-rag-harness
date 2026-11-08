@@ -5,6 +5,8 @@ description = "RAG document Q&A with access control, built layer by layer and me
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.7,<3",
+    "google-genai>=2.33,<3",  # đã kiểm tên lớp/trường trên 2.33.0
+    "python-dotenv>=1.0",
     "tzdata>=2024.1",  # zoneinfo trên Windows cần gói này (mốc reset hạn mức theo giờ Thái Bình Dương)
 ]
 
@@ -21,3 +23,4 @@ packages = ["src/lrh"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = ["live: gọi API thật, tốn lượt free; chỉ chạy khi có GEMINI_API_KEY và LRH_LIVE=1"]

@@ -71,11 +71,24 @@ class Embedder(Protocol):
     model_id: str
     provider: str
 
-    def embed(self, texts: list[str], task: Literal["document", "query"] = "document") -> EmbedResult: ...
+    def embed(
+        self,
+        texts: list[str],
+        task: Literal["document", "query"] = "document",
+        titles: Optional[list[Optional[str]]] = None,
+    ) -> EmbedResult: ...
 
 
 class AdapterError(Exception):
     """Lỗi gốc của mọi lỗi adapter."""
+
+
+class ProviderError(AdapterError):
+    """Nhà cung cấp trả lỗi không thuộc nhóm hạn mức (4xx/5xx khác), hoặc phản hồi không dùng được."""
+
+
+class EmptyResponse(ProviderError):
+    """Phản hồi không có văn bản (bị chặn, hết token cho phần trả lời...). Không được coi là câu trả lời rỗng hợp lệ."""
 
 
 class RateLimited(AdapterError):

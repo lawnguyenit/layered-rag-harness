@@ -48,7 +48,12 @@ class StubModel:
             latency_ms=0.0,
         )
 
-    def embed(self, texts: list[str], task: Literal["document", "query"] = "document") -> EmbedResult:
+    def embed(
+        self,
+        texts: list[str],
+        task: Literal["document", "query"] = "document",
+        titles: Optional[list[Optional[str]]] = None,
+    ) -> EmbedResult:
         vectors = [self._vec(t) for t in texts]
         return EmbedResult(
             vectors=vectors,
