@@ -54,7 +54,7 @@ Hỏi:  người dùng -> xác thực -> lọc theo quyền (trước khi tìm) 
 Vòng lặp công cụ (đã đối chiếu spec MCP 2026-07-28 và tài liệu tool use của Claude API): host đưa danh sách công cụ (`tools/list`) vào lời gọi mô hình; mô hình trả khối `tool_use` rồi dừng; host xin phép, gửi `tools/call` tới server; kết quả quay về dưới dạng `tool_result`; lặp tới khi có câu trả lời cuối. Mô hình không tự kết nối tới server nào.
 
 **Adapter (mảnh thay được).** Hợp đồng đặt ở mức việc cần làm, ví dụ `tìm(câu hỏi, phạm vi quyền) -> các đoạn kèm mã nguồn`. Mỗi adapter qua cùng bộ test hợp đồng, kể cả ca không có quyền.
-- Mô hình: nhà cung cấp và tên mô hình là cấu hình. Dev bằng mô hình rẻ, đo chốt bằng mô hình mạnh. [đề xuất]
+- Mô hình: chỉ dùng tầng miễn phí Gemini API; tên mô hình là cấu hình. Gemma 4 31B là mô hình dev và đo chính, Gemma 4 26B dự phòng, Gemini 3.8 Flash là đường tham chiếu (20 lượt/ngày). Chi tiết và hạn mức: docs/PROVIDERS.md. [đã chốt 2026-11-08]
 - Kho tìm kiếm: PostgreSQL+pgvector (đường 1); lab: CSDL vector chuyên dụng, Elasticsearch/OpenSearch, MongoDB. MySQL Community không có `DISTANCE()` (chỉ HeatWave/MySQL AI), nên chỉ lưu metadata. SQL Server 2025: kiểu và hàm vector GA, chỉ mục DiskANN preview vào 11/2025, trạng thái hiện tại [chưa kiểm].
 - Bộ điều phối: vòng lặp tự viết (đường 1); LangGraph (lab).
 - Vận chuyển MCP: stdio và Streamable HTTP, cùng một server (lab).
@@ -77,7 +77,7 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 |---|---|---|
 | Hướng RAG, tên repo `layered-rag-harness` | [đã chốt] 2026-11-08 | Chủ repo tạo thư mục theo tên này |
 | Ngăn xếp đường 1: Python, FastAPI, PostgreSQL+pgvector, Docker | [đề xuất] | Dựa trên mẫu job mục 2 |
-| Mô hình: dev rẻ, đo chốt mạnh, đổi qua cấu hình | [đề xuất] | Giá tại 2026-11-08: Sonnet 5.5 $2/$10, Haiku 5.5 $0.10/$0.50 mỗi triệu token (input/output) |
+| Mô hình: Gemma 4 31B chính, 26B dự phòng, 3.8 Flash tham chiếu; chỉ tầng miễn phí | [đã chốt] | Hạn mức thật từ AI Studio 2026-11-08: Gemma 14.400 lượt/ngày, 16K token/phút; 3.8 Flash 20 lượt/ngày. Claude loại vì không có tầng miễn phí |
 | Thời gian và thu nhập | [đã chốt] không dùng làm tiêu chí | Chủ repo đã tự cân nhắc. Không đặt hạn chót cứng; điểm dừng 1 là cổng đánh giá |
 | Bảo trì | [đã chốt] là tiêu chí chính khi thêm mảnh | |
 | Ai viết lõi | [đề xuất] chủ repo tự gõ vòng lặp lõi và lọc quyền | Để giải thích được khi bị hỏi |
