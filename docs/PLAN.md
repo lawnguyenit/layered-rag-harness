@@ -93,12 +93,19 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 - **Trung thực**: ghi rõ có dùng AI hỗ trợ viết mã; chỉ nêu số đo đã đo.
 - **Phình phạm vi**: mỗi lớp thêm vào phải sửa một lỗi có trong bộ đo.
 
+## 6b. Môi trường chạy thật (cập nhật 2026-11-08)
+**Đã biết (từ ảnh System > About do chủ repo gửi):** Acer Predator PHN16-72; Intel Core i9-14900HX; RAM 32 GB; GPU NVIDIA RTX 4060 Laptop 8 GB VRAM + Intel UHD; ổ 954 GB, đã dùng 683 GB (còn khoảng 271 GB).
+**Có dấu vết, chưa phải bằng chứng đã cài:** các dự án cũ trong Freelancer có Dockerfile (python:3.11-slim, python:3.13-slim, uv 0.10.6), docker-compose với postgres:18-alpine và n8n; dùng Streamlit, pandas, openpyxl, rapidfuzz, Playwright, pytest, python-dotenv, requests, lxml, customtkinter; hướng dẫn Cloudflare Tunnel. Việc có file Docker không chứng minh Docker Desktop đang chạy trên máy.
+**Chưa biết (chờ chạy `scripts/probe-env.ps1`, kết quả ở `data/private/env-report.txt`):** Docker và daemon, WSL, bản Python/uv/Node/Git, PostgreSQL/pgvector local, driver NVIDIA/CUDA, Ollama, Visual Studio Build Tools, thư viện AI đã cài, cổng đang bị chiếm.
+**Giới hạn của agent:** máy ảo của agent là Linux 2 CPU, 3,8 GB RAM, không GPU, không Docker, không thấy máy Windows. Tác vụ GPU, Docker, gọi API thật phải chạy trên máy chủ repo.
+**Hệ quả:** mô hình mở 7B Q4 chạy cục bộ được (4-6 GB VRAM theo hướng dẫn Ollama); 13B không vừa; QLoRA 3B-8B đạt mức VRAM tối thiểu theo tài liệu Unsloth (3,5/5/6 GB), chưa đo thực tế trên máy này.
+
 ## 7. Chưa biết
 - Số giờ thật cho từng giai đoạn (ghi vào Nhật ký giờ).
 - Framework web nào nên dùng cho giao diện (ngoài CLI).
 - Chất lượng tiếng Việt của embedding và mô hình.
 - Trạng thái DiskANN của SQL Server 2025 hiện tại.
-- Máy chủ repo có Docker và đủ RAM cho PostgreSQL local hay không.
+- Docker/WSL/PostgreSQL local trên máy chủ repo: xem 6b, chờ báo cáo từ scripts/probe-env.ps1.
 
 ## 8. Nhật ký giờ
 | Giai đoạn | Giờ thật | Ghi chú |
