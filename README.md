@@ -19,3 +19,4 @@ A learning-and-portfolio project: a document Q&A assistant (RAG) with access con
 - `docs/lab/` — small throwaway experiments (swap one part, record what was learned)
 - `docs/PROCESS-LOG.md` — chronological log of how the repo was built, including corrections
 - `docs/DATA-CONTRACT.md` — data and permission contract (draft)
+- `data/corpus/` — synthetic documents (fictional company); `eval/` — question set and consistency check
