@@ -32,10 +32,17 @@ Nguồn: ảnh chủ repo gửi. Số có thể đổi, Google ghi hạn mức "
 | Gemini 2.5 Flash | 5 | 250K | 20 |
 | Gemini 2.5 Flash Lite | 10 | 250K | 20 |
 | Gemini 2.5 Flash TTS | 3 | 10K | 10 |
+| Gemma 4 31B (`gemma-4-31b-it`) | 30 | 16K | 14.400 |
+| Gemma 4 26B (`gemma-4-26b-a4b-it`) | 30 | 16K | 14.400 |
 | Gemini Embedding 1 và Gemini Embedding 2 (ảnh thứ hai, cùng ngày) | 100 | 30K | 1.000 |
 | Gemini 2.5 Pro, 3.1 Pro, 2 Flash, 2 Flash Lite | 0 | 0 | 0 (không dùng được ở Free) |
 Hạn mức theo từng mô hình. RPD reset 00:00 giờ Thái Bình Dương = 15:00 giờ VN khi PST (UTC-8, tức mùa đông), 14:00 khi PDT; đây là phép tính múi giờ, không có trong trang.
-Gemini 3.8 Flash có tầng Free (đã xác nhận bằng ảnh), chốt làm mô hình mặc định.
+Gemini 3.8 Flash có tầng Free (đã xác nhận bằng ảnh).
+
+**Gemma 4 qua Gemini API (ảnh thứ ba): đây là API chạy trên máy chủ Google, không phải AI cục bộ.** ID mô hình và hỗ trợ gọi hàm, system instruction, thinking: trang Google (ghi "tài liệu này đã lỗi thời, xem gemma.ai") và một bài blog bên thứ ba; context 256K chỉ từ bài blog. Chưa kiểm: JSON schema, cách trả kết quả hàm về mô hình, chính sách dữ liệu của tầng Free cho Gemma (giả định giống tầng Free chung: Google dùng nội dung để cải thiện sản phẩm), chất lượng tiếng Việt, chất lượng so với 3.8 Flash.
+Giới hạn thật là **16K token/phút**: một câu RAG ~4K token vào thì tối đa ~4 câu/phút, 40 câu ≈ 10 phút; một yêu cầu vượt 16K token có thể bị từ chối (suy luận). Ngân sách ngữ cảnh RAG mỗi câu đặt ≤ ~8K token.
+
+**Phân vai đề xuất (chờ chủ repo xác nhận):** mô hình đo chính và chạy phát triển = `gemma-4-31b-it` (14.400 lượt/ngày giải quyết điểm nghẽn); Gemini 3.8 Flash = đường tham chiếu, chạy tập con câu hỏi (20 lượt/ngày) để so chất lượng. Mỗi kết quả ghi rõ mô hình; hai đường không gộp số.
 
 **Embedding:** 30K token/phút nghĩa là nhập 200K token tối thiểu ≈ 7 phút (phép tính, chưa đo); 1.000 lượt/ngày đủ cho vài trăm đoạn nếu không gộp, mỗi câu hỏi truy vấn tốn 1 lượt. Chưa biết một lượt gọi gộp nhiều đoạn có tính là 1 RPD không [chưa kiểm]. Nhập tài liệu phải theo lô có giới hạn tốc độ theo TPM.
 
@@ -44,7 +51,8 @@ Gemini 3.8 Flash có tầng Free (đã xác nhận bằng ảnh), chốt làm m�
 2. Bộ nhớ đệm phản hồi theo (model_id, hash prompt); chạy lại không gọi lại.
 3. Chạy đo có checkpoint và tiếp tục qua nhiều ngày; không tính 429 là câu trả lời.
 4. Ưu tiên chấm bằng luật xác định (chuỗi bị cấm xuất hiện = rò rỉ, mẫu từ chối) và chấm tay mẫu; LLM chấm chỉ dùng khi cần và tốn lượt riêng.
-5. Không trộn mô hình giữa các lần đo để "lấy thêm hạn mức": kết quả không so sánh được.
+5. Không trộn mô hình trong một lần đo để "lấy thêm hạn mức": kết quả không so sánh được. Với Gemma 4 là mô hình đo chính, nhu cầu này không còn.
+6. Bộ chạy đo giới hạn tốc độ theo cả RPM và TPM (token ước lượng trước khi gửi), không chỉ theo số lượt.
 
 ## 3. Ước lượng chi phí một lần chạy bộ đo (40 câu)
 Giả định, không phải số đo: mỗi câu 4.000 token vào (đoạn truy xuất), 500 token ra; chưa tính lần gọi chấm điểm (nhân khoảng 2 nếu chấm bằng mô hình).
