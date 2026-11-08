@@ -95,8 +95,15 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 
 ## 6b. Môi trường chạy thật (cập nhật 2026-11-08)
 **Đã biết (từ ảnh System > About do chủ repo gửi):** Acer Predator PHN16-72; Intel Core i9-14900HX; RAM 32 GB; GPU NVIDIA RTX 4060 Laptop 8 GB VRAM + Intel UHD; ổ 954 GB, đã dùng 683 GB (còn khoảng 271 GB).
-**Có dấu vết, chưa phải bằng chứng đã cài:** các dự án cũ trong Freelancer có Dockerfile (python:3.11-slim, python:3.13-slim, uv 0.10.6), docker-compose với postgres:18-alpine và n8n; dùng Streamlit, pandas, openpyxl, rapidfuzz, Playwright, pytest, python-dotenv, requests, lxml, customtkinter; hướng dẫn Cloudflare Tunnel. Việc có file Docker không chứng minh Docker Desktop đang chạy trên máy.
-**Chưa biết (chờ chạy `scripts/probe-env.ps1`, kết quả ở `data/private/env-report.txt`):** Docker và daemon, WSL, bản Python/uv/Node/Git, PostgreSQL/pgvector local, driver NVIDIA/CUDA, Ollama, Visual Studio Build Tools, thư viện AI đã cài, cổng đang bị chiếm.
+**Đã đo bằng scripts/probe-env.ps1 (2026-11-08 20:24, máy chủ repo):**
+- Windows 11 Home; CPU i9-14900HX (24 nhân, 32 luồng); RAM 31,7 GB; RTX 4060 Laptop 8 GB (driver 621.14); Intel UHD. Ổ C: còn 116,6 GB, ổ D: còn 152,9 GB. Chế độ nguồn Balanced.
+- **Docker 29.9.2, Compose v5.6.1, Docker Desktop đang chạy** (daemon báo 32 CPU, ~15,5 GiB RAM). WSL2: Ubuntu và docker-desktop đang chạy. Trường "virtualization" báo False nhưng WSL2 và Docker đang chạy, nên không coi là chặn.
+- Image sẵn có liên quan: postgres:18-alpine, postgres:16-alpine, python:3.12-slim, alpine:3.20, n8n. **Không có image pgvector**: image postgres trần không kèm extension pgvector (kiến thức chung, chưa kiểm nguồn hiện tại); cần dùng image có pgvector, tên cụ thể kiểm khi dựng.
+- Python 3.13.9 (miniconda), uv 0.10.6, Node 22.17.0, npm 10.9.2, Git 2.56.0. Không thấy: pnpm, psql, pg_isready, cloudflared, py launcher. Có MySQL Server 8.0.44 (Community) và sqlcmd 16.
+- Thư viện trong môi trường mặc định (conda base): pydantic, pytest, uvicorn, streamlit, playwright, torch 2.12 CUDA. **Không có** fastapi, sqlalchemy, psycopg, google-genai, mcp. Dùng venv riêng của repo (uv), không dùng base.
+- **Cổng 8000 và 5678 đang có tiến trình lắng nghe** (cùng một PID). 5432 và 11434 trống. Quyết định: API của repo không dùng cổng 8000 mặc định; chọn cổng khác khi dựng, và kiểm tra lại cổng trước khi chạy.
+- Ghi chú sạch: Ollama, CUDA Toolkit, VS Build Tools không có; không cần vì hướng AI cục bộ đã bỏ.
+**Dấu vết dự án cũ:** Dockerfile/compose (python 3.11/3.13, uv, postgres, n8n), một image có tag trỏ tới registry AWS ECR (chưa biết đã deploy hay chưa), nhiều dự án Python/Go/Node trong D:\Project.
 **Giới hạn của agent:** máy ảo của agent là Linux 2 CPU, 3,8 GB RAM, không GPU, không Docker, không thấy máy Windows. Tác vụ GPU, Docker, gọi API thật phải chạy trên máy chủ repo.
 **Hệ quả (lịch sử, hướng AI cục bộ đã bỏ):** mô hình mở 7B Q4 chạy cục bộ được (4-6 GB VRAM theo hướng dẫn Ollama); 13B không vừa; QLoRA 3B-8B đạt mức VRAM tối thiểu theo tài liệu Unsloth (3,5/5/6 GB), chưa đo thực tế trên máy này.
 
@@ -105,7 +112,7 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 - Framework web nào nên dùng cho giao diện (ngoài CLI).
 - Chất lượng tiếng Việt của embedding và mô hình.
 - Trạng thái DiskANN của SQL Server 2025 hiện tại.
-- Docker/WSL/PostgreSQL local trên máy chủ repo: xem 6b, chờ báo cáo từ scripts/probe-env.ps1.
+- Dung lượng ổ chứa dữ liệu Docker Desktop (không nằm trong báo cáo); pgvector chạy được trên image nào cụ thể (kiểm khi dựng).
 
 ## 8. Nhật ký giờ
 | Giai đoạn | Giờ thật | Ghi chú |

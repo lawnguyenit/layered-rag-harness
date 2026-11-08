@@ -1,10 +1,11 @@
 # probe-env.ps1 - read-only environment probe for layered-rag-harness.
-# Run from the repo root in PowerShell:  powershell -ExecutionPolicy Bypass -File scripts\probe-env.ps1
+# Run from anywhere in PowerShell (output is always anchored to the repo root):  powershell -ExecutionPolicy Bypass -File scripts\probe-env.ps1
 # Writes data\private\env-report.txt (git-ignored). Does NOT print env vars, PATH, keys or user names.
 # It only runs version/status commands. It installs and changes nothing.
 
 $ErrorActionPreference = 'SilentlyContinue'
-$out = Join-Path (Get-Location) 'data\private'
+$root = Split-Path $PSScriptRoot -Parent
+$out = Join-Path $root 'data\private'
 New-Item -ItemType Directory -Force -Path $out | Out-Null
 $file = Join-Path $out 'env-report.txt'
 $lines = New-Object System.Collections.Generic.List[string]
