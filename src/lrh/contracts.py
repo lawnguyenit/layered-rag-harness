@@ -91,6 +91,11 @@ class EmptyResponse(ProviderError):
     """Phản hồi không có văn bản (bị chặn, hết token cho phần trả lời...). Không được coi là câu trả lời rỗng hợp lệ."""
 
 
+class TransientError(ProviderError):
+    """Lỗi tạm phía nhà cung cấp (HTTP 500/502/503/504): gửi lại nguyên yêu cầu có thể thành công.
+    Quan sát thật: gemma-4-31b-it trả 500 INTERNAL ở 2/16 lượt (eval/results/thinking-probe-*.json, 2026-11-08)."""
+
+
 class RateLimited(AdapterError):
     """Nhà cung cấp báo vượt hạn mức (ví dụ HTTP 429). retry_after tính bằng giây nếu biết."""
 

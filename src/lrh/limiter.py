@@ -10,7 +10,7 @@ from datetime import datetime, time as dtime, timedelta
 from typing import Optional, Protocol
 from zoneinfo import ZoneInfo
 
-from lrh.contracts import DailyQuotaExhausted, RateLimited, RequestTooLarge, SpendCapExceeded
+from lrh.contracts import DailyQuotaExhausted, RateLimited, RequestTooLarge, SpendCapExceeded, TransientError
 from lrh.contracts import GenerateRequest, GenerateResult, ModelAdapter, estimate_request_tokens
 
 LA = ZoneInfo("America/Los_Angeles")
@@ -130,7 +130,7 @@ class SpendGuard:
 
 
 class ThrottledModel:
-    """Bọc adapter: giới hạn RPM/TPM/RPD, thử lại khi nhà cung cấp báo RateLimited, kiểm trần chi tiêu."""
+    """Bọc adapter: giới hạn RPM/TPM/RPD, thử lại khi nhà cung cấp báo RateLimited hoặc TransientError (5xx), kiểm trần chi tiêu."""
 
     def __init__(
         self,
@@ -168,6 +168,13 @@ class ThrottledModel:
                     raise
                 delay = e.retry_after if e.retry_after is not None else min(self.backoff_cap, self.backoff_base * 2 ** retries)
                 self.limiter.clock.sleep(delay)
+                retries += 1
+                continue
+            except TransientError:
+                # 5xx: gửi lại nguyên yêu cầu sau backoff lũy thừa; không đánh dấu rate_limited
+                if retries >= self.max_retries:
+                    raise
+                self.limiter.clock.sleep(min(self.backoff_cap, self.backoff_base * 2 ** retries))
                 retries += 1
                 continue
             self.limiter.settle(res, out.usage.prompt_tokens + out.usage.output_tokens)

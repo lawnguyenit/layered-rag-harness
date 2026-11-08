@@ -17,6 +17,7 @@ from lrh.contracts import (
     GenerateResult,
     ProviderError,
     RateLimited,
+    TransientError,
     Usage,
     estimate_tokens,
 )
@@ -62,6 +63,8 @@ def map_error(e: Any) -> Exception:
             return DailyQuotaExhausted(next_pacific_midnight(time.time()))
         retry = next((_parse_seconds(d.get("retryDelay")) for d in details if str(d.get("@type", "")).endswith("RetryInfo")), None)
         return RateLimited(msg, retry_after=retry)
+    if code in (500, 502, 503, 504):
+        return TransientError(msg)
     return ProviderError(msg)
 
 

@@ -1,0 +1,262 @@
+{
+  "measured_at": "2026-11-08T15:35:26+00:00",
+  "model": "gemma-4-31b-it",
+  "sdk": "google-genai 2.34.0",
+  "temperature": 0.0,
+  "prompts": {
+    "short": "Trả lời đúng một từ: xin chào bằng tiếng Anh?",
+    "rag": "Chỉ dựa vào tài liệu sau để trả lời ngắn gọn.\n\n<tài liệu>\nNếu thực phẩm bị hư hỏng hoặc thiếu, hãy báo trong vòng 24 giờ kể từ khi nhận hàng, kèm ảnh chụp.\nTiền hoàn được chuyển về phương thức thanh toán gốc trong 5-7 ngày làm việc.\nNếu đơn giao trễ, hãy liên hệ hỗ trợ để được xem xét bồi thường.\n</tài liệu>\n\nCâu hỏi: Mình cần báo món hư hỏng trong bao lâu sau khi nhận hàng?"
+  },
+  "configs": {
+    "default": {},
+    "level=minimal": {
+      "thinking_level": "MINIMAL"
+    },
+    "level=low": {
+      "thinking_level": "LOW"
+    },
+    "level=high": {
+      "thinking_level": "HIGH"
+    },
+    "budget=0": {
+      "thinking_budget": 0
+    }
+  },
+  "runs": [
+    {
+      "config": "default",
+      "prompt": "short",
+      "max_output_tokens": 512,
+      "latency_ms": 23913,
+      "prompt_tokens": 13,
+      "candidates_tokens": 1,
+      "thoughts_tokens": 112,
+      "total_tokens": 126,
+      "finish_reason": "FinishReason.STOP",
+      "n_parts": 2,
+      "n_thought_parts": 1,
+      "text_chars": 5,
+      "text_head": "Hello"
+    },
+    {
+      "config": "default",
+      "prompt": "short",
+      "max_output_tokens": 512,
+      "latency_ms": 29934,
+      "prompt_tokens": 13,
+      "candidates_tokens": 1,
+      "thoughts_tokens": 112,
+      "total_tokens": 126,
+      "finish_reason": "FinishReason.STOP",
+      "n_parts": 2,
+      "n_thought_parts": 1,
+      "text_chars": 5,
+      "text_head": "Hello"
+    },
+    {
+      "config": "default",
+      "prompt": "rag",
+      "max_output_tokens": 512,
+      "latency_ms": 14920,
+      "prompt_tokens": 115,
+      "candidates_tokens": 12,
+      "thoughts_tokens": 190,
+      "total_tokens": 317,
+      "finish_reason": "FinishReason.STOP",
+      "n_parts": 2,
+      "n_thought_parts": 1,
+      "text_chars": 38,
+      "text_head": "Trong vòng 24 giờ kể từ khi nhận hàng."
+    },
+    {
+      "config": "default",
+      "prompt": "rag",
+      "max_output_tokens": 512,
+      "latency_ms": 682,
+      "error": "500 INTERNAL: Internal error encountered."
+    },
+    {
+      "config": "level=minimal",
+      "prompt": "short",
+      "max_output_tokens": 512,
+      "latency_ms": 30489,
+      "prompt_tokens": 13,
+      "candidates_tokens": 1,
+      "thoughts_tokens": null,
+      "total_tokens": 14,
+      "finish_reason": "FinishReason.STOP",
+      "n_parts": 2,
+      "n_thought_parts": 1,
+      "text_chars": 5,
+      "text_head": "Hello"
+    },
+    {
+      "config": "level=minimal",
+      "prompt": "short",
+      "max_output_tokens": 512,
+      "latency_ms": 479,
+      "error": "500 INTERNAL: Internal error encountered."
+    },
+    {
+      "config": "level=minimal",
+      "prompt": "rag",
+      "max_output_tokens": 512,
+      "latency_ms": 9386,
+      "prompt_tokens": 115,
+      "candidates_tokens": 15,
+      "thoughts_tokens": null,
+      "total_tokens": 130,
+      "finish_reason": "FinishReason.STOP",
+      "n_parts": 2,
+      "n_thought_parts": 1,
+      "text_chars": 50,
+      "text_head": "Bạn cần báo trong vòng 24 giờ kể từ khi nhận hàng."
+    },
+    {
+      "config": "level=minimal",
+      "prompt": "rag",
+      "max_output_tokens": 512,
+      "latency_ms": 17256,
+      "prompt_tokens": 115,
+      "candidates_tokens": 15,
+      "thoughts_tokens": null,
+      "total_tokens": 130,
+      "finish_reason": "FinishReason.STOP",
+      "n_parts": 2,
+      "n_thought_parts": 1,
+      "text_chars": 50,
+      "text_head": "Bạn cần báo trong vòng 24 giờ kể từ khi nhận hàng."
+    },
+    {
+      "config": "level=low",
+      "prompt": "short",
+      "max_output_tokens": 512,
+      "latency_ms": 260,
+      "error": "400 INVALID_ARGUMENT: Thinking level is not supported for this model."
+    },
+    {
+      "config": "level=low",
+      "prompt": "short",
+      "max_output_tokens": 512,
+      "latency_ms": 319,
+      "error": "400 INVALID_ARGUMENT: Thinking level is not supported for this model."
+    },
+    {
+      "config": "level=low",
+      "prompt": "rag",
+      "max_output_tokens": 512,
+      "latency_ms": 678,
+      "error": "400 INVALID_ARGUMENT: Thinking level is not supported for this model."
+    },
+    {
+      "config": "level=low",
+      "prompt": "rag",
+      "max_output_tokens": 512,
+      "latency_ms": 445,
+      "error": "400 INVALID_ARGUMENT: Thinking level is not supported for this model."
+    },
+    {
+      "config": "level=high",
+      "prompt": "short",
+      "max_output_tokens": 512,
+      "latency_ms": 18400,
+      "prompt_tokens": 13,
+      "candidates_tokens": 1,
+      "thoughts_tokens": 112,
+      "total_tokens": 126,
+      "finish_reason": "FinishReason.STOP",
+      "n_parts": 2,
+      "n_thought_parts": 1,
+      "text_chars": 5,
+      "text_head": "Hello"
+    },
+    {
+      "config": "level=high",
+      "prompt": "short",
+      "max_output_tokens": 512,
+      "latency_ms": 35909,
+      "prompt_tokens": 13,
+      "candidates_tokens": 1,
+      "thoughts_tokens": 112,
+      "total_tokens": 126,
+      "finish_reason": "FinishReason.STOP",
+      "n_parts": 2,
+      "n_thought_parts": 1,
+      "text_chars": 5,
+      "text_head": "Hello"
+    },
+    {
+      "config": "level=high",
+      "prompt": "rag",
+      "max_output_tokens": 512,
+      "latency_ms": 25293,
+      "prompt_tokens": 115,
+      "candidates_tokens": 12,
+      "thoughts_tokens": 190,
+      "total_tokens": 317,
+      "finish_reason": "FinishReason.STOP",
+      "n_parts": 2,
+      "n_thought_parts": 1,
+      "text_chars": 38,
+      "text_head": "Trong vòng 24 giờ kể từ khi nhận hàng."
+    },
+    {
+      "config": "level=high",
+      "prompt": "rag",
+      "max_output_tokens": 512,
+      "latency_ms": 30086,
+      "prompt_tokens": 115,
+      "candidates_tokens": 12,
+      "thoughts_tokens": 190,
+      "total_tokens": 317,
+      "finish_reason": "FinishReason.STOP",
+      "n_parts": 2,
+      "n_thought_parts": 1,
+      "text_chars": 38,
+      "text_head": "Trong vòng 24 giờ kể từ khi nhận hàng."
+    },
+    {
+      "config": "budget=0",
+      "prompt": "short",
+      "max_output_tokens": 512,
+      "latency_ms": 326,
+      "error": "400 INVALID_ARGUMENT: Thinking budget is not supported for this model."
+    },
+    {
+      "config": "budget=0",
+      "prompt": "short",
+      "max_output_tokens": 512,
+      "latency_ms": 318,
+      "error": "400 INVALID_ARGUMENT: Thinking budget is not supported for this model."
+    },
+    {
+      "config": "budget=0",
+      "prompt": "rag",
+      "max_output_tokens": 512,
+      "latency_ms": 489,
+      "error": "400 INVALID_ARGUMENT: Thinking budget is not supported for this model."
+    },
+    {
+      "config": "budget=0",
+      "prompt": "rag",
+      "max_output_tokens": 512,
+      "latency_ms": 478,
+      "error": "400 INVALID_ARGUMENT: Thinking budget is not supported for this model."
+    },
+    {
+      "config": "default",
+      "prompt": "rag",
+      "max_output_tokens": 32,
+      "latency_ms": 17582,
+      "prompt_tokens": 115,
+      "candidates_tokens": null,
+      "thoughts_tokens": 29,
+      "total_tokens": 144,
+      "finish_reason": "FinishReason.MAX_TOKENS",
+      "n_parts": 1,
+      "n_thought_parts": 1,
+      "text_chars": 0,
+      "text_head": ""
+    }
+  ]
+}

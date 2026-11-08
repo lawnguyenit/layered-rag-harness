@@ -4,7 +4,7 @@ from google.genai import errors, types
 
 from lrh.adapters.gemini import GeminiEmbedder, GeminiModel, map_error
 from lrh.contracts import (
-    DailyQuotaExhausted, EmptyResponse, GenerateRequest, Message, ProviderError, RateLimited, ToolSpec,
+    DailyQuotaExhausted, EmptyResponse, GenerateRequest, Message, ProviderError, RateLimited, ToolSpec, TransientError,
 )
 
 
@@ -90,6 +90,13 @@ def test_429_perday_becomes_daily_exhausted():
 def test_other_errors_become_provider_error():
     assert isinstance(map_error(errors.ServerError(503, {"error": {"message": "x", "status": "UNAVAILABLE"}})), ProviderError)
     assert not isinstance(map_error(errors.ClientError(400, {"error": {"message": "bad"}})), RateLimited)
+
+
+def test_5xx_is_transient_4xx_is_not():
+    # B-003: gemma-4-31b-it trả 500 INTERNAL thật ở 2/16 lượt (2026-11-08)
+    for code in (500, 502, 503, 504):
+        assert isinstance(map_error(errors.ServerError(code, {"error": {"message": "Internal error encountered.", "status": "INTERNAL"}})), TransientError)
+    assert not isinstance(map_error(errors.ClientError(400, {"error": {"message": "Thinking level is not supported for this model."}})), TransientError)
 
 
 def emb_resp(n, d=4):

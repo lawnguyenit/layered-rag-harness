@@ -6,9 +6,11 @@ from lrh.contracts import (
     DailyQuotaExhausted,
     GenerateRequest,
     Message,
+    ProviderError,
     RateLimited,
     RequestTooLarge,
     SpendCapExceeded,
+    TransientError,
 )
 from lrh.limiter import Limits, RateLimiter, SpendGuard, ThrottledModel
 
@@ -45,6 +47,31 @@ def test_gives_up_after_max_retries(clock):
     with pytest.raises(RateLimited):
         m.generate(r())
     assert len(inner.calls) == 4
+
+
+def test_transient_5xx_is_retried_with_backoff(clock):
+    # B-003: trước bản sửa, một lỗi 500 làm hỏng ngay câu hỏi trong lần đo
+    inner = StubModel(failures=[TransientError("500 INTERNAL")])
+    m = ThrottledModel(inner, RateLimiter(Limits(), clock), backoff_base=2.0)
+    out = m.generate(r())
+    assert out.retries == 1 and out.rate_limited is False
+    assert clock.sleeps == [2.0] and len(inner.calls) == 2
+
+
+def test_transient_gives_up_after_max_retries(clock):
+    inner = StubModel(failures=[TransientError("500") for _ in range(4)])
+    m = ThrottledModel(inner, RateLimiter(Limits(), clock), max_retries=3)
+    with pytest.raises(TransientError):
+        m.generate(r())
+    assert len(inner.calls) == 4
+
+
+def test_non_transient_provider_error_is_not_retried(clock):
+    inner = StubModel(failures=[ProviderError("400 bad request")])
+    m = ThrottledModel(inner, RateLimiter(Limits(), clock))
+    with pytest.raises(ProviderError):
+        m.generate(r())
+    assert len(inner.calls) == 1
 
 
 def test_each_attempt_consumes_daily_quota(clock):
