@@ -12,7 +12,7 @@ Số đo:
 Production:
 - [ ] Khóa API chỉ ở phía server, đọc từ .env
 - [x] Trần chi tiêu (SPEND_CAP_USD) được thực thi trong code (SpendGuard, tests/test_throttled.py; chưa nối vào cấu hình .env)
-- [ ] Chạy bằng một lệnh, phụ thuộc ghim phiên bản (uv.lock đã có; chưa kiểm `uv sync` trên máy chủ repo)
+- [ ] Chạy bằng một lệnh, phụ thuộc ghim phiên bản (`uv sync` và live smoke test chạy được trên máy chủ repo 2026-11-08; uv.lock cũ thiếu gói, đã tạo lại: B-002; còn thiếu lệnh chạy điểm gốc)
 - [ ] Trang thành phần: adapter mô hình, harness
 
 ## Giai đoạn 1: RAG

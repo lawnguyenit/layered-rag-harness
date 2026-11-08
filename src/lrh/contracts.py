@@ -115,8 +115,11 @@ class SpendCapExceeded(AdapterError):
     """Chi tiêu vượt SPEND_CAP_USD."""
 
 
-# Hệ số đổi ký tự sang token. ƯỚC LƯỢNG thô, chưa hiệu chỉnh cho tiếng Việt: bước 0.6 (hồ sơ token) thay bằng số đo thật.
-CHARS_PER_TOKEN = 3.0
+# Hệ số đổi ký tự sang token, hiệu chỉnh ở bước 0.6 (eval/results/token-profile-2026-11-08.json, countTokens,
+# gemma-4-31b-it và gemini-embedding-2, 63 mục: 23 tài liệu + 40 câu). Đo được: gộp VI 2,54, EN 3,48, thấp nhất 1,81
+# (hóa đơn nhiều chữ số). 2.0 cố ý ước cao: tổng ước/thật = 1,35; 3/63 mục bị ước thấp, tệ nhất 11%.
+# Hệ số cũ 3.0 ước thấp 36/63 mục. Đo lại khi corpus hoặc system prompt đổi nhiều.
+CHARS_PER_TOKEN = 2.0
 
 
 def estimate_tokens(text: str, chars_per_token: float = CHARS_PER_TOKEN) -> int:

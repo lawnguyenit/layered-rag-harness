@@ -1,0 +1,1003 @@
+{
+  "measured_at": "2026-11-08T15:19:28+00:00",
+  "git_commit": "af07368",
+  "sdk": "google-genai 2.34.0",
+  "method": "models.count_tokens on the document body (frontmatter removed) or the question text, one call per item",
+  "chars_per_token_in_code_at_measurement": 3.0,
+  "models": {
+    "gemma-4-31b-it": {
+      "summary": {
+        "all": {
+          "n": 63,
+          "chars": 5231,
+          "tokens": 1951,
+          "pooled_chars_per_token": 2.681,
+          "min_chars_per_token": 1.806,
+          "median_chars_per_token": 2.667,
+          "max_chars_per_token": 4.786,
+          "underestimated_at_3.0": 36
+        },
+        "lang=en": {
+          "n": 11,
+          "chars": 993,
+          "tokens": 285,
+          "pooled_chars_per_token": 3.484,
+          "min_chars_per_token": 2.579,
+          "median_chars_per_token": 3.429,
+          "max_chars_per_token": 4.786,
+          "underestimated_at_3.0": 4
+        },
+        "lang=vi": {
+          "n": 52,
+          "chars": 4238,
+          "tokens": 1666,
+          "pooled_chars_per_token": 2.544,
+          "min_chars_per_token": 1.806,
+          "median_chars_per_token": 2.596,
+          "max_chars_per_token": 4.083,
+          "underestimated_at_3.0": 32
+        },
+        "kind=doc": {
+          "n": 23,
+          "chars": 3396,
+          "tokens": 1325,
+          "pooled_chars_per_token": 2.563,
+          "min_chars_per_token": 1.806,
+          "median_chars_per_token": 2.552,
+          "max_chars_per_token": 4.786,
+          "underestimated_at_3.0": 18
+        },
+        "kind=question": {
+          "n": 40,
+          "chars": 1835,
+          "tokens": 626,
+          "pooled_chars_per_token": 2.931,
+          "min_chars_per_token": 2.095,
+          "median_chars_per_token": 3.0,
+          "max_chars_per_token": 4.263,
+          "underestimated_at_3.0": 18
+        }
+      },
+      "items": [
+        {
+          "kind": "doc",
+          "id": "fin-discount-rules",
+          "lang": "vi",
+          "chars": 90,
+          "tokens": 35
+        },
+        {
+          "kind": "doc",
+          "id": "fin-refund-thresholds",
+          "lang": "vi",
+          "chars": 140,
+          "tokens": 73
+        },
+        {
+          "kind": "doc",
+          "id": "invoice-c001-inv01",
+          "lang": "vi",
+          "chars": 112,
+          "tokens": 62
+        },
+        {
+          "kind": "doc",
+          "id": "invoice-c002-inv02",
+          "lang": "vi",
+          "chars": 112,
+          "tokens": 62
+        },
+        {
+          "kind": "doc",
+          "id": "mgmt-escalation-matrix",
+          "lang": "vi",
+          "chars": 107,
+          "tokens": 41
+        },
+        {
+          "kind": "doc",
+          "id": "mgmt-staffing-plan",
+          "lang": "en",
+          "chars": 70,
+          "tokens": 27
+        },
+        {
+          "kind": "doc",
+          "id": "order-c001-1001",
+          "lang": "vi",
+          "chars": 163,
+          "tokens": 77
+        },
+        {
+          "kind": "doc",
+          "id": "order-c002-1002",
+          "lang": "vi",
+          "chars": 143,
+          "tokens": 66
+        },
+        {
+          "kind": "doc",
+          "id": "order-c003-1003",
+          "lang": "vi",
+          "chars": 167,
+          "tokens": 76
+        },
+        {
+          "kind": "doc",
+          "id": "proc-support-escalation",
+          "lang": "vi",
+          "chars": 173,
+          "tokens": 52
+        },
+        {
+          "kind": "doc",
+          "id": "proc-support-late-delivery",
+          "lang": "vi",
+          "chars": 111,
+          "tokens": 43
+        },
+        {
+          "kind": "doc",
+          "id": "pub-contact-hours",
+          "lang": "vi",
+          "chars": 94,
+          "tokens": 37
+        },
+        {
+          "kind": "doc",
+          "id": "pub-delivery-areas",
+          "lang": "vi",
+          "chars": 148,
+          "tokens": 58
+        },
+        {
+          "kind": "doc",
+          "id": "pub-faq-en",
+          "lang": "en",
+          "chars": 203,
+          "tokens": 58
+        },
+        {
+          "kind": "doc",
+          "id": "pub-faq-ordering",
+          "lang": "vi",
+          "chars": 205,
+          "tokens": 94
+        },
+        {
+          "kind": "doc",
+          "id": "pub-partner-notice",
+          "lang": "en",
+          "chars": 170,
+          "tokens": 36
+        },
+        {
+          "kind": "doc",
+          "id": "pub-payment-methods",
+          "lang": "vi",
+          "chars": 116,
+          "tokens": 43
+        },
+        {
+          "kind": "doc",
+          "id": "pub-privacy-summary",
+          "lang": "en",
+          "chars": 134,
+          "tokens": 28
+        },
+        {
+          "kind": "doc",
+          "id": "pub-product-plans",
+          "lang": "en",
+          "chars": 156,
+          "tokens": 58
+        },
+        {
+          "kind": "doc",
+          "id": "pub-return-policy",
+          "lang": "vi",
+          "chars": 239,
+          "tokens": 70
+        },
+        {
+          "kind": "doc",
+          "id": "ticket-c001-t01",
+          "lang": "vi",
+          "chars": 183,
+          "tokens": 79
+        },
+        {
+          "kind": "doc",
+          "id": "ticket-c002-t02",
+          "lang": "vi",
+          "chars": 161,
+          "tokens": 71
+        },
+        {
+          "kind": "doc",
+          "id": "ticket-c003-t03",
+          "lang": "vi",
+          "chars": 199,
+          "tokens": 79
+        },
+        {
+          "kind": "question",
+          "id": "A-001",
+          "lang": "vi",
+          "chars": 57,
+          "tokens": 16
+        },
+        {
+          "kind": "question",
+          "id": "A-002",
+          "lang": "vi",
+          "chars": 46,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "A-003",
+          "lang": "en",
+          "chars": 50,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "A-004",
+          "lang": "vi",
+          "chars": 33,
+          "tokens": 15
+        },
+        {
+          "kind": "question",
+          "id": "A-005",
+          "lang": "vi",
+          "chars": 50,
+          "tokens": 22
+        },
+        {
+          "kind": "question",
+          "id": "A-006",
+          "lang": "vi",
+          "chars": 41,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "A-007",
+          "lang": "vi",
+          "chars": 49,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "A-008",
+          "lang": "en",
+          "chars": 40,
+          "tokens": 15
+        },
+        {
+          "kind": "question",
+          "id": "B-001",
+          "lang": "vi",
+          "chars": 80,
+          "tokens": 32
+        },
+        {
+          "kind": "question",
+          "id": "B-002",
+          "lang": "vi",
+          "chars": 53,
+          "tokens": 22
+        },
+        {
+          "kind": "question",
+          "id": "B-003",
+          "lang": "en",
+          "chars": 81,
+          "tokens": 19
+        },
+        {
+          "kind": "question",
+          "id": "B-004",
+          "lang": "vi",
+          "chars": 57,
+          "tokens": 23
+        },
+        {
+          "kind": "question",
+          "id": "B-005",
+          "lang": "vi",
+          "chars": 56,
+          "tokens": 20
+        },
+        {
+          "kind": "question",
+          "id": "B-006",
+          "lang": "vi",
+          "chars": 69,
+          "tokens": 19
+        },
+        {
+          "kind": "question",
+          "id": "C-001",
+          "lang": "vi",
+          "chars": 62,
+          "tokens": 16
+        },
+        {
+          "kind": "question",
+          "id": "C-002",
+          "lang": "vi",
+          "chars": 39,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "C-003",
+          "lang": "en",
+          "chars": 24,
+          "tokens": 7
+        },
+        {
+          "kind": "question",
+          "id": "C-004",
+          "lang": "vi",
+          "chars": 47,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "C-005",
+          "lang": "vi",
+          "chars": 49,
+          "tokens": 16
+        },
+        {
+          "kind": "question",
+          "id": "E-001",
+          "lang": "vi",
+          "chars": 56,
+          "tokens": 23
+        },
+        {
+          "kind": "question",
+          "id": "E-002",
+          "lang": "vi",
+          "chars": 50,
+          "tokens": 15
+        },
+        {
+          "kind": "question",
+          "id": "E-003",
+          "lang": "vi",
+          "chars": 36,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "E-004",
+          "lang": "vi",
+          "chars": 36,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "E-005",
+          "lang": "vi",
+          "chars": 71,
+          "tokens": 21
+        },
+        {
+          "kind": "question",
+          "id": "E-006",
+          "lang": "vi",
+          "chars": 46,
+          "tokens": 14
+        },
+        {
+          "kind": "question",
+          "id": "E-007",
+          "lang": "vi",
+          "chars": 46,
+          "tokens": 14
+        },
+        {
+          "kind": "question",
+          "id": "E-008",
+          "lang": "vi",
+          "chars": 47,
+          "tokens": 19
+        },
+        {
+          "kind": "question",
+          "id": "E-009",
+          "lang": "vi",
+          "chars": 47,
+          "tokens": 19
+        },
+        {
+          "kind": "question",
+          "id": "E-010",
+          "lang": "vi",
+          "chars": 44,
+          "tokens": 21
+        },
+        {
+          "kind": "question",
+          "id": "E-011",
+          "lang": "vi",
+          "chars": 44,
+          "tokens": 21
+        },
+        {
+          "kind": "question",
+          "id": "E-012",
+          "lang": "vi",
+          "chars": 36,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "E-013",
+          "lang": "vi",
+          "chars": 36,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "F-001",
+          "lang": "vi",
+          "chars": 33,
+          "tokens": 15
+        },
+        {
+          "kind": "question",
+          "id": "F-002",
+          "lang": "vi",
+          "chars": 32,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "F-003",
+          "lang": "en",
+          "chars": 49,
+          "tokens": 19
+        },
+        {
+          "kind": "question",
+          "id": "F-004",
+          "lang": "vi",
+          "chars": 69,
+          "tokens": 19
+        },
+        {
+          "kind": "question",
+          "id": "G-001",
+          "lang": "vi",
+          "chars": 27,
+          "tokens": 9
+        },
+        {
+          "kind": "question",
+          "id": "G-002",
+          "lang": "vi",
+          "chars": 13,
+          "tokens": 6
+        },
+        {
+          "kind": "question",
+          "id": "G-003",
+          "lang": "en",
+          "chars": 16,
+          "tokens": 6
+        },
+        {
+          "kind": "question",
+          "id": "G-004",
+          "lang": "vi",
+          "chars": 18,
+          "tokens": 6
+        }
+      ]
+    },
+    "gemini-embedding-2": {
+      "summary": {
+        "all": {
+          "n": 63,
+          "chars": 5231,
+          "tokens": 1944,
+          "pooled_chars_per_token": 2.691,
+          "min_chars_per_token": 1.836,
+          "median_chars_per_token": 2.69,
+          "max_chars_per_token": 5.0,
+          "underestimated_at_3.0": 36
+        },
+        "lang=en": {
+          "n": 11,
+          "chars": 993,
+          "tokens": 283,
+          "pooled_chars_per_token": 3.509,
+          "min_chars_per_token": 2.579,
+          "median_chars_per_token": 3.429,
+          "max_chars_per_token": 5.0,
+          "underestimated_at_3.0": 4
+        },
+        "lang=vi": {
+          "n": 52,
+          "chars": 4238,
+          "tokens": 1661,
+          "pooled_chars_per_token": 2.551,
+          "min_chars_per_token": 1.836,
+          "median_chars_per_token": 2.655,
+          "max_chars_per_token": 3.875,
+          "underestimated_at_3.0": 32
+        },
+        "kind=doc": {
+          "n": 23,
+          "chars": 3396,
+          "tokens": 1319,
+          "pooled_chars_per_token": 2.575,
+          "min_chars_per_token": 1.836,
+          "median_chars_per_token": 2.552,
+          "max_chars_per_token": 5.0,
+          "underestimated_at_3.0": 18
+        },
+        "kind=question": {
+          "n": 40,
+          "chars": 1835,
+          "tokens": 625,
+          "pooled_chars_per_token": 2.936,
+          "min_chars_per_token": 2.095,
+          "median_chars_per_token": 3.0,
+          "max_chars_per_token": 4.263,
+          "underestimated_at_3.0": 18
+        }
+      },
+      "items": [
+        {
+          "kind": "doc",
+          "id": "fin-discount-rules",
+          "lang": "vi",
+          "chars": 90,
+          "tokens": 33
+        },
+        {
+          "kind": "doc",
+          "id": "fin-refund-thresholds",
+          "lang": "vi",
+          "chars": 140,
+          "tokens": 76
+        },
+        {
+          "kind": "doc",
+          "id": "invoice-c001-inv01",
+          "lang": "vi",
+          "chars": 112,
+          "tokens": 61
+        },
+        {
+          "kind": "doc",
+          "id": "invoice-c002-inv02",
+          "lang": "vi",
+          "chars": 112,
+          "tokens": 61
+        },
+        {
+          "kind": "doc",
+          "id": "mgmt-escalation-matrix",
+          "lang": "vi",
+          "chars": 107,
+          "tokens": 41
+        },
+        {
+          "kind": "doc",
+          "id": "mgmt-staffing-plan",
+          "lang": "en",
+          "chars": 70,
+          "tokens": 27
+        },
+        {
+          "kind": "doc",
+          "id": "order-c001-1001",
+          "lang": "vi",
+          "chars": 163,
+          "tokens": 76
+        },
+        {
+          "kind": "doc",
+          "id": "order-c002-1002",
+          "lang": "vi",
+          "chars": 143,
+          "tokens": 66
+        },
+        {
+          "kind": "doc",
+          "id": "order-c003-1003",
+          "lang": "vi",
+          "chars": 167,
+          "tokens": 77
+        },
+        {
+          "kind": "doc",
+          "id": "proc-support-escalation",
+          "lang": "vi",
+          "chars": 173,
+          "tokens": 52
+        },
+        {
+          "kind": "doc",
+          "id": "proc-support-late-delivery",
+          "lang": "vi",
+          "chars": 111,
+          "tokens": 42
+        },
+        {
+          "kind": "doc",
+          "id": "pub-contact-hours",
+          "lang": "vi",
+          "chars": 94,
+          "tokens": 37
+        },
+        {
+          "kind": "doc",
+          "id": "pub-delivery-areas",
+          "lang": "vi",
+          "chars": 148,
+          "tokens": 58
+        },
+        {
+          "kind": "doc",
+          "id": "pub-faq-en",
+          "lang": "en",
+          "chars": 203,
+          "tokens": 58
+        },
+        {
+          "kind": "doc",
+          "id": "pub-faq-ordering",
+          "lang": "vi",
+          "chars": 205,
+          "tokens": 97
+        },
+        {
+          "kind": "doc",
+          "id": "pub-partner-notice",
+          "lang": "en",
+          "chars": 170,
+          "tokens": 34
+        },
+        {
+          "kind": "doc",
+          "id": "pub-payment-methods",
+          "lang": "vi",
+          "chars": 116,
+          "tokens": 43
+        },
+        {
+          "kind": "doc",
+          "id": "pub-privacy-summary",
+          "lang": "en",
+          "chars": 134,
+          "tokens": 28
+        },
+        {
+          "kind": "doc",
+          "id": "pub-product-plans",
+          "lang": "en",
+          "chars": 156,
+          "tokens": 58
+        },
+        {
+          "kind": "doc",
+          "id": "pub-return-policy",
+          "lang": "vi",
+          "chars": 239,
+          "tokens": 70
+        },
+        {
+          "kind": "doc",
+          "id": "ticket-c001-t01",
+          "lang": "vi",
+          "chars": 183,
+          "tokens": 77
+        },
+        {
+          "kind": "doc",
+          "id": "ticket-c002-t02",
+          "lang": "vi",
+          "chars": 161,
+          "tokens": 69
+        },
+        {
+          "kind": "doc",
+          "id": "ticket-c003-t03",
+          "lang": "vi",
+          "chars": 199,
+          "tokens": 78
+        },
+        {
+          "kind": "question",
+          "id": "A-001",
+          "lang": "vi",
+          "chars": 57,
+          "tokens": 17
+        },
+        {
+          "kind": "question",
+          "id": "A-002",
+          "lang": "vi",
+          "chars": 46,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "A-003",
+          "lang": "en",
+          "chars": 50,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "A-004",
+          "lang": "vi",
+          "chars": 33,
+          "tokens": 15
+        },
+        {
+          "kind": "question",
+          "id": "A-005",
+          "lang": "vi",
+          "chars": 50,
+          "tokens": 22
+        },
+        {
+          "kind": "question",
+          "id": "A-006",
+          "lang": "vi",
+          "chars": 41,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "A-007",
+          "lang": "vi",
+          "chars": 49,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "A-008",
+          "lang": "en",
+          "chars": 40,
+          "tokens": 15
+        },
+        {
+          "kind": "question",
+          "id": "B-001",
+          "lang": "vi",
+          "chars": 80,
+          "tokens": 32
+        },
+        {
+          "kind": "question",
+          "id": "B-002",
+          "lang": "vi",
+          "chars": 53,
+          "tokens": 22
+        },
+        {
+          "kind": "question",
+          "id": "B-003",
+          "lang": "en",
+          "chars": 81,
+          "tokens": 19
+        },
+        {
+          "kind": "question",
+          "id": "B-004",
+          "lang": "vi",
+          "chars": 57,
+          "tokens": 24
+        },
+        {
+          "kind": "question",
+          "id": "B-005",
+          "lang": "vi",
+          "chars": 56,
+          "tokens": 20
+        },
+        {
+          "kind": "question",
+          "id": "B-006",
+          "lang": "vi",
+          "chars": 69,
+          "tokens": 19
+        },
+        {
+          "kind": "question",
+          "id": "C-001",
+          "lang": "vi",
+          "chars": 62,
+          "tokens": 16
+        },
+        {
+          "kind": "question",
+          "id": "C-002",
+          "lang": "vi",
+          "chars": 39,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "C-003",
+          "lang": "en",
+          "chars": 24,
+          "tokens": 7
+        },
+        {
+          "kind": "question",
+          "id": "C-004",
+          "lang": "vi",
+          "chars": 47,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "C-005",
+          "lang": "vi",
+          "chars": 49,
+          "tokens": 15
+        },
+        {
+          "kind": "question",
+          "id": "E-001",
+          "lang": "vi",
+          "chars": 56,
+          "tokens": 23
+        },
+        {
+          "kind": "question",
+          "id": "E-002",
+          "lang": "vi",
+          "chars": 50,
+          "tokens": 14
+        },
+        {
+          "kind": "question",
+          "id": "E-003",
+          "lang": "vi",
+          "chars": 36,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "E-004",
+          "lang": "vi",
+          "chars": 36,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "E-005",
+          "lang": "vi",
+          "chars": 71,
+          "tokens": 23
+        },
+        {
+          "kind": "question",
+          "id": "E-006",
+          "lang": "vi",
+          "chars": 46,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "E-007",
+          "lang": "vi",
+          "chars": 46,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "E-008",
+          "lang": "vi",
+          "chars": 47,
+          "tokens": 18
+        },
+        {
+          "kind": "question",
+          "id": "E-009",
+          "lang": "vi",
+          "chars": 47,
+          "tokens": 18
+        },
+        {
+          "kind": "question",
+          "id": "E-010",
+          "lang": "vi",
+          "chars": 44,
+          "tokens": 21
+        },
+        {
+          "kind": "question",
+          "id": "E-011",
+          "lang": "vi",
+          "chars": 44,
+          "tokens": 21
+        },
+        {
+          "kind": "question",
+          "id": "E-012",
+          "lang": "vi",
+          "chars": 36,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "E-013",
+          "lang": "vi",
+          "chars": 36,
+          "tokens": 13
+        },
+        {
+          "kind": "question",
+          "id": "F-001",
+          "lang": "vi",
+          "chars": 33,
+          "tokens": 15
+        },
+        {
+          "kind": "question",
+          "id": "F-002",
+          "lang": "vi",
+          "chars": 32,
+          "tokens": 12
+        },
+        {
+          "kind": "question",
+          "id": "F-003",
+          "lang": "en",
+          "chars": 49,
+          "tokens": 19
+        },
+        {
+          "kind": "question",
+          "id": "F-004",
+          "lang": "vi",
+          "chars": 69,
+          "tokens": 19
+        },
+        {
+          "kind": "question",
+          "id": "G-001",
+          "lang": "vi",
+          "chars": 27,
+          "tokens": 9
+        },
+        {
+          "kind": "question",
+          "id": "G-002",
+          "lang": "vi",
+          "chars": 13,
+          "tokens": 6
+        },
+        {
+          "kind": "question",
+          "id": "G-003",
+          "lang": "en",
+          "chars": 16,
+          "tokens": 6
+        },
+        {
+          "kind": "question",
+          "id": "G-004",
+          "lang": "vi",
+          "chars": 18,
+          "tokens": 6
+        }
+      ]
+    }
+  }
+}
