@@ -7,7 +7,7 @@ Agent đọc file này ở đầu mỗi phiên. Trước khi đóng giai đoạn
 Trước khi viết corpus và bộ câu hỏi:
 - [ ] docs/DATA-CONTRACT.md được chủ repo duyệt (vai trò, quy ước nhóm E, định dạng bản ghi)
 Số đo:
-- [ ] Tỉ lệ đúng trên bộ câu hỏi cố định (chấm tay) = điểm gốc
+- [ ] Tỉ lệ đúng trên bộ câu hỏi cố định (chấm tay) = điểm gốc. Trước khi chạy: sửa key_fact sai của A-007, B-005, B-006 (docs/lab/thinking-level.md), vì sửa sau thì phải chạy lại mọi bản đo
 - [ ] Độ trễ và chi phí mỗi lượt
 Production:
 - [ ] Khóa API chỉ ở phía server, đọc từ .env
