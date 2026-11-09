@@ -69,3 +69,7 @@ A chronological record of how this repository was built: what changed, why, and 
 - Each level still lost one question to `500 INTERNAL` after three retries (2-4-8 s backoff); retries are not yet split between 429 and 5xx.
 - Question-set defects found by reading the failures: A-007, B-005 and B-006 have key facts that a correct answer need not contain. They must be fixed before the baseline run.
 **Open decision (owner):** thinking level for the measured track. Agent proposal: HIGH.
+
+## 2026-11-09 — Thinking level decided
+
+**Decision (owner): HIGH thinking for the measured track**, based on `docs/lab/thinking-level.md`. HIGH is now set explicitly per model in `limits_table.py` (equal to the measured default) rather than left to the provider's default, so a silent provider change cannot alter what is measured. The thinking level is part of the cache key (`cache_tag`), so changing it never returns a cached answer from another level. 55 tests pass; removing the level from the cache key makes the new test fail. Not yet checked: whether `gemma-4-26b-a4b-it` accepts HIGH.

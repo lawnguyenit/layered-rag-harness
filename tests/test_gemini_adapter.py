@@ -129,3 +129,29 @@ def test_embedding001_uses_task_type():
 def test_embedding_aggregated_vector_is_rejected():
     with pytest.raises(ProviderError):
         GeminiEmbedder("gemini-embedding-2", dim=4, client=FakeClient(emb=emb_resp(1))).embed(["a", "b"])
+
+
+def test_factory_pins_thinking_high_for_gemma():
+    # Chủ repo chốt HIGH 2026-11-09 (docs/lab/thinking-level.md); đặt tường minh, không dựa vào mặc định nhà cung cấp
+    from lrh.config import Settings
+    from lrh.factory import build_generator
+    m = build_generator("gemma-4-31b-it", Settings(gemini_api_key="fake"), use_cache=False)
+    assert m.inner._thinking_level == "HIGH"
+    assert m.cache_tag == "gemma-4-31b-it|thinking=HIGH"
+
+
+def test_thinking_level_is_sent_to_sdk():
+    c = FakeClient(gen=resp())
+    GeminiModel("gemma-4-31b-it", client=c, thinking_level="HIGH").generate(req(("user", "hi")))
+    assert c.models.calls[0][1]["config"].thinking_config.thinking_level == "HIGH"
+
+
+def test_cache_key_changes_with_thinking_level(tmp_path):
+    from lrh.cache import CachedModel, ResponseCache
+    c = FakeClient(gen=resp())
+    cache = ResponseCache(str(tmp_path / "c.sqlite"))
+    r = GenerateRequest(messages=[Message(role="user", content="hi")], temperature=0.0)
+    CachedModel(GeminiModel("gemma-4-31b-it", client=c, thinking_level="HIGH"), cache).generate(r)
+    again = CachedModel(GeminiModel("gemma-4-31b-it", client=c, thinking_level="HIGH"), cache).generate(r)
+    other = CachedModel(GeminiModel("gemma-4-31b-it", client=c, thinking_level="MINIMAL"), cache).generate(r)
+    assert again.cache_hit is True and other.cache_hit is False and len(c.models.calls) == 2

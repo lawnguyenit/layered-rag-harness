@@ -83,6 +83,7 @@ class GeminiModel:
         self.model_id = model_id
         self._client = client or _make_client(api_key, timeout_s)
         self._thinking_level = thinking_level
+        self.cache_tag = f"{model_id}|thinking={thinking_level}" if thinking_level else model_id
 
     def generate(self, req: GenerateRequest) -> GenerateResult:
         if req.tools:

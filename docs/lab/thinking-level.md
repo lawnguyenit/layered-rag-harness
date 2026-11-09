@@ -41,4 +41,4 @@
 - Đánh giá tay ở đây do agent viết thí nghiệm làm; chủ repo chưa đối chiếu.
 
 ## Có đưa vào đường 1 không
-Chờ chủ repo quyết. Đề xuất của agent: **HIGH (mặc định)** cho điểm gốc và các giai đoạn sau, vì hai lỗi của MINIMAL rơi đúng vào điều dự án đo (nhóm C, theo chỉ dẫn), còn cái giá của HIGH (độ trễ, token) không tốn tiền ở tầng Free và vẫn nằm trong TPM. Nếu chọn MINIMAL thì phải giữ nguyên cho mọi giai đoạn, và mức suy nghĩ phải vào khóa đệm.
+**Có: chủ repo chốt HIGH ngày 2026-11-09** (docs/PLAN.md mục Quyết định). HIGH được đặt tường minh trong `src/lrh/limits_table.py` và đưa vào khóa đệm (`cache_tag`). Đề xuất ban đầu của agent: **HIGH (mặc định)** cho điểm gốc và các giai đoạn sau, vì hai lỗi của MINIMAL rơi đúng vào điều dự án đo (nhóm C, theo chỉ dẫn), còn cái giá của HIGH (độ trễ, token) không tốn tiền ở tầng Free và vẫn nằm trong TPM. Nếu chọn MINIMAL thì phải giữ nguyên cho mọi giai đoạn, và mức suy nghĩ phải vào khóa đệm.

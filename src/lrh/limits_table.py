@@ -14,11 +14,16 @@ class ModelSpec:
     limits: Limits
     price_in_per_m: float = 0.0   # tầng Free = 0
     price_out_per_m: float = 0.0
+    # Mức suy nghĩ cố định cho đường đo. None = để mặc định của nhà cung cấp (chưa kiểm cho mô hình đó).
+    thinking_level: str | None = None
 
 
 MODELS: dict[str, ModelSpec] = {
-    "gemma-4-31b-it": ModelSpec(Limits(rpm=30, tpm=16_000, rpd=14_400)),
-    "gemma-4-26b-a4b-it": ModelSpec(Limits(rpm=30, tpm=16_000, rpd=14_400)),
+    # HIGH: chủ repo chốt 2026-11-09 sau docs/lab/thinking-level.md. Đặt tường minh (bằng mặc định đo được) để
+    # nhà cung cấp đổi mặc định cũng không đổi lặng lẽ điều đang đo. Gemma 4 31B chỉ nhận MINIMAL/HIGH.
+    "gemma-4-31b-it": ModelSpec(Limits(rpm=30, tpm=16_000, rpd=14_400), thinking_level="HIGH"),
+    # 26B: chưa kiểm mức suy nghĩ nào được nhận; giữ HIGH cho cùng điều kiện với 31B, kiểm khi dùng tới
+    "gemma-4-26b-a4b-it": ModelSpec(Limits(rpm=30, tpm=16_000, rpd=14_400), thinking_level="HIGH"),
     # ID "gemini-3.8-flash" lấy từ tài liệu, chưa gọi thử
     "gemini-3.8-flash": ModelSpec(Limits(rpm=5, tpm=250_000, rpd=20)),
 }

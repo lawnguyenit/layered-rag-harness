@@ -84,6 +84,7 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 | Số đo | [đã chốt] không dồn hết từ đầu, nhắc đúng giai đoạn | Gắn vào cổng từng giai đoạn trong docs/GATES.md |
 | Hướng khách hàng: người hỏi chính là khách của công ty thuê; thêm vai trò nội bộ (support, finance, manager) | [đã chốt hướng; bộ vai trò đề xuất] | Mẫu job hỏi cô lập dữ liệu giữa các khách; chủ repo muốn thể hiện cô lập tối thiểu theo vai trò |
 | Bước 0.0 hợp đồng dữ liệu và quyền trước corpus (docs/DATA-CONTRACT.md) | [đề xuất] | Chủ repo chỉ ra corpus và câu hỏi phụ thuộc vào nhãn quyền chưa được định nghĩa |
+| Mức suy nghĩ của Gemma cho đường đo: HIGH, đặt tường minh | [đã chốt] 2026-11-09 | Sau docs/lab/thinking-level.md: MINIMAL rẻ và nhanh hơn nhưng sai C-005 (không nói "không tìm thấy") và G-003 (sai ngôn ngữ). Đặt trong src/lrh/limits_table.py; mức suy nghĩ nằm trong khóa đệm. Đổi mức = chạy lại mọi bản đo |
 | Frontend | [đề xuất] CLI trước, web tối thiểu sau | Framework chọn theo bằng chứng job, không theo cảm tính |
 
 ## 6. Rủi ro và điểm mù chưa xử lý

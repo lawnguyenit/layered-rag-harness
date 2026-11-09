@@ -17,7 +17,7 @@ def build_generator(model_id: str, settings: Settings, *, use_cache: bool = True
         raise ConfigError(f"Mô hình '{model_id}' chưa có trong src/lrh/limits_table.py: khai báo hạn mức và giá trước.")
     if not settings.gemini_api_key:
         raise ConfigError("Thiếu GEMINI_API_KEY trong .env")
-    inner = GeminiModel(model_id, api_key=settings.gemini_api_key)
+    inner = GeminiModel(model_id, api_key=settings.gemini_api_key, thinking_level=spec.thinking_level)
     spend = SpendGuard(settings.spend_cap_usd, {model_id: (spec.price_in_per_m, spec.price_out_per_m)})
     model = ThrottledModel(inner, RateLimiter(spec.limits), spend=spend)
     if use_cache:

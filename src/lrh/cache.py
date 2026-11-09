@@ -52,7 +52,8 @@ class CachedModel:
     def generate(self, req: GenerateRequest) -> GenerateResult:
         if req.temperature != 0:
             return self.inner.generate(req)
-        key = cache_key(self.inner.model_id, req)
+        # cache_tag gồm cấu hình adapter đổi được đầu ra (mức suy nghĩ); không có thì dùng model_id
+        key = cache_key(getattr(self.inner, "cache_tag", self.inner.model_id), req)
         hit = self.cache.get(key)
         if hit is not None:
             return GenerateResult(**hit).model_copy(update={"cache_hit": True, "retries": 0, "rate_limited": False})

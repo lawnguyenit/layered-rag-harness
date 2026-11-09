@@ -150,6 +150,7 @@ class ThrottledModel:
         self.spend = spend
         self.model_id = inner.model_id
         self.provider = inner.provider
+        self.cache_tag = getattr(inner, "cache_tag", inner.model_id)
 
     def generate(self, req: GenerateRequest) -> GenerateResult:
         est_prompt = estimate_request_tokens(req)
