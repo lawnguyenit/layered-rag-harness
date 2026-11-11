@@ -1,0 +1,234 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1580" role="img" aria-labelledby="title desc">
+  <title id="title">Layered RAG Harness request data flow</title>
+  <desc id="desc">Separate document ingestion from an online request. Trusted session identity creates an access scope. Intent selects exact lookup or RAG. Only authorized evidence and user content are assembled into a prompt. The model output is validated before returning or calling a read-only tool.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#83918d"/></marker>
+    <marker id="arrow-green" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#43866f"/></marker>
+    <marker id="arrow-coral" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#c57562"/></marker>
+    <marker id="arrow-purple" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#8b6ab1"/></marker>
+    <marker id="arrow-amber" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#b88b38"/></marker>
+    <style>
+      text{font-family:Arial,'Segoe UI',sans-serif;fill:#26353b}.lane{fill:#fafbf9;stroke:#e5e9e5;stroke-width:1.3}.lane-ingest{fill:#f4f8f5}.lane-online{fill:#fbfbf9}.lane-title{font-size:13px;font-weight:700;letter-spacing:1.5px;fill:#62746d}.lane-sub{font-size:11px;fill:#8a9691}.box{stroke-width:1.4;rx:11}.box-trusted{fill:#eeedfc;stroke:#9589d4}.box-code{fill:#eaf2f8;stroke:#7d9fbd}.box-data{fill:#e9f5ee;stroke:#71ac91}.box-untrusted{fill:#fbefea;stroke:#d28a75}.box-model{fill:#f8f1df;stroke:#c5a14f}.box-semantic{fill:#f3edfa;stroke:#a68ac3}.box-gate{fill:#fff4e4;stroke:#d69b4f}.box-block{fill:#fcece8;stroke:#d27d68}.box-neutral{fill:#f1f0eb;stroke:#aaa79b}.head{font-size:14px;font-weight:700}.body{font-size:11px;fill:#617078}.small{font-size:10px;fill:#78858a}.micro{font-size:9px;fill:#77837e}.chip{font-size:9px;font-weight:700;letter-spacing:.4px}.chip-current{fill:#2c7d69}.chip-planned{fill:#887144}.chip-proposed{fill:#8668a5}.arrow{fill:none;stroke:#899691;stroke-width:1.7;marker-end:url(#arrow)}.arrow-trusted{fill:none;stroke:#4c8b74;stroke-width:2;marker-end:url(#arrow-green)}.arrow-untrusted{fill:none;stroke:#c47a67;stroke-width:1.8;marker-end:url(#arrow-coral)}.arrow-semantic{fill:none;stroke:#9273b5;stroke-width:1.8;marker-end:url(#arrow-purple)}.arrow-config{fill:none;stroke:#b38a3d;stroke-width:1.8;stroke-dasharray:6 5;marker-end:url(#arrow-amber)}.arrow-block{fill:none;stroke:#c26c58;stroke-width:1.8;stroke-dasharray:5 4;marker-end:url(#arrow-coral)}.edge-label{font-size:9px;fill:#707d7c}.edge-label-trusted{font-size:9px;fill:#43816d}.edge-label-untrusted{font-size:9px;fill:#b36a57}.divider{stroke:#e5e9e5;stroke-width:1;stroke-dasharray:3 5}.step{font-size:10px;font-weight:700;fill:#478370}.strip{fill:#17262e;stroke:#17262e;rx:12}.strip-head{font-size:11px;font-weight:700;letter-spacing:.7px;fill:#a9ddcb}.strip-body{font-size:11px;fill:#edf1ec}.strip-note{font-size:10px;fill:#bec8c2}.line-label{font-size:10px;font-weight:700;fill:#788580}
+    </style>
+  </defs>
+
+  <rect class="lane lane-ingest" x="18" y="18" width="1164" height="190" rx="16"/>
+  <text class="lane-title" x="42" y="48">A · NẠP TÀI LIỆU — OFFLINE / KHI CORPUS THAY ĐỔI</text>
+  <text class="lane-sub" x="42" y="67">Metadata quyền đi cùng tài liệu xuống từng chunk; đây không phải dữ liệu do câu hỏi người dùng tạo ra.</text>
+
+  <rect class="box box-data" x="42" y="91" width="235" height="91"/>
+  <text class="head" x="60" y="117">Corpus files</text>
+  <text class="body" x="60" y="139">23 tài liệu tổng hợp hiện có</text>
+  <text class="small" x="60" y="159">doc_id · allowed_roles · owner_customer_id</text>
+  <text class="chip chip-current" x="60" y="174">DATA EXISTS</text>
+
+  <path class="arrow-trusted" d="M278 136H322"/><text class="edge-label-trusted" x="281" y="124">source</text>
+  <rect class="box box-code" x="326" y="91" width="228" height="91"/>
+  <text class="head" x="344" y="117">Parse &amp; chunk</text>
+  <text class="body" x="344" y="139">Đọc nội dung và metadata</text>
+  <text class="small" x="344" y="159">Chunk kế thừa ACL của document</text>
+  <text class="chip chip-planned" x="344" y="174">G1 · PLANNED</text>
+
+  <path class="arrow-trusted" d="M555 136H599"/><text class="edge-label-trusted" x="559" y="124">chunks + ACL</text>
+  <rect class="box box-data" x="603" y="91" width="237" height="91"/>
+  <text class="head" x="621" y="117">Document / chunk records</text>
+  <text class="body" x="621" y="139">text · doc_id · position</text>
+  <text class="small" x="621" y="159">allowed_roles · owner_customer_id</text>
+  <text class="chip chip-planned" x="621" y="174">ACL METADATA</text>
+
+  <path class="arrow-trusted" d="M841 136H885"/><text class="edge-label-trusted" x="847" y="124">index</text>
+  <rect class="box box-data" x="889" y="91" width="260" height="91"/>
+  <text class="head" x="907" y="117">Search index / data store</text>
+  <text class="body" x="907" y="139">Exact identifiers + semantic chunks</text>
+  <text class="small" x="907" y="159">Index adapter · chưa triển khai</text>
+  <text class="chip chip-planned" x="907" y="174">G1 · PLANNED</text>
+
+  <rect class="lane lane-online" x="18" y="228" width="1164" height="1044" rx="16"/>
+  <text class="lane-title" x="42" y="259">B · MỘT LƯỢT HỎI — ONLINE REQUEST FLOW</text>
+  <text class="lane-sub" x="42" y="278">Nét liền = dữ liệu đi qua · nét đứt = cấu hình / điều khiển · nhánh đỏ = dừng trước khi dữ liệu vào prompt.</text>
+
+  <rect class="box box-untrusted" x="42" y="309" width="242" height="100"/>
+  <text class="head" x="60" y="337">Request từ người dùng</text>
+  <text class="body" x="60" y="359">question text</text>
+  <text class="small" x="60" y="378">session_token · conversation_id</text>
+  <text class="chip" x="60" y="398" fill="#b86c58">UNTRUSTED INPUT</text>
+
+  <path class="arrow-untrusted" d="M285 339H341"/><text class="edge-label-untrusted" x="291" y="328">question</text>
+  <path class="arrow-trusted" d="M285 383H318V470H341"/><text class="edge-label-trusted" x="290" y="405">session token</text>
+
+  <rect class="box box-code" x="345" y="309" width="240" height="100"/>
+  <text class="head" x="363" y="337">Input gate · code</text>
+  <text class="body" x="363" y="359">size · format · rate · spam</text>
+  <text class="small" x="363" y="378">semantic detector nếu policy cần</text>
+  <text class="chip chip-current" x="363" y="398">LIMITER G0 · SAFETY LATER</text>
+
+  <path class="arrow-untrusted" d="M586 359H641"/><text class="edge-label-untrusted" x="590" y="347">valid text</text>
+  <rect class="box box-semantic" x="645" y="309" width="260" height="100"/>
+  <text class="head" x="663" y="337">Hiểu yêu cầu · intent</text>
+  <text class="body" x="663" y="359">Rules parse ID / slot rõ ràng</text>
+  <text class="small" x="663" y="378">Embedding gợi ý · classifier tùy chọn</text>
+  <text class="chip chip-proposed" x="663" y="398">PROPOSAL · CHƯA CÓ TRONG CODE</text>
+
+  <path class="arrow-semantic" d="M906 359H961"/><text class="edge-label" x="910" y="347">intent + slots</text>
+  <rect class="box box-gate" x="965" y="309" width="185" height="100"/>
+  <text class="head" x="982" y="337">Route decision</text>
+  <text class="body" x="982" y="359">exact · RAG · none</text>
+  <text class="small" x="982" y="378">unclear → ask again</text>
+  <text class="chip chip-proposed" x="982" y="398">CODE GATE</text>
+
+  <rect class="box box-code" x="345" y="439" width="240" height="91"/>
+  <text class="head" x="363" y="466">Auth / session lookup</text>
+  <text class="body" x="363" y="488">Validate token; load account</text>
+  <text class="small" x="363" y="508">invalid → 401, stop before retrieval</text>
+  <text class="chip chip-planned" x="363" y="523">G3 · PLANNED</text>
+
+  <path class="arrow-trusted" d="M586 484H641"/><text class="edge-label-trusted" x="591" y="472">verified subject</text>
+  <rect class="box box-trusted" x="645" y="439" width="260" height="91"/>
+  <text class="head" x="663" y="466">actor_context · trusted</text>
+  <text class="body" x="663" y="488">user_id · role · customer_id</text>
+  <text class="small" x="663" y="508">Không lấy các giá trị này từ prompt</text>
+  <text class="chip chip-planned" x="663" y="523">G3 · PLANNED</text>
+
+  <path class="arrow-trusted" d="M906 484H961"/><text class="edge-label-trusted" x="911" y="472">policy inputs</text>
+  <rect class="box box-trusted" x="965" y="439" width="185" height="91"/>
+  <text class="head" x="982" y="466">access_scope</text>
+  <text class="body" x="982" y="488">role + ownership</text>
+  <text class="small" x="982" y="508">chỉ dùng trong code/query</text>
+  <text class="chip chip-planned" x="982" y="523">NOT LLM</text>
+
+  <path class="arrow-config" d="M1057 410V432"/><text class="edge-label" x="1066" y="427">route ≠ quyền</text>
+
+  <text class="step" x="42" y="574">C1 · EXACT ID LOOKUP</text>
+  <text class="step" x="645" y="574">C2 · SEMANTIC RETRIEVAL</text>
+
+  <path class="arrow" d="M1057 410V589H458V603"/><text class="edge-label" x="697" y="581">intent=order / known identifier</text>
+  <rect class="box box-data" x="345" y="607" width="300" height="105"/>
+  <text class="head" x="363" y="635">Exact read query</text>
+  <text class="body" x="363" y="657">WHERE order_id = :parsed_id</text>
+  <text class="body" x="363" y="677">AND owner_id = actor.customer_id</text>
+  <text class="chip chip-planned" x="363" y="700">G1/G3 · PLANNED</text>
+
+  <path class="arrow" d="M1057 410V588H840V603"/><text class="edge-label" x="900" y="581">intent=knowledge question</text>
+  <rect class="box box-data" x="650" y="607" width="380" height="105"/>
+  <text class="head" x="668" y="635">Retriever with ACL filter</text>
+  <text class="body" x="668" y="657">allowed_roles ∩ actor.role</text>
+  <text class="body" x="668" y="677">owner_customer_id = actor.customer_id</text>
+  <text class="chip chip-planned" x="668" y="700">FILTER BEFORE TOP-K · G1/G3</text>
+
+  <path class="arrow-trusted" d="M1070 183V592H1029V630"/><text class="edge-label-trusted" x="1038" y="570">indexed chunks</text>
+  <path class="arrow-config" d="M1057 530V589H1025V650"/><text class="edge-label" x="1066" y="563">scope predicate</text>
+  <path class="arrow-config" d="M965 484H930V695H645"/><text class="edge-label" x="871" y="688">owner predicate</text>
+
+  <rect class="box box-data" x="42" y="607" width="265" height="105"/>
+  <text class="head" x="60" y="635">Order / record store</text>
+  <text class="body" x="60" y="657">Tìm đúng ID; không embedding</text>
+  <text class="small" x="60" y="677">Chỉ đọc theo access_scope</text>
+  <text class="chip chip-planned" x="60" y="700">READ ONLY · LATER</text>
+  <path class="arrow-trusted" d="M345 660H312"/><text class="edge-label-trusted" x="312" y="648">scoped lookup</text>
+
+  <path class="arrow-trusted" d="M495 713V761H565V779"/><text class="edge-label-trusted" x="503" y="751">record allowed</text>
+  <path class="arrow-trusted" d="M840 713V761H650V779"/><text class="edge-label-trusted" x="733" y="751">authorized chunks</text>
+  <path class="arrow-block" d="M645 700H660V744H980V779"/><text class="edge-label-untrusted" x="680" y="738">no owner match</text>
+  <rect class="box box-data" x="405" y="783" width="355" height="91"/>
+  <text class="head" x="423" y="811">authorized_evidence</text>
+  <text class="body" x="423" y="833">doc_id · source · text · ACL đã qua</text>
+  <text class="chip chip-planned" x="423" y="859">ONLY THIS CAN ENTER CONTEXT</text>
+
+  <path class="arrow-block" d="M645 712V744H930V783"/><text class="edge-label-untrusted" x="786" y="737">deny / no match</text>
+  <rect class="box box-block" x="835" y="783" width="315" height="91"/>
+  <text class="head" x="853" y="811">No-access / no-result path</text>
+  <text class="body" x="853" y="833">Không chuyển restricted text vào prompt</text>
+  <text class="small" x="853" y="853">Phản hồi cố định theo DATA-CONTRACT</text>
+  <text class="chip" x="853" y="868" fill="#ad5a49">NO EXISTENCE LEAK</text>
+
+  <path class="arrow" d="M1150 359H1170V880H360V930"/><text class="edge-label" x="1050" y="874">uncertain intent</text>
+  <rect class="box box-gate" x="835" y="897" width="315" height="70"/>
+  <text class="head" x="853" y="925">Fixed NOT_FOUND response</text>
+  <text class="small" x="853" y="947">Không tiết lộ tài liệu tồn tại hay bị chặn</text>
+  <text class="chip chip-planned" x="853" y="963">CODE POLICY · G1</text>
+  <path class="arrow-block" d="M992 874V893"/>
+  <rect class="box box-gate" x="42" y="897" width="315" height="70"/>
+  <text class="head" x="60" y="925">Ask customer to clarify</text>
+  <text class="small" x="60" y="947">Thiếu slot / intent mơ hồ → dừng lượt</text>
+
+  <text class="step" x="42" y="983">D · PROMPT ASSEMBLY</text>
+  <rect class="box box-trusted" x="42" y="990" width="285" height="95"/>
+  <text class="head" x="60" y="1018">SYSTEM TEMPLATE</text>
+  <text class="body" x="60" y="1040">Vai trò · giới hạn · quy tắc trích dẫn</text>
+  <text class="small" x="60" y="1060">Nguồn code / file cấu hình tin cậy</text>
+  <text class="chip chip-current" x="60" y="1077">G0 · TEMPLATE DRAFT</text>
+
+  <rect class="box box-code" x="367" y="990" width="300" height="95"/>
+  <text class="head" x="385" y="1018">Instruction selector</text>
+  <text class="body" x="385" y="1040">actor.role + intent → module phù hợp</text>
+  <text class="small" x="385" y="1060">customer_id vẫn ở scope/query, không cần vào prompt</text>
+  <text class="chip chip-proposed" x="385" y="1077">ROUTING MODULE · PROPOSED</text>
+
+  <path class="arrow-config" d="M328 1037H364"/><text class="edge-label" x="329" y="1025">base rules</text>
+  <path class="arrow-config" d="M790 530V550H1180V975H518V987"/><text class="edge-label" x="1123" y="545">actor.role</text>
+  <path class="arrow-semantic" d="M1057 410H1165V975H646V987"/><text class="edge-label" x="1080" y="402">intent</text>
+
+  <rect class="box box-trusted" x="707" y="990" width="443" height="95"/>
+  <text class="head" x="725" y="1018">system_instruction</text>
+  <text class="body" x="725" y="1040">base template + selected role/task instructions</text>
+  <text class="small" x="725" y="1060">Không ghép user text / document text vào system role</text>
+  <text class="chip chip-current" x="725" y="1077">ROLE=SYSTEM → GEMINI CONFIG</text>
+  <path class="arrow-config" d="M668 1037H704"/>
+
+  <rect class="box box-untrusted" x="42" y="1120" width="445" height="101"/>
+  <text class="head" x="60" y="1148">contents · role=user</text>
+  <text class="body" x="60" y="1170">Câu hỏi hiện tại + history đã chọn</text>
+  <text class="body" x="60" y="1190">+ authorized_evidence có source labels</text>
+  <text class="chip" x="60" y="1213" fill="#b86c58">USER / DOCUMENT TEXT = UNTRUSTED DATA</text>
+  <path class="arrow-untrusted" d="M583 874H27V1170H39"/><text class="edge-label-untrusted" x="32" y="1100">question + allowed evidence</text>
+
+  <rect class="box box-code" x="527" y="1120" width="220" height="101"/>
+  <text class="head" x="545" y="1148">GenerateRequest</text>
+  <text class="body" x="545" y="1170">messages=[system, user]</text>
+  <text class="small" x="545" y="1190">temperature=0 · max_output=1024</text>
+  <text class="chip chip-current" x="545" y="1213">NORMALIZED CONTRACT · G0</text>
+
+  <rect class="box box-code" x="785" y="1120" width="365" height="101"/>
+  <text class="head" x="803" y="1148">Response cache</text>
+  <text class="body" x="803" y="1170">key = model/cache_tag + request</text>
+  <text class="small" x="803" y="1190">Miss → ThrottledModel + SpendGuard</text>
+  <text class="chip chip-current" x="803" y="1213">CACHED → THROTTLED · G0</text>
+
+  <rect class="box box-model" x="42" y="1260" width="330" height="88"/>
+  <text class="head" x="60" y="1288">ModelSpec config</text>
+  <text class="body" x="60" y="1310">thinking_level = HIGH</text>
+  <text class="chip chip-current" x="60" y="1338">MODEL CONFIG · G0</text>
+
+  <rect class="box box-code" x="420" y="1260" width="330" height="88"/>
+  <text class="head" x="438" y="1288">GeminiModel adapter</text>
+  <text class="body" x="438" y="1310">system → config.system_instruction</text>
+  <text class="small" x="438" y="1330">user/assistant → Gemini contents</text>
+  <text class="chip chip-current" x="438" y="1342">PROVIDER MAPPING · G0</text>
+
+  <rect class="box box-model" x="785" y="1260" width="365" height="88"/>
+  <text class="head" x="803" y="1288">Gemini API · Gemma 4 31B</text>
+  <text class="body" x="803" y="1310">system_instruction + contents + config</text>
+  <text class="chip chip-current" x="803" y="1338">MODEL ADAPTER EXISTS · G0</text>
+
+  <path class="arrow-config" d="M929 1087V1102H637V1117"/><text class="edge-label" x="778" y="1098">system message</text>
+  <path class="arrow-untrusted" d="M487 1170H524"/><text class="edge-label-untrusted" x="490" y="1158">user message</text>
+  <path class="arrow" d="M748 1170H782"/><text class="edge-label" x="750" y="1158">request</text>
+  <path class="arrow" d="M967 1222V1240H755V1304"/><text class="edge-label" x="817" y="1236">cache miss · wrappers</text>
+  <path class="arrow-config" d="M373 1304H417"/><text class="edge-label" x="375" y="1292">thinking config</text>
+  <path class="arrow" d="M751 1304H782"/><text class="edge-label" x="753" y="1292">normalized call</text>
+
+  <path class="arrow" d="M967 1349V1383H720"/>
+  <rect class="box box-data" x="405" y="1387" width="315" height="75"/>
+  <text class="head" x="423" y="1415">Text → validate → answer</text>
+  <text class="small" x="423" y="1438">Kiểm lỗi / output; đính nguồn khi có RAG</text>
+
+  <path class="arrow-config" d="M1010 1349V1383H1050"/>
+  <rect class="box box-gate" x="835" y="1387" width="315" height="75"/>
+  <text class="head" x="853" y="1415">tool_call → validate → MCP</text>
+  <text class="small" x="853" y="1438">Schema + quyền trong code; read-only · G2 future</text>
+
+  <rect class="strip" x="18" y="1490" width="1164" height="73" rx="12"/>
+  <text class="strip-head" x="40" y="1517">TRẠNG THÁI ĐÚNG VỚI REPO</text>
+  <text class="strip-body" x="40" y="1540">Đang có: CLI → GenerateRequest → Cached(Throttled/SpendGuard) → Gemini adapter. Auth, RAG retrieval, prompt routing và MCP là phần đích theo GATES.md.</text>
+  <text class="strip-note" x="40" y="1557">System role được adapter ánh xạ sang Gemini system_instruction; user/assistant messages thành contents.</text>
+</svg>

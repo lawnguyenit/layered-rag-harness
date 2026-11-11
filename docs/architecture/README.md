@@ -1,6 +1,8 @@
 # Interactive harness flow
 
-This is a dependency-free static architecture viewer for the request lifecycle. It distinguishes the proposed target design from the code currently implemented in the repository.
+This is a dependency-free static architecture viewer for the request lifecycle. The main view is a box-and-arrow data-flow diagram: it follows corpus documents through indexing, then follows a live request through identity, routing, access filtering, prompt assembly, and the model boundary. It distinguishes the proposed target design from the code currently implemented in the repository.
+
+`flow.svg` is the source diagram. Solid arrows carry data, dashed arrows carry configuration or control, and coral branches stop requests before restricted text can enter the prompt. Each stage is labeled as current, planned, or proposed. The trace view includes the current G0 path as well as target-design examples.
 
 ## Preview locally
 

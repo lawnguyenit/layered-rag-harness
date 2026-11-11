@@ -77,3 +77,7 @@ A chronological record of how this repository was built: what changed, why, and 
 ## 2026-11-11 — Interactive architecture viewer
 
 **Added** a dependency-free static flow explorer at `docs/architecture/`. It shows the proposed request lifecycle, code/model/data boundaries, stage markers, component details, and three simulated traces (owned order lookup, negated intent, cross-customer lookup). The page labels itself as a design target and links to the current gate checklist so it does not imply that later-stage components are implemented. Added a README entry point and corrected its stale status from “no code yet” to “stage 0 in progress; official baseline pending,” based on the current source tree and `docs/GATES.md`. No application deployment or GitHub Pages hosting was configured.
+
+## 2026-11-11 — Data-flow diagram clarification
+
+**Changed** the architecture viewer's main flow from a component explorer to a concrete data-flow diagram after owner feedback. The SVG now shows the offline corpus/index path and online request path, with named data objects, arrows, decision branches, identity and ACL boundaries, prompt assembly, provider mapping, and current-versus-planned labels. Added a G0 trace so readers can compare today's implemented CLI-to-Gemini path with future RAG/auth examples. This is a documentation artifact; no application feature was implemented. Visual and syntax checks recorded in the commit.
