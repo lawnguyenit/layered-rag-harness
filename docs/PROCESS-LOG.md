@@ -73,3 +73,7 @@ A chronological record of how this repository was built: what changed, why, and 
 ## 2026-11-09 — Thinking level decided
 
 **Decision (owner): HIGH thinking for the measured track**, based on `docs/lab/thinking-level.md`. HIGH is now set explicitly per model in `limits_table.py` (equal to the measured default) rather than left to the provider's default, so a silent provider change cannot alter what is measured. The thinking level is part of the cache key (`cache_tag`), so changing it never returns a cached answer from another level. 55 tests pass; removing the level from the cache key makes the new test fail. Not yet checked: whether `gemma-4-26b-a4b-it` accepts HIGH.
+
+## 2026-11-11 — Interactive architecture viewer
+
+**Added** a dependency-free static flow explorer at `docs/architecture/`. It shows the proposed request lifecycle, code/model/data boundaries, stage markers, component details, and three simulated traces (owned order lookup, negated intent, cross-customer lookup). The page labels itself as a design target and links to the current gate checklist so it does not imply that later-stage components are implemented. Added a README entry point and corrected its stale status from “no code yet” to “stage 0 in progress; official baseline pending,” based on the current source tree and `docs/GATES.md`. No application deployment or GitHub Pages hosting was configured.

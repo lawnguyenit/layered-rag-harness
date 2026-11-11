@@ -2,7 +2,7 @@
 
 A learning-and-portfolio project: a document Q&A assistant (RAG) with access control and tool calling, built one layer at a time. After each layer, the same fixed question set is re-run, so every layer has to show which failure it fixes.
 
-**Status:** planning. No code yet (stage 0 not started). See `docs/PLAN.md`.
+**Status:** stage 0 in progress. The model adapter and baseline scaffolding exist; the official baseline run is still pending. See `docs/PLAN.md` and [the interactive harness flow](docs/architecture/).
 
 ## Principles
 - One layer at a time; a layer is added only if it fixes a failure found by the question set.
@@ -19,6 +19,7 @@ A learning-and-portfolio project: a document Q&A assistant (RAG) with access con
 - `docs/lab/` — small throwaway experiments (swap one part, record what was learned)
 - `docs/PROCESS-LOG.md` — chronological log of how the repo was built, including corrections
 - `docs/DATA-CONTRACT.md` — data and permission contract (draft)
+- `docs/architecture/` — interactive request lifecycle and design boundaries
 - `data/corpus/` — synthetic documents (fictional company); `eval/` — question set and consistency check
 
 ## Quick start (stage 0)

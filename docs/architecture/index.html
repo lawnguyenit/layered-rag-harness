@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a25">
+  <meta name="description" content="Sơ đồ tương tác mô tả một request đi qua harness: hiểu yêu cầu, truy xuất có quyền, ghép prompt và gọi LLM.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>Request flow — Layered RAG Harness</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="../../README.md" aria-label="Layered RAG Harness home">
+        <span class="brand-mark">LRH</span>
+        <span class="brand-name">Layered RAG Harness <span class="brand-divider">/</span> Architecture</span>
+      </a>
+      <div class="topbar-right">
+        <span class="status-dot"></span>
+        <span>Design spec · evolving</span>
+        <a class="source-link" href="../PLAN.md">Project plan ↗</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow"><span>REQUEST LIFECYCLE</span><span class="eyebrow-line"></span><span>01 TURN</span></div>
+          <h1>Một lượt hỏi đi<br><em>qua harness</em> thế nào?</h1>
+          <p>Khám phá luồng từ câu khách gửi đến prompt cuối cùng đưa vào LLM. Bấm vào từng khối để xem trách nhiệm, dữ liệu vào/ra và ranh giới an toàn.</p>
+          <div class="hero-tags">
+            <span class="tag tag-proposed">Thiết kế đích</span>
+            <span class="tag tag-now">Giai đoạn 0 đang làm</span>
+            <span class="tag tag-muted">Không phải mọi khối đã được code</span>
+          </div>
+        </div>
+        <div class="hero-side" aria-label="Key design principle">
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="hero-core"><span class="core-label">HARNESS</span><span class="core-caption">điều phối · giới hạn · kiểm soát</span></div>
+          <div class="hero-side-note"><span class="note-number">01</span><span>LLM hiểu ngôn ngữ.<br><b>Code giữ ranh giới quyền.</b></span></div>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Interactive architecture explorer">
+        <div class="workspace-head">
+          <div>
+            <div class="section-kicker">SYSTEM MAP <span>·</span> PROPOSED TARGET FLOW</div>
+            <h2>Request processing</h2>
+          </div>
+          <div class="view-tabs" role="tablist" aria-label="Sơ đồ">
+            <button class="view-tab is-active" role="tab" aria-selected="true" data-view="flow">Luồng xử lý</button>
+            <button class="view-tab" role="tab" aria-selected="false" data-view="traces">Trace ví dụ</button>
+            <button class="view-tab" role="tab" aria-selected="false" data-view="contracts">Ranh giới</button>
+          </div>
+        </div>
+
+        <div class="legend" aria-label="Chú giải">
+          <span><i class="legend-swatch sw-code"></i>Code / quy tắc xác định</span>
+          <span><i class="legend-swatch sw-data"></i>Danh tính / dữ liệu</span>
+          <span><i class="legend-swatch sw-semantic"></i>Hiểu ngữ nghĩa / tùy chọn</span>
+          <span><i class="legend-swatch sw-model"></i>Model API</span>
+          <span><i class="legend-swatch sw-guard"></i>Cổng quyết định</span>
+        </div>
+
+        <div class="view-panel is-active" id="flow-view" role="tabpanel">
+          <div class="flow-layout">
+            <div class="flow-canvas">
+              <div class="flow-start">
+                <div class="start-icon">↳</div>
+                <div><span class="mini-label">INBOUND</span><strong>Người dùng gửi câu hỏi</strong><small>prompt · session token · conversation_id</small></div>
+                <span class="phase-chip phase-now">ENTRY</span>
+              </div>
+              <div class="connector"><span></span></div>
+
+              <button class="node node-code" data-node="ingress">
+                <span class="node-index">01</span><span class="node-content"><b>Kiểm tra request &amp; giới hạn</b><small>Kiểu dữ liệu · độ dài · định dạng · rate · token budget</small></span><span class="node-owner">CODE</span><span class="node-phase">G0</span>
+              </button>
+              <div class="connector"><span></span></div>
+              <button class="node node-data" data-node="identity">
+                <span class="node-index">02</span><span class="node-content"><b>Xác thực &amp; tạo actor context</b><small>user_id · customer_id · role từ session đáng tin</small></span><span class="node-owner">AUTH + CODE</span><span class="node-phase phase-later">G3</span>
+              </button>
+              <div class="connector"><span></span></div>
+              <button class="node node-data" data-node="history">
+                <span class="node-index">03</span><span class="node-content"><b>Nạp lịch sử hội thoại</b><small>Chỉ conversation thuộc đúng người dùng; lịch sử không cấp quyền</small></span><span class="node-owner">DATA + CODE</span><span class="node-phase phase-later">LATER</span>
+              </button>
+
+              <div class="stage-label"><span>04</span><b>HIỂU YÊU CẦU</b><i>Diễn giải câu chữ, không quyết định quyền</i></div>
+              <div class="branch-grid">
+                <button class="node node-code compact" data-node="parse">
+                  <span class="node-index">A</span><span class="node-content"><b>Parse dữ kiện rõ</b><small>Mã đơn · ngày · số tham chiếu</small></span><span class="node-owner">CODE</span>
+                </button>
+                <button class="node node-semantic compact" data-node="embedding">
+                  <span class="node-index">B</span><span class="node-content"><b>Đề xuất intent gần nghĩa</b><small>Embedding trên catalog intent, không trên quyền</small></span><span class="node-owner">EMBEDDING</span>
+                </button>
+              </div>
+              <div class="connector connector-split"><span></span></div>
+              <button class="node node-gate" data-node="intent-gate">
+                <span class="node-index">◇</span><span class="node-content"><b>Intent đủ rõ và không mâu thuẫn?</b><small>Kiểm phủ định, thiếu slot, nhiều ý định cùng lúc</small></span><span class="node-owner">DECISION</span>
+              </button>
+              <div class="branch-grid branch-outcomes">
+                <button class="node node-semantic compact" data-node="semantic-fallback">
+                  <span class="node-index">C</span><span class="node-content"><b>Phân loại ngữ nghĩa tùy chọn</b><small>Chỉ khi chưa rõ; thêm độ trễ/chi phí</small></span><span class="node-owner">MODEL</span>
+                </button>
+                <button class="node node-gate compact" data-node="clarify">
+                  <span class="node-index">?</span><span class="node-content"><b>Hỏi khách làm rõ</b><small>Dừng lượt này; không tự đoán</small></span><span class="node-owner">SAFE EXIT</span>
+                </button>
+              </div>
+
+              <div class="stage-label"><span>05</span><b>CHỌN &amp; TRUY XUẤT DỮ LIỆU</b><i>Theo intent và danh tính đã xác thực</i></div>
+              <div class="branch-grid">
+                <button class="node node-data compact" data-node="exact-lookup">
+                  <span class="node-index">↗</span><span class="node-content"><b>Tra cứu chính xác</b><small>order_id + owner_customer_id từ session</small></span><span class="node-owner">SQL / API</span>
+                </button>
+                <button class="node node-data compact" data-node="semantic-retrieval">
+                  <span class="node-index">⌕</span><span class="node-content"><b>Tìm kiếm ngữ nghĩa</b><small>ACL filter trước top-k; chỉ lấy đoạn được phép</small></span><span class="node-owner">RAG</span>
+                </button>
+              </div>
+              <button class="node node-code acl-node" data-node="authorization">
+                <span class="node-index">⛨</span><span class="node-content"><b>Ranh giới quyền cưỡng chế bằng code</b><small>role · customer_id · allowed_roles · ownership</small></span><span class="node-owner">NOT LLM</span><span class="node-phase phase-later">G1/G3</span>
+              </button>
+
+              <div class="stage-label"><span>06</span><b>KIỂM TRA NGỮ CẢNH</b><i>Hai nguồn không tin cậy được kiểm riêng</i></div>
+              <div class="branch-grid">
+                <button class="node node-semantic compact" data-node="user-safety">
+                  <span class="node-index">U</span><span class="node-content"><b>Prompt khách</b><small>Safety / injection signal nếu cần</small></span><span class="node-owner">DETECTOR</span>
+                </button>
+                <button class="node node-semantic compact" data-node="doc-safety">
+                  <span class="node-index">D</span><span class="node-content"><b>Đoạn truy xuất</b><small>Đánh dấu là data; không thành system instruction</small></span><span class="node-owner">DETECTOR</span>
+                </button>
+              </div>
+              <div class="callout callout-amber"><span>!</span><div><b>Detector là tín hiệu, không phải ACL.</b><small>Không dựa vào quét ngữ nghĩa để bảo đảm người dùng không thấy tài liệu bị cấm.</small></div></div>
+
+              <div class="connector"><span></span></div>
+              <button class="node node-code" data-node="trim">
+                <span class="node-index">07</span><span class="node-content"><b>Cắt và xếp hạng ngữ cảnh</b><small>Giữ prompt nền · câu hiện tại · lịch sử cần thiết · top-k hợp lệ</small></span><span class="node-owner">TOKENIZER + CODE</span><span class="node-phase phase-now">G0/G1</span>
+              </button>
+              <div class="connector"><span></span></div>
+              <button class="node node-code" data-node="prompt-build">
+                <span class="node-index">08</span><span class="node-content"><b>Ghép prompt cuối</b><small>Base instructions + intent module + context có nguồn + câu hỏi</small></span><span class="node-owner">PROMPT BUILDER</span><span class="node-phase phase-now">G0</span>
+              </button>
+              <div class="connector"><span></span></div>
+              <button class="node node-code" data-node="cache">
+                <span class="node-index">09</span><span class="node-content"><b>Cache · hạn mức · cấu hình</b><small>Key theo model + prompt/context + scope + version liên quan</small></span><span class="node-owner">CODE</span><span class="node-phase phase-now">G0</span>
+              </button>
+              <div class="connector connector-model"><span></span></div>
+              <button class="node node-model" data-node="llm">
+                <span class="node-index">10</span><span class="node-content"><b>LLM API</b><small>Nhận prompt hoàn chỉnh · sinh text hoặc tool call</small></span><span class="node-owner">MODEL API</span>
+              </button>
+
+              <div class="stage-label stage-return"><span>11</span><b>KIỂM SOÁT PHẢN HỒI</b><i>Model output vẫn là dữ liệu không tin cậy</i></div>
+              <div class="branch-grid">
+                <button class="node node-code compact" data-node="text-output">
+                  <span class="node-index">T</span><span class="node-content"><b>Text response</b><small>Kiểm schema · lỗi · nguồn trích</small></span><span class="node-owner">CODE</span>
+                </button>
+                <button class="node node-code compact" data-node="tool-output">
+                  <span class="node-index">M</span><span class="node-content"><b>Tool call</b><small>Validate args + quyền trước MCP</small></span><span class="node-owner">CODE → MCP</span><span class="node-phase phase-later">G2</span>
+                </button>
+              </div>
+              <div class="flow-end"><span class="end-check">✓</span><div><b>Trả lời người dùng</b><small>hoặc hỏi làm rõ / từ chối theo policy đã định</small></div></div>
+            </div>
+
+            <aside class="detail-panel" aria-live="polite">
+              <div class="detail-topline"><span class="detail-eyebrow">COMPONENT INSPECTOR</span><span class="detail-count">01 / 18</span></div>
+              <div class="detail-icon" id="detail-icon">↳</div>
+              <h3 id="detail-title">Chọn một khối trong sơ đồ</h3>
+              <p id="detail-summary">Bấm vào node để xem trách nhiệm, xử lý bằng code hay mô hình, và dữ liệu nào được phép đi tiếp.</p>
+              <div class="detail-rule"></div>
+              <div class="detail-field"><span>OWNER</span><b id="detail-owner">—</b></div>
+              <div class="detail-field"><span>INPUT → OUTPUT</span><b id="detail-io">—</b></div>
+              <div class="detail-field"><span>FAILURE PATH</span><b id="detail-failure">—</b></div>
+              <div class="detail-field"><span>STAGE</span><b id="detail-stage">—</b></div>
+              <div class="detail-note"><span>DESIGN RULE</span><p id="detail-rule">Quyền truy cập được cưỡng chế trong code, không suy ra từ ngôn ngữ của prompt.</p></div>
+              <div class="detail-footer"><span class="pulse"></span> Spec can evolve with measured failures</div>
+            </aside>
+          </div>
+        </div>
+
+        <div class="view-panel" id="traces-view" role="tabpanel" hidden>
+          <div class="trace-intro"><div><div class="section-kicker">FOLLOW THE DATA</div><h3>Một input, từng bước biến đổi</h3><p>Chọn một trường hợp để xem harness chuyển dữ liệu nào đi đâu. Đây là trace thiết kế, chưa phải log chạy thật.</p></div><span class="tag tag-proposed">SIMULATED TRACE</span></div>
+          <div class="trace-selectors" role="group" aria-label="Chọn trace">
+            <button class="trace-button is-active" data-trace="order">Tra cứu đơn của mình</button>
+            <button class="trace-button" data-trace="ambiguous">Ý định còn mơ hồ</button>
+            <button class="trace-button" data-trace="cross">Hỏi đơn người khác</button>
+          </div>
+          <div class="trace-grid"><div class="trace-input-card"><span class="mini-label">CUSTOMER INPUT</span><blockquote id="trace-prompt"></blockquote><div class="trace-actor"><span class="avatar">C1</span><div><b id="trace-actor">customer · c001</b><small>actor lấy từ session, không từ prompt</small></div></div></div><div class="trace-steps" id="trace-steps"></div></div>
+          <div class="trace-result" id="trace-result"></div>
+        </div>
+
+        <div class="view-panel" id="contracts-view" role="tabpanel" hidden>
+          <div class="trace-intro"><div><div class="section-kicker">ENFORCEMENT BOUNDARIES</div><h3>Model đề xuất. Harness quyết định.</h3><p>Mỗi đầu ra do model tạo phải được xem là dữ liệu cần kiểm tra trước khi nó làm thay đổi luồng hoặc chạm vào nguồn dữ liệu.</p></div><span class="tag tag-proposed">CONTRACT VIEW</span></div>
+          <div class="contract-grid">
+            <article class="contract-card contract-code"><span class="contract-label">CODE OWNS</span><h4>Quy tắc bắt buộc</h4><ul><li>Danh tính và vai trò từ session</li><li>Rate, kích thước, token, spend cap</li><li>ACL trước truy xuất / top-k</li><li>Validate tham số và quyền trước MCP</li><li>Cache key không trộn scope dữ liệu</li></ul></article>
+            <article class="contract-card contract-model"><span class="contract-label">MODEL MAY HELP</span><h4>Hiểu ngôn ngữ</h4><ul><li>Intent và slot khi câu diễn đạt tự do</li><li>Phủ định, tham chiếu hội thoại, mơ hồ</li><li>Safety / injection signals theo nhu cầu</li><li>Tóm tắt hoặc tạo câu trả lời có nguồn</li><li>Không tự cấp quyền hoặc chạy tool</li></ul></article>
+            <article class="contract-card contract-data"><span class="contract-label">DATA BOUNDARY</span><h4>Context có nguồn</h4><ul><li>Chunks mang doc_id và ACL metadata</li><li>Retrieved text vẫn là untrusted data</li><li>History không xác thực danh tính</li><li>Tool result không thành system instruction</li><li>Chỉ dữ liệu đã qua quyền vào prompt</li></ul></article>
+          </div>
+          <div class="contract-foot"><b>Failure principle</b><span>Nếu bước semantic không chắc → hỏi lại / dừng an toàn. Nếu bước quyền không xác nhận → không đưa dữ liệu vào context.</span></div>
+          <div class="phase-roadmap"><div><span>G0</span><b>Prompt + model adapter</b><small>Đang làm · baseline pending</small></div><div><span>G1</span><b>RAG</b><small>Retrieval &amp; source grounding</small></div><div><span>G2</span><b>MCP read-only</b><small>Tool contract &amp; timeout</small></div><div><span>G3</span><b>Access &amp; guardrails</b><small>Enforce and evaluate</small></div><div><span>G4</span><b>Operations</b><small>Monitoring · recovery · CI</small></div></div>
+        </div>
+      </section>
+
+      <section class="bottom-band">
+        <div class="bottom-mark">i</div><p><b>Scope note</b> Sơ đồ mô tả luồng đích để bàn thiết kế. Trạng thái code thật nằm trong <a href="../GATES.md">GATES.md</a>; không xem node có mặt ở đây là đã triển khai.</p>
+        <a class="bottom-link" href="../DATA-CONTRACT.md">Data &amp; permission contract ↗</a>
+      </section>
+    </main>
+
+    <footer class="site-footer"><span>LRH · ARCHITECTURE NOTES</span><span>AI-assisted design · evidence lives in the repo</span></footer>
+  </div>
+</body>
+</html>
