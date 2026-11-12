@@ -59,11 +59,22 @@ class RouteTask(BaseModel):
     slots: dict[str, SlotValue]
 
 
+class TaskOutcome(BaseModel):
+    """Per-intent/target planning result; only `route` outcomes are dispatchable."""
+
+    intent_id: str
+    slots: dict[str, SlotValue] = Field(default_factory=dict)
+    decision: Literal["route", "clarify", "unsupported", "no_action"]
+    missing_slots: list[str] = Field(default_factory=list)
+    ambiguity_type: str | None = None
+
+
 class RoutePlan(BaseModel):
     request_id: str
     conversation_id: str
-    decision: Literal["route", "clarify", "unsupported", "no_action"]
+    decision: Literal["route", "partial", "clarify", "unsupported", "no_action"]
     tasks: list[RouteTask] = Field(default_factory=list)
+    task_outcomes: list[TaskOutcome] = Field(default_factory=list)
     intent_candidates: list[str] = Field(default_factory=list)
     polarity: Literal["positive", "negative"] = "positive"
     negated_intents: list[str] = Field(default_factory=list)

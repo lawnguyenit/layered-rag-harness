@@ -185,6 +185,27 @@ def test_route_planner_missing_invalid_unsupported_multi_and_negative(catalog):
         {"intent_id": "order.lookup", "slots": {"order_id": {"value": "BM-1002"}}},
     ]}), **{**args, "question": "Không hủy BM-1001, chỉ xem BM-1002"})
     assert mixed.decision == "route" and [task.intent_id for task in mixed.tasks] == ["order.lookup"]
+    assert [outcome.decision for outcome in mixed.task_outcomes] == ["no_action", "route"]
+    mixed_negative_summary = planner.plan(ParseResult.model_validate({"decision": "no_action", "tasks": [
+        {"intent_id": "order.cancel", "polarity": "negative", "slots": {"order_id": {"value": "BM-1001"}}},
+        {"intent_id": "order.lookup", "slots": {"order_id": {"value": "BM-1002"}}},
+    ]}), **{**args, "question": "Không hủy BM-1001, chỉ xem BM-1002"})
+    assert mixed_negative_summary.decision == "route"
+    assert [task.intent_id for task in mixed_negative_summary.tasks] == ["order.lookup"]
+    partial_unsupported = planner.plan(ParseResult.model_validate({"decision": "route", "tasks": [
+        {"intent_id": "order.lookup", "slots": {"order_id": {"value": "BM-1001"}}},
+        {"intent_id": "order.cancel", "slots": {"order_id": {"value": "BM-1002"}}},
+    ]}), **{**args, "question": "Tra BM-1001 và hủy BM-1002"})
+    assert partial_unsupported.decision == "partial"
+    assert [task.intent_id for task in partial_unsupported.tasks] == ["order.lookup"]
+    assert [outcome.decision for outcome in partial_unsupported.task_outcomes] == ["route", "unsupported"]
+    partial_clarify = planner.plan(ParseResult.model_validate({"decision": "route", "tasks": [
+        {"intent_id": "order.lookup", "slots": {"order_id": {"value": "BM-1001"}}},
+        {"intent_id": "order.cancel"},
+    ]}), **{**args, "question": "Tra BM-1001 và hủy đơn"})
+    assert partial_clarify.decision == "partial"
+    assert partial_clarify.tasks[0].intent_id == "order.lookup"
+    assert [outcome.decision for outcome in partial_clarify.task_outcomes] == ["route", "clarify"]
     multiple = planner.plan(ParseResult.model_validate({"decision": "route", "tasks": [
         {"intent_id": "order.lookup", "slots": {"order_id": {"value": "BM-1001"}}},
         {"intent_id": "order.lookup", "slots": {"order_id": {"value": "BM-1002"}}},

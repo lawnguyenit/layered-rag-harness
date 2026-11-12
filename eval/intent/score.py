@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 
-DECISIONS = ("route", "clarify", "unsupported", "no_action")
+DECISIONS = ("route", "partial", "clarify", "unsupported", "no_action")
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -64,6 +64,21 @@ def task_signature(task: dict[str, Any]) -> str:
 
 def task_multiset(tasks: list[dict[str, Any]]) -> Counter[str]:
     return Counter(task_signature(task) for task in tasks)
+
+
+def outcome_signature(task: dict[str, Any]) -> str:
+    slots = {name: slot.get("value") for name, slot in task.get("slots", {}).items()}
+    return canonical({
+        "intent_id": task.get("intent_id"),
+        "slots": slots,
+        "decision": task.get("decision"),
+        "missing_slots": sorted(task.get("missing_slots", [])),
+        "ambiguity_type": task.get("ambiguity_type"),
+    })
+
+
+def outcome_multiset(tasks: list[dict[str, Any]]) -> Counter[str]:
+    return Counter(outcome_signature(task) for task in tasks)
 
 
 def macro_f1(gold: Counter[str], pred: Counter[str]) -> dict[str, Any]:
@@ -123,7 +138,8 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
     predicted_slots: Counter[tuple[str, str, str]] = Counter()
     gold_provenance: Counter[tuple[str, str, str, str]] = Counter()
     predicted_provenance: Counter[tuple[str, str, str, str]] = Counter()
-    intent_exact = slot_exact = route_task_exact = polarity_correct = candidate_polarity_exact = negation_exact = reference_exact = 0
+    intent_exact = slot_exact = route_task_exact = task_outcome_exact = polarity_correct = candidate_polarity_exact = negation_exact = reference_exact = 0
+    task_outcome_total = 0
     ambiguity_exact = plan_ambiguity_exact = missing_slots_exact = plan_missing_slots_exact = 0
     decision_correct = false_dispatch = wrong_dispatch = clarify_tp = clarify_total = false_clarify = 0
     routed = provider_errors = 0
@@ -142,6 +158,8 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
         expected_candidates = gold_candidates(expected)
         expected_route = gold_route_tasks(expected)
         actual_route = (plan or {}).get("tasks", [])
+        expected_outcomes = expected.get("task_outcomes")
+        actual_outcomes = (plan or {}).get("task_outcomes", [])
         gold_intents.update(intent_counts(expected_candidates))
         predicted_intents.update(intent_counts(parse_tasks))
         gold_slots.update(slot_counts(expected_candidates))
@@ -151,9 +169,13 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
         intents_ok = intent_counts(expected_candidates) == intent_counts(parse_tasks)
         slots_ok = task_multiset(expected_candidates) == task_multiset(parse_tasks)
         route_tasks_ok = task_multiset(expected_route) == task_multiset(actual_route)
+        outcomes_ok = outcome_multiset(expected_outcomes or []) == outcome_multiset(actual_outcomes) if expected_outcomes is not None else None
         intent_exact += int(intents_ok)
         slot_exact += int(slots_ok)
         route_task_exact += int(route_tasks_ok)
+        if outcomes_ok is not None:
+            task_outcome_total += 1
+            task_outcome_exact += int(outcomes_ok)
         actual_polarity = "negative" if parsed and (parsed.get("decision") == "no_action" or (parsed.get("tasks") and all(t.get("polarity") == "negative" for t in parsed["tasks"]))) else "positive"
         polarity_correct += int(actual_polarity == expected.get("polarity", "positive"))
         candidate_polarity_exact += int(Counter((task.get("intent_id"), task.get("polarity", "positive")) for task in expected_candidates) == Counter((task.get("intent_id"), task.get("polarity", "positive")) for task in parse_tasks))
@@ -166,7 +188,7 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
         if expected.get("polarity") == "negative":
             expected_negated.update(task.get("intent_id") for task in expected_candidates)
         negation_exact += int(actual_negated == expected_negated)
-        references_ok = (parsed or {}).get("references", {}) == expected.get("references", {})
+        references_ok = (plan or {}).get("references", {}) == expected.get("references", {})
         reference_exact += int(references_ok)
         ambiguity_exact += int((parsed or {}).get("ambiguity_type") == expected.get("ambiguity_type"))
         plan_ambiguity_exact += int((plan or {}).get("ambiguity_type") == expected.get("ambiguity_type"))
@@ -174,24 +196,24 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
         plan_missing_slots_exact += int(sorted((plan or {}).get("missing_slots", [])) == sorted(expected.get("missing_slots", [])))
         if "reference" in gold.get("group", ""):
             reference_groups[gold["group"]]["total"] += 1
-            reference_groups[gold["group"]]["correct"] += int((parsed or {}).get("references", {}) == expected.get("references", {}))
+            reference_groups[gold["group"]]["correct"] += int((plan or {}).get("references", {}) == expected.get("references", {}))
 
         actual_decision = plan.get("decision") if plan else "provider_error"
         expected_decision = expected["decision"]
         group = gold.get("group", "unassigned")
         group_counts[group]["cases"] += 1
         group_counts[group]["decision_correct"] += int(actual_decision == expected_decision)
-        group_counts[group]["routed"] += int(actual_decision == "route")
-        group_counts[group]["false_dispatch"] += int(expected_decision != "route" and actual_decision == "route")
+        group_counts[group]["routed"] += int(actual_decision in {"route", "partial"})
+        group_counts[group]["false_dispatch"] += int(expected_decision in {"clarify", "unsupported", "no_action"} and actual_decision in {"route", "partial"})
         if expected_decision in decision_confusion:
             decision_confusion[expected_decision][actual_decision] = decision_confusion[expected_decision].get(actual_decision, 0) + 1
         decision_correct += int(actual_decision == expected_decision)
-        routed += int(actual_decision == "route")
+        routed += int(actual_decision in {"route", "partial"})
         is_schema_failure = pred.get("error") in {"ValidationError", "JSONDecodeError", "schema_validation"}
         provider_errors += int(actual_decision == "provider_error" and not is_schema_failure)
-        false_dispatch += int(expected_decision != "route" and actual_decision == "route")
-        if expected_decision == "route":
-            wrong_dispatch += int(actual_decision == "route" and not route_tasks_ok)
+        false_dispatch += int(expected_decision in {"clarify", "unsupported", "no_action"} and actual_decision in {"route", "partial"})
+        if expected_decision in {"route", "partial"}:
+            wrong_dispatch += int(actual_decision in {"route", "partial"} and not route_tasks_ok)
             false_clarify += int(actual_decision == "clarify")
         if expected_decision == "clarify":
             clarify_total += 1
@@ -226,8 +248,10 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
             categories.append("NEGATION_SCOPE")
         if not references_ok:
             categories.append("REFERENCE_RESOLUTION")
-        if expected_decision == "route" and actual_decision == "route" and not route_tasks_ok:
+        if expected_decision == "route" and actual_decision in {"route", "partial"} and not route_tasks_ok:
             categories.append("MULTI_TASK_DROPPED_OR_MERGED" if len(expected_route) != len(actual_route) else "WRONG_SLOT")
+        if outcomes_ok is False:
+            categories.append("TASK_OUTCOME_MISMATCH")
         if pred.get("error"):
             categories.append("OUTPUT_SCHEMA_FAILURE" if pred["error"] in {"ValidationError", "JSONDecodeError", "schema_validation"} else "PROVIDER_FAILURE")
         categories = list(dict.fromkeys(categories))
@@ -248,6 +272,7 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
         "intent": {"exact_correct": intent_exact, "total": count, "task_micro_macro": macro_f1(gold_intents, predicted_intents)},
         "slots": {"parse_candidate_exact_correct": slot_exact, "total": count, "value_micro_macro": macro_f1(string_keys(gold_slots), string_keys(predicted_slots)), "provenance_exact_correct": sum((gold_provenance & predicted_provenance).values()), "provenance_total": sum(gold_provenance.values())},
         "route_task_exact": {"correct": route_task_exact, "total": count},
+        "task_outcome_exact": {"correct": task_outcome_exact, "total": task_outcome_total},
         "polarity": {"summary_correct": polarity_correct, "candidate_polarity_exact_correct": candidate_polarity_exact, "total": count, "summary_accuracy": polarity_correct / count if count else None, "candidate_exact_accuracy": candidate_polarity_exact / count if count else None},
         "negated_intents_exact": {"correct": negation_exact, "total": count},
         "references_exact": {"correct": reference_exact, "total": count},

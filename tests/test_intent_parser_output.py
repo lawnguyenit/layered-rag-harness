@@ -56,3 +56,28 @@ def test_parser_keeps_safe_call_metadata_when_json_is_invalid():
     assert captured.value.metadata.prompt_tokens == 17
     assert captured.value.issue_types == ["json_invalid"]
     assert "not-json" not in str(captured.value)
+
+
+def test_parser_removes_raw_slot_for_valid_identifier_and_preserves_malformed_raw():
+    valid_model = FakeModel(
+        '{"decision":"route","tasks":[{"intent_id":"order.lookup","slots":{'
+        '"order_id":{"value":"BM-1001","source":"current_turn"},'
+        '"order_id_raw":{"value":"BM-1001","source":"current_turn"}}}]}'
+    )
+    valid = ModelIntentParser(valid_model, catalog()).parse("BM-1001 status", [])
+    assert set(valid.tasks[0].slots) == {"order_id"}
+
+    raw_only_model = FakeModel(
+        '{"decision":"clarify","tasks":[{"intent_id":"order.lookup","slots":{'
+        '"order_id_raw":{"value":"BM-1O01","source":"current_turn"}}}]}'
+    )
+    malformed = ModelIntentParser(raw_only_model, catalog()).parse("BM-1O01 status", [])
+    assert set(malformed.tasks[0].slots) == {"order_id_raw"}
+
+    valid_raw_only_model = FakeModel(
+        '{"decision":"route","tasks":[{"intent_id":"order.lookup","slots":{'
+        '"order_id_raw":{"value":"BM-1002","source":"current_turn"}}}]}'
+    )
+    normalized = ModelIntentParser(valid_raw_only_model, catalog()).parse("BM-1002 status", [])
+    assert normalized.tasks[0].slots["order_id"].value == "BM-1002"
+    assert "order_id_raw" not in normalized.tasks[0].slots

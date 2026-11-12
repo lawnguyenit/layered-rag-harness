@@ -115,3 +115,11 @@ A chronological record of how this repository was built: what changed, why, and 
 **Fixed** the planner defect exposed by a same-turn reference case: resolve a compatible entity in the current utterance before scanning prior turns, and keep `current_turn` out of the cross-turn references map. Added a regression test.
 
 **Evidence:** independent suite: 74 passed, 2 skipped; v2/v1/v0 validators accept 22/35/30 cases. One Starlette/httpx deprecation warning remains. Diagnostic write-up: `eval/intent/reports/diagnostic-v2-2026-11-12.md`; raw output is ignored under `data/private/`. This is a local checkpoint; commit and push after final review.
+
+## 2026-11-12 — Intent v3 per-task outcomes and final diagnostic
+
+**Decided for this implementation checkpoint** to keep `requested_field` optional but extract it when explicit, evaluate compound requests per intent/target, and derive references from slot provenance. A valid sibling task may be routeable while another task is `clarify` or `unsupported`; the overall plan is `partial`, and `task_outcomes` preserves every disposition. Only `tasks` are dispatchable. These are documented implementation choices for the owner to review; no tool/retrieval action was added.
+
+**Fixed** duplicate raw-ID output using catalog grammars. A model response that repeated a valid ID in both canonical and `*_raw` slots is normalized before scoring; identical malformed raw/canonical strings keep only the raw slot. Unknown sentinel outcomes now carry `out_of_scope`.
+
+**Evidence:** independent reviewer validated v3 labels/docs. Independent tests: 75 passed, 2 skipped; v3/v2/v1/v0 validators accept 22/22/35/30 rows. One Gemini call per v3 case was attempted: 20 responses matched decision, route tasks and task outcomes; two provider `TransientError`s (D-004/D-011). After deterministic output normalization and plan replay, candidate exact, route-task exact, and task-outcome exact are each 20/22; reference, plan ambiguity and missing-slot exact are 22/22; false/wrong dispatch are 0/0. This remains draft-only. Report: `eval/intent/reports/diagnostic-v3-2026-11-12.md`.

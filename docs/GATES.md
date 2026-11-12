@@ -31,8 +31,8 @@ Production:
 ### Tier 2 — intent and route planning
 - [x] Versioned parser port and replaceable catalog exist; Bếp Mây is only a fixture
 - [x] Required slots, ID formats, negation, references and multiple route tasks covered by contract tests
-- [x] `clarify`, `unsupported`, `no_action` return no dispatchable tasks
-- [x] v0 and v1 draft schema/split keys independently reviewed; owner approval of v1 gold labels remains pending
+- [x] `clarify`, `unsupported`, `no_action` return no dispatchable tasks; `partial` carries per-task outcomes and only ready tasks are dispatchable
+- [x] v0, v1, and v3 draft schema/split keys independently reviewed; owner approval of v3 gold labels remains pending
 - [x] Scoring tool reports counts, false dispatch beside coverage, groups, error categories, latency/tokens/retries
 - [x] Run a bounded draft diagnostic set, independently review it, and publish owner-readable findings (preview only; not accuracy)
 - [ ] Run semantic parser against owner-approved gold and record a measured held-out score

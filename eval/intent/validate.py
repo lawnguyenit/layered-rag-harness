@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 EXPECTED_KEYS = {"decision", "parse_candidates", "route_tasks", "polarity", "negated_intents", "references", "missing_slots", "ambiguity_type"}
-DECISIONS = {"route", "clarify", "unsupported", "no_action"}
+DECISIONS = {"route", "partial", "clarify", "unsupported", "no_action"}
 
 
 def read_jsonl(path: Path):
@@ -46,8 +46,9 @@ def validate(gold_path: Path, catalog_path: Path) -> list[str]:
         family_split[family] = row.get("split")
         conversation_split[conversation] = row.get("split")
         expected = row.get("expected") or {}
-        if set(expected) != EXPECTED_KEYS:
-            errors.append(f"{row_id}: expected keys must be {sorted(EXPECTED_KEYS)}")
+        expected_keys = EXPECTED_KEYS | ({"task_outcomes"} if row.get("benchmark_version") == "intent-v3-diagnostic-draft" else set())
+        if set(expected) != expected_keys:
+            errors.append(f"{row_id}: expected keys must be {sorted(expected_keys)}")
         if not isinstance(expected.get("parse_candidates"), list) or not isinstance(expected.get("route_tasks"), list):
             errors.append(f"{row_id}: parse_candidates and route_tasks must always be arrays")
             continue
@@ -80,8 +81,26 @@ def validate(gold_path: Path, catalog_path: Path) -> list[str]:
             signature = (task.get("intent_id"), json.dumps(task.get("slots", {}), ensure_ascii=False, sort_keys=True))
             if signature not in candidate_signatures:
                 errors.append(f"{row_id}: every route task must match a positive parse candidate")
-        if expected.get("decision") != "route" and expected.get("route_tasks"):
+        if expected.get("decision") not in {"route", "partial"} and expected.get("route_tasks"):
             errors.append(f"{row_id}: non-route decision must have no route tasks")
+        if row.get("benchmark_version") == "intent-v3-diagnostic-draft":
+            outcomes = expected.get("task_outcomes", [])
+            if not isinstance(outcomes, list):
+                errors.append(f"{row_id}: task_outcomes must be an array")
+            else:
+                if expected.get("decision") == "partial" and not (
+                    any(item.get("decision") == "route" for item in outcomes)
+                    and any(item.get("decision") in {"clarify", "unsupported"} for item in outcomes)
+                ):
+                    errors.append(f"{row_id}: partial needs at least one routable and one blocked task outcome")
+                for item in outcomes:
+                    if item.get("decision") not in {"route", "clarify", "unsupported", "no_action"}:
+                        errors.append(f"{row_id}: invalid task outcome decision")
+                    if item.get("decision") == "route" and not any(
+                        task.get("intent_id") == item.get("intent_id") and task.get("slots", {}) == item.get("slots", {})
+                        for task in expected.get("route_tasks", [])
+                    ):
+                        errors.append(f"{row_id}: route outcome must match a route task")
         if expected.get("decision") == "clarify" and not (expected.get("missing_slots") or expected.get("ambiguity_type")):
             errors.append(f"{row_id}: clarify needs a missing slot or ambiguity type")
         for task in expected.get("parse_candidates", []):

@@ -21,6 +21,14 @@ Updated 2026-11-12. This record captures the current conversation; earlier proje
 | DEC-REFERENCE-RECENCY | Resolve “that order” to the most recently mentioned compatible entity; clarify if none or if the parser cannot identify a compatible antecedent. | Always clarify whenever more than one entity exists in history. | 5a context resolution | User response, 2026-11-12 |
 | DEC-NEGATION-NO-ACTION | “Đừng hủy đơn” means `no_action`; never create a route for the negated cancellation. | Confirming or dispatching the negated action. | 5a polarity/dispatch boundary | User response, 2026-11-12 |
 
+## Implementation choices made to complete the diagnostic contract
+
+| ID | Choice | Rationale | Status |
+|---|---|---|---|
+| IMPL-PARTIAL-TASKS | Evaluate each positive intent/target independently. A ready sibling may be routed while a missing sibling is `clarify` and a handlerless sibling is `unsupported`; report top-level `partial` and preserve every disposition in `task_outcomes`. Only entries in `tasks` are dispatchable. | This makes the user-approved one-task-per-intent/target behavior explicit and prevents a blocked sibling from being silently dropped. No action is executed in Tier 1–2. | Implemented for owner review; execution-layer contract must honor per-task outcomes. |
+| IMPL-REQUESTED-FIELD | Keep `requested_field` optional in the fixture. The parser must extract it when explicit or strongly implied; no field is invented from vague wording. | It is a query preference rather than an entity required to identify the order. A production tool may impose a narrower required-field contract. | Implemented; diagnostic benchmark measures extraction. |
+| IMPL-REFERENCE-SOURCE | Canonical reference evaluation uses the entity slot's `source` (`current_turn` or `prior_turn_N`); the model-generated `references` map is not authoritative. The route planner emits a canonical map for the API response. | Avoids scoring duplicate, inconsistent representations of the same antecedent. | Implemented in v3 scorer/runtime; retain legacy parse field temporarily for compatibility. |
+
 ## Superseded plan timing
 
 `docs/PLAN.md` previously placed HTTP identity in project stage 3. The current request moves API and authentication into runtime Tiers 1–2. This changes delivery order, not the separate project gate labels G0–G4. Reconcile `docs/PLAN.md` and `docs/GATES.md` before declaring a gate complete.
