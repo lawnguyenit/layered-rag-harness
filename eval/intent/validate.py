@@ -1,4 +1,4 @@
-"""Validate the draft benchmark contract without calling any model or provider."""
+"""Validate an intent benchmark draft without calling a model or provider."""
 from __future__ import annotations
 
 import argparse
@@ -31,7 +31,7 @@ def validate(gold_path: Path, catalog_path: Path) -> list[str]:
         if row_id in seen_ids:
             errors.append(f"{row_id}: duplicate case ID")
         seen_ids.add(row_id)
-        if row.get("benchmark_version") != "intent-v0-draft" or row.get("catalog_version") != catalog.get("catalog_version"):
+        if not str(row.get("benchmark_version", "")).endswith("-draft") or row.get("catalog_version") != catalog.get("catalog_version"):
             errors.append(f"{row_id}: benchmark/catalog version mismatch")
         if not row.get("paraphrase_family_id") or not row.get("conversation_id"):
             errors.append(f"{row_id}: missing leakage-safe split key")
@@ -55,6 +55,18 @@ def validate(gold_path: Path, catalog_path: Path) -> list[str]:
             errors.append(f"{row_id}: invalid decision label")
         if expected.get("polarity") not in {"positive", "negative"}:
             errors.append(f"{row_id}: invalid polarity")
+        if row.get("benchmark_version") == "intent-v1-draft":
+            candidate_negations = set()
+            for candidate in expected.get("parse_candidates", []):
+                candidate_negations.update(candidate.get("negated_intents", []))
+                if candidate.get("polarity") == "negative":
+                    candidate_negations.add(candidate.get("intent_id"))
+            if candidate_negations != set(expected.get("negated_intents", [])):
+                errors.append(f"{row_id}: top-level negated_intents must match negative parse candidates")
+            candidate_polarities = [candidate.get("polarity", "positive") for candidate in expected.get("parse_candidates", [])]
+            summary_polarity = "negative" if candidate_polarities and all(value == "negative" for value in candidate_polarities) else "positive"
+            if expected.get("polarity") != summary_polarity:
+                errors.append(f"{row_id}: top-level polarity must follow the v1 candidate aggregation rule")
         if expected.get("decision") == "no_action" and expected.get("route_tasks"):
             errors.append(f"{row_id}: no_action must have an empty route task list")
         if expected.get("decision") == "route" and not expected.get("parse_candidates"):
@@ -107,15 +119,15 @@ def validate(gold_path: Path, catalog_path: Path) -> list[str]:
                 errors.append(f"{row_id}: route task intent not in catalog: {intent_id}")
             if any(slot not in definitions for slot in task.get("slots", {})):
                 errors.append(f"{row_id}: route task has a slot not in catalog")
-    if len(rows) != 30:
-        errors.append(f"expected 30 draft cases, found {len(rows)}")
+    if not rows:
+        errors.append("benchmark must contain at least one case")
     return errors
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gold", type=Path, default=Path("eval/intent/cases-v0-draft.jsonl"))
-    parser.add_argument("--catalog", type=Path, default=Path("eval/intent/catalog-bm-v0.json"))
+    parser.add_argument("--gold", type=Path, default=Path("eval/intent/cases-v1-draft.jsonl"))
+    parser.add_argument("--catalog", type=Path, default=Path("eval/intent/catalog-bm-v1.json"))
     args = parser.parse_args()
     errors = validate(args.gold, args.catalog)
     if errors:

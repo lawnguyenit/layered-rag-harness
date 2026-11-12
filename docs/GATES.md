@@ -32,7 +32,7 @@ Production:
 - [x] Versioned parser port and replaceable catalog exist; Bếp Mây is only a fixture
 - [x] Required slots, ID formats, negation, references and multiple route tasks covered by contract tests
 - [x] `clarify`, `unsupported`, `no_action` return no dispatchable tasks
-- [x] Draft benchmark schema and split keys independently reviewed; owner approval of gold labels is still pending
+- [x] v0 and v1 draft schema/split keys independently reviewed; owner approval of v1 gold labels remains pending
 - [x] Scoring tool reports counts, false dispatch beside coverage, groups, error categories, latency/tokens/retries
 - [ ] Run semantic parser against owner-approved gold and record a measured held-out score
 

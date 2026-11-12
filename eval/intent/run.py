@@ -31,8 +31,8 @@ def _git_commit() -> str:
 
 def main() -> None:
     cli = argparse.ArgumentParser()
-    cli.add_argument("--gold", type=Path, default=Path("eval/intent/cases-v0-draft.jsonl"))
-    cli.add_argument("--catalog", type=Path, default=Path("eval/intent/catalog-bm-v0.json"))
+    cli.add_argument("--gold", type=Path, default=Path("eval/intent/cases-v1-draft.jsonl"))
+    cli.add_argument("--catalog", type=Path, default=Path("eval/intent/catalog-bm-v1.json"))
     cli.add_argument("--out", type=Path, required=True)
     cli.add_argument("--model-id", default=None)
     cli.add_argument("--limit", type=int, default=None, help="Run the first N cases for a pilot only")

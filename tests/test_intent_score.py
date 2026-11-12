@@ -44,7 +44,7 @@ def test_score_reports_false_dispatch_beside_coverage_and_marks_draft_preview():
 def test_score_counts_pure_negation_as_negative_no_action():
     gold = [{
         "id": "I-22", "gold_status": "draft", "group": "negation",
-        "expected": {"decision": "no_action", "parse_candidates": [{"intent_id": "order.cancel", "slots": {"order_id": {"value": "BM-1001", "source": "current_turn"}}}], "route_tasks": [], "polarity": "negative", "negated_intents": [], "references": {}, "missing_slots": [], "ambiguity_type": None},
+        "expected": {"decision": "no_action", "parse_candidates": [{"intent_id": "order.cancel", "slots": {"order_id": {"value": "BM-1001", "source": "current_turn"}}, "polarity": "negative", "negated_intents": ["order.cancel"]}], "route_tasks": [], "polarity": "negative", "negated_intents": ["order.cancel"], "references": {}, "missing_slots": [], "ambiguity_type": None},
     }]
     predictions = [{
         "id": "I-22",
@@ -52,5 +52,35 @@ def test_score_counts_pure_negation_as_negative_no_action():
         "plan": {"decision": "no_action"}, "call": {}, "error": None,
     }]
     result = score(gold, predictions)
-    assert result["polarity"] == {"correct": 1, "total": 1, "accuracy": 1.0}
+    assert result["polarity"]["summary_correct"] == 1
+    assert result["polarity"]["candidate_polarity_exact_correct"] == 1
+    assert result["polarity"]["summary_accuracy"] == 1.0
+    assert result["polarity"]["candidate_exact_accuracy"] == 1.0
     assert result["negated_intents_exact"] == {"correct": 1, "total": 1}
+
+
+def test_score_checks_candidate_polarity_for_mixed_intents():
+    gold = [{
+        "id": "I-mixed", "gold_status": "draft", "group": "negation_pair",
+        "expected": {
+            "decision": "route",
+            "parse_candidates": [
+                {"intent_id": "order.lookup", "slots": {"order_id": {"value": "BM-1001", "source": "current_turn"}}, "polarity": "positive", "negated_intents": []},
+                {"intent_id": "order.cancel", "slots": {"order_id": {"value": "BM-1001", "source": "current_turn"}}, "polarity": "negative", "negated_intents": ["order.cancel"]},
+            ],
+            "route_tasks": [{"intent_id": "order.lookup", "slots": {"order_id": {"value": "BM-1001", "source": "current_turn"}}}],
+            "polarity": "positive", "negated_intents": ["order.cancel"], "references": {}, "missing_slots": [], "ambiguity_type": None,
+        },
+    }]
+    predictions = [{
+        "id": "I-mixed",
+        "parsed": {"decision": "route", "tasks": [
+            {"intent_id": "order.lookup", "slots": {"order_id": {"value": "BM-1001", "source": "current_turn"}}, "polarity": "positive"},
+            {"intent_id": "order.cancel", "slots": {"order_id": {"value": "BM-1001", "source": "current_turn"}}, "polarity": "negative", "negated_intents": ["order.cancel"]},
+        ], "negated_intents": ["order.cancel"], "references": {}},
+        "plan": {"decision": "route", "tasks": [{"intent_id": "order.lookup", "slots": {"order_id": {"value": "BM-1001", "source": "current_turn"}}}]},
+        "call": {}, "error": None,
+    }]
+    result = score(gold, predictions)
+    assert result["polarity"]["summary_correct"] == 1
+    assert result["polarity"]["candidate_polarity_exact_correct"] == 1

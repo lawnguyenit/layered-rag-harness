@@ -8,7 +8,7 @@ This is a local development route-planning API. It needs a real OIDC token and a
 2. Run `docker compose -f compose.auth.yaml up -d`.
 3. Open `http://localhost:8080`, create realm `lrh`, and create one application role per user such as `customer` or `support`. The API rejects a token carrying zero or multiple recognized application roles; it does not infer role hierarchy.
 4. Create an OIDC client for the API. Configure an access-token audience mapper that emits `lrh-api` as `aud`. Add a user-attribute mapper for `customer_id` if testing customer-owned records. Use an Authorization Code + PKCE client flow for a real interactive client; do not build a password-collection flow into the harness.
-5. Set `.env` values for `OIDC_ISSUER`, `OIDC_AUDIENCE`, `OIDC_JWKS_URL`, `LRH_ROUTE_CATALOG`, and `GEMINI_API_KEY`. Local Keycloak URLs are `http://localhost:8080/realms/lrh` and `http://localhost:8080/realms/lrh/protocol/openid-connect/certs`; audience is `lrh-api`; fixture catalog is `eval/intent/catalog-bm-v0.json`.
+5. Set the local environment values for `OIDC_ISSUER`, `OIDC_AUDIENCE`, `OIDC_JWKS_URL`, `LRH_ROUTE_CATALOG`, and `GEMINI_API_KEY`. Local Keycloak URLs are `http://localhost:8080/realms/lrh` and `http://localhost:8080/realms/lrh/protocol/openid-connect/certs`; audience is `lrh-api`; current fixture catalog is `eval/intent/catalog-bm-v1.json`.
 6. Start from the repository root with `uv run uvicorn lrh.server:app --host 127.0.0.1 --port 8010`.
 
 Request `POST /v1/route` with JSON `{"question":"Đơn BM-1001 giao khi nào?"}` and an `Authorization: Bearer <access token>` header. The response contains a decision and zero or more route tasks. The HTTP body cannot set `role`, `customer_id`, `actor`, or `access_scope`.

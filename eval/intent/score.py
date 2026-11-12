@@ -123,7 +123,7 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
     predicted_slots: Counter[tuple[str, str, str]] = Counter()
     gold_provenance: Counter[tuple[str, str, str, str]] = Counter()
     predicted_provenance: Counter[tuple[str, str, str, str]] = Counter()
-    intent_exact = slot_exact = route_task_exact = polarity_correct = negation_exact = reference_exact = 0
+    intent_exact = slot_exact = route_task_exact = polarity_correct = candidate_polarity_exact = negation_exact = reference_exact = 0
     ambiguity_exact = plan_ambiguity_exact = missing_slots_exact = plan_missing_slots_exact = 0
     decision_correct = false_dispatch = wrong_dispatch = clarify_tp = clarify_total = false_clarify = 0
     routed = provider_errors = 0
@@ -156,6 +156,7 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
         route_task_exact += int(route_tasks_ok)
         actual_polarity = "negative" if parsed and (parsed.get("decision") == "no_action" or (parsed.get("tasks") and all(t.get("polarity") == "negative" for t in parsed["tasks"]))) else "positive"
         polarity_correct += int(actual_polarity == expected.get("polarity", "positive"))
+        candidate_polarity_exact += int(Counter((task.get("intent_id"), task.get("polarity", "positive")) for task in expected_candidates) == Counter((task.get("intent_id"), task.get("polarity", "positive")) for task in parse_tasks))
         actual_negated = set((parsed or {}).get("negated_intents", []))
         for task in parse_tasks:
             actual_negated.update(task.get("negated_intents", []))
@@ -246,7 +247,7 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
         "intent": {"exact_correct": intent_exact, "total": count, "task_micro_macro": macro_f1(gold_intents, predicted_intents)},
         "slots": {"parse_candidate_exact_correct": slot_exact, "total": count, "value_micro_macro": macro_f1(string_keys(gold_slots), string_keys(predicted_slots)), "provenance_exact_correct": sum((gold_provenance & predicted_provenance).values()), "provenance_total": sum(gold_provenance.values())},
         "route_task_exact": {"correct": route_task_exact, "total": count},
-        "polarity": {"correct": polarity_correct, "total": count, "accuracy": polarity_correct / count if count else None},
+        "polarity": {"summary_correct": polarity_correct, "candidate_polarity_exact_correct": candidate_polarity_exact, "total": count, "summary_accuracy": polarity_correct / count if count else None, "candidate_exact_accuracy": candidate_polarity_exact / count if count else None},
         "negated_intents_exact": {"correct": negation_exact, "total": count},
         "references_exact": {"correct": reference_exact, "total": count},
         "ambiguity_type_exact": {"parser_correct": ambiguity_exact, "plan_correct": plan_ambiguity_exact, "total": count},
@@ -292,7 +293,7 @@ def _score_pairs(gold_rows: list[dict[str, Any]], predictions: dict[str, dict[st
 
 def main() -> None:
     cli = argparse.ArgumentParser()
-    cli.add_argument("--gold", type=Path, default=Path("eval/intent/cases-v0-draft.jsonl"))
+    cli.add_argument("--gold", type=Path, default=Path("eval/intent/cases-v1-draft.jsonl"))
     cli.add_argument("--predictions", type=Path, required=True)
     cli.add_argument("--out", type=Path, default=None)
     cli.add_argument("--split", choices=("all", "dev", "test"), default="all")

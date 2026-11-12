@@ -1,6 +1,6 @@
-# Intent, slot, and uncertainty evaluation (draft)
+# Intent, slot, and uncertainty evaluation (v1 draft)
 
-**Status:** versioned design draft, not a frozen or measured benchmark. Gold labels still need independent review.
+**Status:** version 1 draft, not a frozen or measured benchmark. Gold labels still need owner approval. Version 0 is preserved as `cases-v0-draft.jsonl` and `catalog-bm-v0.json`.
 
 This suite measures runtime 5a in isolation. It does not measure answer quality, identity verification, permission enforcement, retrieval, or final response generation. Bếp Mây is a replaceable fixture; the parser contract and evaluation procedure are domain-neutral.
 
@@ -11,15 +11,15 @@ Each JSONL row contains:
 - `benchmark_version` and `catalog_version`;
 - fixed `split` (`dev` or `test`), `paraphrase_family_id`, and `conversation_id` for leakage-safe separation;
 - prior `context` turns and current `utterance`;
-- `expected`: the same fields on every row: `decision`, `parse_candidates`, `route_tasks` (possibly empty), top-level `polarity`, `negated_intents`, `references`, `missing_slots`, and `ambiguity_type`. Each parse candidate contains `intent_id`, its own `polarity`, `negated_intents`, and normalized `slots` with provenance. Candidates are semantic parses; route tasks are the post-validation plan that may execute later.
+- `expected`: `decision`, `parse_candidates`, `route_tasks` (possibly empty), top-level `polarity`, `negated_intents`, `references`, `missing_slots`, and `ambiguity_type`. Each parse candidate contains `intent_id`, its own `polarity`, `negated_intents`, and normalized `slots` with provenance. Candidate-level negative intents must be included in the top-level `negated_intents`. Summary polarity is `negative` only when there is at least one candidate and every candidate is negative; it is `positive` if any positive candidate exists (including a mixed-polarity request) or no candidate was recognized. Candidates are semantic parses; route tasks are the post-validation plan that may execute later.
 
 Decision labels are exactly `route`, `clarify`, `unsupported`, and `no_action`. `route` means a parse can produce one or more candidate route tasks; it does **not** mean the caller is authorized or a task has run. Identity and access scope are scored at their own boundary. Multiple candidates/route tasks are one per intent/target. A negative candidate may appear under `parse_candidates` for scoring but must never appear in `route_tasks`. Required/allowed slot names, types, vocabularies, and ID grammars belong in the versioned route catalog, not in model confidence.
 
-For the Bếp Mây fixture, order IDs use `BM-[0-9]{4}` and invoice IDs use `INV-[0-9]{4}-[0-9]{4}`. Preserve malformed values in a raw slot for diagnosis; do not silently repair them into valid IDs. A missing or invalid required target yields `clarify`. A recognized intent with no registered handler yields `unsupported`, after required information is present. A solely negated request yields `no_action` and must not dispatch. If a compatible entity is referenced, select the most recently mentioned one; otherwise clarify.
+For the Bếp Mây fixture, order IDs use `BM-[0-9]{4}` and invoice IDs use `INV-[0-9]{4}-[0-9]{4}`. An unqualified cancellation in this fixture means `order.cancel`; a missing order ID yields `clarify`. Preserve malformed values in a raw slot for diagnosis; do not silently repair them into valid IDs. A missing or invalid required target yields `clarify`. A recognized intent with no registered handler yields `unsupported`, after required information is present. A solely negated request yields `no_action` and must not dispatch. In a mixed request, negative candidates never become route tasks while positive candidates are evaluated normally. Planning is all-or-nothing: `route_tasks` are emitted only when the overall decision is `route`; clarify, unsupported, and no_action produce no tasks. If a compatible entity is referenced, select the most recently mentioned one; otherwise clarify.
 
 ## Current draft coverage
 
-The 30 cases cover paraphrase, nearby intents, slot extraction, missing/invalid slots, multiple targets/intents, positive/negative contrasts, negation, unique/missing/recent-reference resolution, code switching, and unsupported domains. The fixed pilot split has 7 development cases and 23 test cases; paraphrase families and conversations do not cross splits. `I-022` reflects the approved rule that a solely negated cancellation is `no_action`: it keeps the detected negative candidate for parser scoring and has an empty route task list. All rows are still drafts, not independently accepted gold labels. With only 23 held-out cases across many intents, this is a pilot benchmark; it cannot establish stable per-intent accuracy or a low production error rate.
+The 35 cases cover paraphrase, nearby intents, slot extraction, missing/invalid IDs, multiple targets/intents, positive/negative contrasts, negation, compatible/incompatible references, code switching, and unsupported domains. The fixed pilot split has 6 development cases and 29 test cases; paraphrase families and conversations do not cross splits. `I-022` and `I-031` reflect the owner decision that a solely negated action is `no_action`: preserve the negative candidate for parser scoring and emit no route task. All rows are still drafts, not accepted gold labels. The owner has seen the v0 suite; this pilot split is not an independent blind test. Dev is too small and lacks key uncertainty slices for threshold selection; test coverage is thin for unsupported in-domain requests, ambiguous intents, mixed valid/invalid multi-task requests, and reference boundary cases. With only 29 held-out cases across many intents, it cannot establish stable per-intent accuracy or a low production error rate.
 
 The existing `eval/questions.jsonl` scores final answers. Its four G cases do not measure intent, slot, negation, or reference quality. Do not infer a 5a score from the existing LLM answer experiment.
 
@@ -29,7 +29,7 @@ Report numerator, denominator, benchmark/catalog version, and per-slice results:
 
 1. **Intent:** candidate macro-F1, per-intent precision/recall, confusion matrix.
 2. **Slots:** parse-candidate exact match; value-level per-slot precision/recall/F1; exact match for IDs and slot provenance. Report post-validation route-task exact match separately.
-3. **Polarity:** polarity accuracy, negation-scope accuracy, and contrast-pair consistency.
+3. **Polarity:** summary polarity accuracy, candidate-level polarity exact match, negated-intent exact match, and contrast-pair consistency.
 4. **References:** antecedent accuracy split by unique, missing, and multiple/recent antecedents.
 5. **Uncertainty:** `false_dispatch` when expected clarify/unsupported/no_action is routed; `wrong_dispatch` for a route with wrong intent/slot; clarify recall; false clarify on clear supported cases; automatic route coverage. Show false dispatch beside coverage.
 6. **Serving:** p50/p95 latency, input/output tokens, API calls per request, retry/timeout/provider-error rates, and throughput at named concurrency levels.
@@ -44,7 +44,7 @@ Log parser output separately from the later authorization and execution decision
 
 ## Run protocol
 
-- Freeze route taxonomy/catalog, gold labels, parser prompt/schema, model ID, and benchmark version before the final run.
+- Freeze route taxonomy/catalog, owner-approved gold labels, parser prompt/schema, model ID, and benchmark version before the final run. Version changes must retain old artifacts and use a new filename.
 - Use the fixed `dev` split only for prompt/schema iteration and the untouched `test` split for pilot reporting; keep `paraphrase_family_id` and whole `conversation_id` together. Do not put held-out utterances or close paraphrases in few-shot examples.
 - This pilot has no calibrated score or threshold-selection protocol. If a future parser introduces a route/abstain score, expand `dev` with representative unsupported, no-action, multi-task, and reference cases before choosing an operating point; leave `test` untouched.
 - Report raw counts and uncertainty intervals for small slices. Do not claim low failure rates from a handful of cases.
@@ -59,8 +59,8 @@ From the repository root:
 
 ```powershell
 uv run python eval/intent/validate.py
-uv run python eval/intent/run.py --split dev --out data/private/intent-dev.jsonl
-uv run python eval/intent/score.py --split dev --predictions data/private/intent-dev.jsonl
+uv run python eval/intent/run.py --split dev --out data/private/intent-v1-dev.jsonl
+uv run python eval/intent/score.py --split dev --predictions data/private/intent-v1-dev.jsonl
 ```
 
-After prompt/catalog changes stop, use a new output filename for each run, compare on `dev`, then run `--split test` once for the candidate. The runner loads the configured model/API key from the local environment; it does not use the final-answer cache. Results belong under `data/private/` and must not be committed. Draft results are preview-only.
+After prompt/catalog changes stop, use a new output filename for each run, compare on `dev`, then run `--split test` once for the candidate. The runner loads the configured model/API key from the local environment; it does not use the final-answer cache. Results belong under `data/private/` and must not be committed. Draft results are preview-only. The current environment has no Gemini key configured; live scoring remains blocked until a key is configured by the owner.

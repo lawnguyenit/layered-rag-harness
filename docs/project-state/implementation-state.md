@@ -11,7 +11,7 @@
 | IMP-ACCESS-SCOPE | Trusted route access scope derived from verified actor. | implemented and independently unit-verified | no | `src/lrh/request_contracts.py`, `src/lrh/routing.py`; body fields are forbidden. | Tests cover claim-derived role/scope; this scope is not yet an ACL filter over data. | 2026-11-12 |
 | IMP-HISTORY | Per-subject local SQLite conversation context. | implemented and independently unit-verified | no | `src/lrh/conversation_store.py`; default path under `data/private/`. | Ownership isolation test passes; multi-instance production store not implemented. | 2026-11-12 |
 | IMP-5A | Intent, slots, polarity, negation, references and route-plan validation. | implemented; contract tests pass; semantic score not measured | no | `src/lrh/routing.py`; model behind `IntentParser`/`ModelIntentParser`; catalog is external config. | Focused and full tests pass; live Gemini 5a benchmark not run. | 2026-11-12 |
-| IMP-EVAL-5A | Labeled 5a benchmark draft. | draft, structurally validated | no | `eval/intent/README.md`, `eval/intent/catalog-bm-v0.json`, `eval/intent/cases-v0-draft.jsonl`. | Validator passes; independent reviewer cleared schema blockers but gold approval remains open. | 2026-11-12 |
+| IMP-EVAL-5A | Labeled 5a benchmark draft. | v1 draft, structurally validated; independent v1 review and owner gold approval pending | no | `eval/intent/README.md`, `eval/intent/catalog-bm-v1.json`, `eval/intent/cases-v1-draft.jsonl`. | Validator passes 35 draft rows; live Gemini score not measured. v0 is preserved. | 2026-11-12 |
 
 ## Approved design boundary
 
