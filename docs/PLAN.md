@@ -125,4 +125,4 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 |---|---|---|
 | (chưa bắt đầu) | | |
 | Runtime Tier 1–2 / 5a diagnostic iteration | 1.2 | 2026-11-12: author/review v2-v3 cases, run bounded Gemini diagnostics, implement partial per-task outcomes, canonical reference scoring, raw-ID normalization, add contract tests, update state/report docs. Rounded elapsed work for this iteration; excludes owner gold review. |
-| Runtime Tier 1 / local Keycloak smoke | 0.5 | 2026-11-12: temporary loopback Keycloak setup, token/JWKS/API smoke, and verification-state update. Rounded elapsed work; hardcoded smoke claim means dynamic per-user mapper remains unverified. |
+| Runtime Tier 1 / local Keycloak smoke | 0.7 | 2026-11-12: temporary loopback Keycloak setup, token/JWKS and Uvicorn HTTP route smoke, and verification-state update. Rounded elapsed work; hardcoded smoke claim means dynamic per-user mapper remains unverified. |
