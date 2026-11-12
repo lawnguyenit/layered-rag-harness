@@ -55,7 +55,7 @@ def validate(gold_path: Path, catalog_path: Path) -> list[str]:
             errors.append(f"{row_id}: invalid decision label")
         if expected.get("polarity") not in {"positive", "negative"}:
             errors.append(f"{row_id}: invalid polarity")
-        if row.get("benchmark_version") == "intent-v1-draft":
+        if row.get("benchmark_version") != "intent-v0-draft":
             candidate_negations = set()
             for candidate in expected.get("parse_candidates", []):
                 candidate_negations.update(candidate.get("negated_intents", []))

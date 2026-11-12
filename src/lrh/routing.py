@@ -182,6 +182,12 @@ def _latest_entity(question: str, history: list[dict[str, object]], pattern: str
     # Catalog grammars are anchored for validation; extraction needs the same token pattern inside text.
     extraction_pattern = pattern.removeprefix("^").removesuffix("$")
     regex = re.compile(r"(?<![A-Za-z0-9])(?:" + extraction_pattern + r")(?![A-Za-z0-9])", re.IGNORECASE)
+    # A pronoun may point to an entity mentioned earlier in the same utterance
+    # ("BM-1001 ... that order"). The current turn is newer than conversation
+    # history, so resolve it first and preserve its provenance.
+    current_matches = list(regex.finditer(question))
+    if current_matches:
+        return current_matches[-1].group(0), "current_turn"
     for item in reversed(history):
         utterance = item.get("utterance")
         turn = item.get("turn")
@@ -277,7 +283,8 @@ class RoutePlanner:
                     entity = _latest_entity(question, history, pattern) if pattern else None
                     if entity:
                         slots[slot_name] = SlotValue(value=entity[0], source=entity[1])
-                        resolved_references[slot_name] = entity[1]
+                        if entity[1].startswith("prior_turn_"):
+                            resolved_references[slot_name] = entity[1]
                     else:
                         slots.pop(slot_name, None)
                 elif slot_name in slots:

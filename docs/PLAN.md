@@ -124,3 +124,4 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 | Giai đoạn | Giờ thật | Ghi chú |
 |---|---|---|
 | (chưa bắt đầu) | | |
+| Runtime Tier 1–2 / 5a diagnostic iteration | 0.4 | 2026-11-12: author and independently review 22 draft cases, run one Gemini diagnostic, fix same-turn reference handling, update report/state docs. Rounded elapsed work for this iteration; excludes any future owner review. |

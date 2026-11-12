@@ -9,6 +9,7 @@ Updated 2026-11-12. This record captures the current conversation; earlier proje
 | REQ-RUNTIME-T1T2 | Implement runtime Tier 1 and Tier 2; specifically measure uncertainty in 5a (intent, slots, negation, references), error types, and accuracy. | Add an API request path up to a scoped route plan, plus a fixed, reviewable parser evaluation suite. Do not imply RAG/tool execution is part of these tiers. | requested | Conversation, 2026-11-12 |
 | REQ-GENERIC | The process is generic; Bếp Mây is only a concrete example. | Keep ingress, identity, parsing and route contracts domain-neutral; put example intents in a replaceable fixture/catalog. | approved | Conversation, 2026-11-12 |
 | REQ-AUTH | Include a real HTTP API and authentication in scope now. | No unauthenticated production request path; actor identity comes from validated credentials, never question/body claims. | approved | User response, 2026-11-12 |
+| REQ-EVAL-OWNED-DRAFT | Do not make the owner manually interpret dense JSON labels before useful testing. | Agent authors targeted diagnostic cases from known risks, independently reviews/tests them, then presents a readable result and asks the owner to inspect only remaining ambiguous product decisions or uncovered failure modes. | approved | User response, 2026-11-12 |
 
 ## Approved decisions
 

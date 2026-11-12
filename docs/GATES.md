@@ -34,6 +34,7 @@ Production:
 - [x] `clarify`, `unsupported`, `no_action` return no dispatchable tasks
 - [x] v0 and v1 draft schema/split keys independently reviewed; owner approval of v1 gold labels remains pending
 - [x] Scoring tool reports counts, false dispatch beside coverage, groups, error categories, latency/tokens/retries
+- [x] Run a bounded draft diagnostic set, independently review it, and publish owner-readable findings (preview only; not accuracy)
 - [ ] Run semantic parser against owner-approved gold and record a measured held-out score
 
 ### Unfinished project gates still in force

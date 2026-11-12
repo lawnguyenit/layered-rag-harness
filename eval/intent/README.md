@@ -15,7 +15,7 @@ Each JSONL row contains:
 
 Decision labels are exactly `route`, `clarify`, `unsupported`, and `no_action`. `route` means a parse can produce one or more candidate route tasks; it does **not** mean the caller is authorized or a task has run. Identity and access scope are scored at their own boundary. Multiple candidates/route tasks are one per intent/target. A negative candidate may appear under `parse_candidates` for scoring but must never appear in `route_tasks`. Required/allowed slot names, types, vocabularies, and ID grammars belong in the versioned route catalog, not in model confidence.
 
-For the Bếp Mây fixture, order IDs use `BM-[0-9]{4}` and invoice IDs use `INV-[0-9]{4}-[0-9]{4}`. An unqualified cancellation in this fixture means `order.cancel`; a missing order ID yields `clarify`. Preserve malformed values in a raw slot for diagnosis; do not silently repair them into valid IDs. A missing or invalid required target yields `clarify`. A recognized intent with no registered handler yields `unsupported`, after required information is present. A solely negated request yields `no_action` and must not dispatch. In a mixed request, negative candidates never become route tasks while positive candidates are evaluated normally. Planning is all-or-nothing: `route_tasks` are emitted only when the overall decision is `route`; clarify, unsupported, and no_action produce no tasks. If a compatible entity is referenced, select the most recently mentioned one; otherwise clarify.
+For the Bếp Mây fixture, order IDs use `BM-[0-9]{4}` and invoice IDs use `INV-[0-9]{4}-[0-9]{4}`. An unqualified cancellation in this fixture means `order.cancel`; a missing order ID yields `clarify`. Preserve malformed values in a raw slot for diagnosis; do not silently repair them into valid IDs. A missing or invalid required target yields `clarify`. A recognized intent with no registered handler yields `unsupported`, after required information is present. A solely negated request yields `no_action` and must not dispatch. In a mixed request, negative candidates never become route tasks while positive candidates are evaluated normally. Planning is currently all-or-nothing: `route_tasks` are emitted only when the overall decision is `route`; clarify, unsupported, and no_action produce no tasks. This compound-request policy is a provisional product decision and is explicitly probed by D-010/D-011, not established as accepted gold. If a compatible entity is referenced, select the most recently mentioned one, checking the current utterance before prior turns; otherwise clarify. The `references` map records cross-turn antecedents only; same-turn coreference is represented by the resolved slot's `source=current_turn`. An `unknown` intent candidate may retain detected mention slots for diagnosis, but it never creates a route task.
 
 ## Current draft coverage
 
@@ -52,6 +52,18 @@ Log parser output separately from the later authorization and execution decision
 - Separate deterministic contract/unit tests, semantic benchmark runs, and load tests. They answer different questions.
 
 No reportable 5a parser score exists yet. One live draft-only route smoke case passed after enabling JSON MIME output; it does not estimate accuracy. `score.py` marks draft labels `draft_preview_not_reportable_as_accuracy` and reports raw counts, Wilson intervals for selected rates, group slices, errors, latency, tokens, and retries.
+
+## Owner-readable diagnostic set
+
+`review-v2-diagnostic.md` lists 22 targeted cases in plain language. Its matching JSONL file is intentionally labeled `intent-v2-diagnostic-draft`; it supplements rather than replaces the v1 pilot. It concentrates on negation scope, compound all-or-nothing decisions, malformed IDs, compatible/incompatible references, follow-up slot filling, in-domain unsupported actions, prompt text injection, and self-asserted roles. Run it with explicit paths:
+
+```powershell
+uv run python eval/intent/validate.py --gold eval/intent/cases-v2-diagnostic-draft.jsonl --catalog eval/intent/catalog-bm-v1.json
+uv run python eval/intent/run.py --gold eval/intent/cases-v2-diagnostic-draft.jsonl --catalog eval/intent/catalog-bm-v1.json --split all --out data/private/intent-v2-diagnostic.jsonl
+uv run python eval/intent/score.py --gold eval/intent/cases-v2-diagnostic-draft.jsonl --split all --predictions data/private/intent-v2-diagnostic.jsonl
+```
+
+The diagnostic run stays preview-only because its labels are drafts. Use the readable review guide and [run report](reports/diagnostic-v2-2026-11-12.md) for owner review; do not present its aggregate as production accuracy.
 
 ## Commands
 

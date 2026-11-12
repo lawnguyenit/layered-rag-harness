@@ -107,3 +107,11 @@ A chronological record of how this repository was built: what changed, why, and 
 **Correction, same date:** after enabling JSON MIME mode and retaining local Pydantic validation, one live `I-001` route smoke passed through parse and planning. Observed condition: `gemma-4-31b-it`, draft-only one-case run, one retry, 38,961 ms, 1,523 prompt tokens, 351 output/thinking tokens. Result remains `draft_preview_not_reportable_as_accuracy`; no test-split evaluation was run. Additional smoke requests are not evidence of accuracy or production latency. Independent checks after this code change: 33 focused tests passed; full suite 73 passed, 2 skipped; v0/v1 validators pass (30/35 draft rows). One Starlette/httpx deprecation warning remains.
 
 **Source milestone:** commit `0f42253`, pushed to `origin/main`.
+
+## 2026-11-12 — Intent v2 diagnostic benchmark and same-turn reference fix
+
+**Added** 22 targeted 5a diagnostic cases and a Vietnamese plain-language review guide; independent blind review found the guide, JSON labels, and catalog conventions consistent. Ran one sequential Gemini diagnostic on the draft set. Of 22 requests, 18 returned the expected top-level decision; 4 failed at the provider boundary (three transient errors and one empty response). Exact slot checks exposed repeated omission of the optional `requested_field`; the strict reference-map metric also disagrees with correct slot provenance in two cases. These findings are preview-only and not a gold score. The report lists the owner decisions still open.
+
+**Fixed** the planner defect exposed by a same-turn reference case: resolve a compatible entity in the current utterance before scanning prior turns, and keep `current_turn` out of the cross-turn references map. Added a regression test.
+
+**Evidence:** independent suite: 74 passed, 2 skipped; v2/v1/v0 validators accept 22/35/30 cases. One Starlette/httpx deprecation warning remains. Diagnostic write-up: `eval/intent/reports/diagnostic-v2-2026-11-12.md`; raw output is ignored under `data/private/`. This is a local checkpoint; commit and push after final review.

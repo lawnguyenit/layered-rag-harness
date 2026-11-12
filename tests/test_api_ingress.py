@@ -214,6 +214,25 @@ def test_reference_resolves_to_latest_compatible_entity(catalog):
     assert plan.tasks[0].slots["order_id"].source == "prior_turn_2"
 
 
+def test_same_turn_reference_resolves_to_latest_mentioned_entity(catalog):
+    from lrh.request_contracts import Actor
+    from lrh.routing import RoutePlanner
+
+    parsed = ParseResult.model_validate({"decision": "route", "tasks": [{"intent_id": "order.lookup"}]})
+    plan = RoutePlanner(catalog).plan(
+        parsed,
+        question="Đừng hủy BM-1001; chỉ kiểm tra trạng thái đơn đó.",
+        history=[{"turn": 1, "utterance": "Đơn BM-1002 đang giao."}],
+        actor=Actor(subject="u1", role="customer", customer_id="c001"),
+        request_id="r1",
+        conversation_id="c1",
+    )
+    assert plan.decision == "route"
+    assert plan.tasks[0].slots["order_id"].value == "BM-1001"
+    assert plan.tasks[0].slots["order_id"].source == "current_turn"
+    assert plan.references == {}
+
+
 def test_oidc_verifies_signature_issuer_audience_expiry_and_role_claim():
     private = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     public = private.public_key()
