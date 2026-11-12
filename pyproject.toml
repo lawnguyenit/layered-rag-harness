@@ -11,6 +11,8 @@ dependencies = [
     "uvicorn[standard]>=0.34,<1",
     "PyJWT[crypto]>=2.10,<3",
     "tzdata>=2024.1",  # zoneinfo trên Windows cần gói này (mốc reset hạn mức theo giờ Thái Bình Dương)
+    "psycopg[binary]>=3.2,<4",
+    "alembic>=1.13,<2",
 ]
 
 [dependency-groups]

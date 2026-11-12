@@ -13,3 +13,5 @@ data/private/
 *.egg-info/
 dist/
 build/
+output/
+.playwright-cli/
