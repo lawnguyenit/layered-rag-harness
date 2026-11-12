@@ -1,4 +1,6 @@
-# Bộ ca chẩn đoán 5a — bản dễ đọc
+# Bộ ca chẩn đoán 5a v2 — bản dễ đọc (lịch sử, đã supersede)
+
+> **Trạng thái:** bản này được giữ để đối chiếu lịch sử, không còn là chuẩn hành vi cho D-010/D-011. V3 và runtime hiện hành dùng `partial`: task đủ điều kiện vẫn được đưa vào `tasks`, còn task thiếu slot là `clarify` và task không có handler là `unsupported`. Chỉ `tasks` được dispatch. Xem `review-v3-diagnostic.md` và `docs/project-state/user-intent.md`.
 
 **Mục đích:** tìm lỗi cụ thể của parser trước khi chốt gold. Đây là 22 ca draft; một lần chạy trên tập này là chẩn đoán, không phải accuracy chính thức.
 
@@ -13,8 +15,8 @@
 | D-007 | Hủy thiếu mã<br>“Hủy đơn giúp tôi.” | `clarify` — hỏi mã đơn trước khi kết luận unsupported | Có bỏ qua slot bắt buộc không? |
 | D-008 | Hai mục tiêu cùng loại<br>“Tra cứu riêng trạng thái của cả BM-1001 lẫn BM-1002, mỗi đơn một kết quả.” | `route` — phải giữ đủ hai đơn trong danh sách task | Có làm rơi hoặc gộp một đơn không? |
 | D-009 | Hai intent hỗ trợ<br>“Tra trạng thái đơn BM-1001 và tổng hóa đơn INV-2026-0451.” | `route` — một task đơn hàng và một task hóa đơn | Có gộp intent khác loại thành một task không? |
-| D-010 | Một task đủ, một task thiếu mã *(policy probe; giả định tạm thời)*<br>“Tra trạng thái đơn BM-1001 và tổng hóa đơn của tôi.” | Tạm kỳ vọng `clarify` toàn câu, không dispatch một phần | Chính sách partial dispatch cần chủ repo quyết định sau khi xem kết quả. |
-| D-011 | Một task hỗ trợ, một task chưa có handler *(policy probe; giả định tạm thời)*<br>“Tra trạng thái BM-1001 và hủy đơn BM-1002.” | Tạm kỳ vọng `unsupported` toàn câu, không dispatch task tra cứu | Chính sách partial dispatch cần chủ repo quyết định sau khi xem kết quả. |
+| D-010 | Một task đủ, một task thiếu mã *(giả định cũ; xem v3)*<br>“Tra trạng thái đơn BM-1001 và tổng hóa đơn của tôi.” | V2 từng kỳ vọng `clarify` toàn câu; V3/runtime hiện hành kỳ vọng `partial`: giữ task đơn hàng, task hóa đơn là `clarify` | Không dùng nhãn v2 để đánh giá runtime hiện tại. |
+| D-011 | Một task hỗ trợ, một task chưa có handler *(giả định cũ; xem v3)*<br>“Tra trạng thái BM-1001 và hủy đơn BM-1002.” | V2 từng kỳ vọng `unsupported` toàn câu; V3/runtime hiện hành kỳ vọng `partial`: giữ task tra cứu, task hủy là `unsupported` | Không dùng nhãn v2 để đánh giá runtime hiện tại. |
 | D-012 | Mã đơn có ký tự O/0 nhập nhầm<br>“Đơn BM-1O01 giao chưa?” | `clarify` — giữ nguyên chuỗi sai, không tự sửa mã | Có tự biến mã sai thành mã hợp lệ không? |
 | D-013 | Mã hóa đơn sai định dạng<br>“Hóa đơn INV-2026-45O1 tổng cộng bao nhiêu?” | `clarify` — giữ raw ID để người dùng sửa | Có âm thầm sửa ID không? |
 | D-014 | Tham chiếu đúng loại nhưng không phải thực thể mới nhất<br>“Đơn đó giao chưa?” | `route` — chọn đơn gần nhất cùng loại, bỏ qua hóa đơn mới hơn | Có chọn thực thể chỉ vì được nhắc cuối cùng không? |

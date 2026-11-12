@@ -26,7 +26,7 @@ Production:
 - [x] Actor/customer identity comes only from validated token claims; conversation history is scoped by subject
 - [x] Rate-limit behavior is tested; single-process limitation is documented
 - [x] Component pages and local API setup instructions exist
-- [ ] Define and measure semantic input-safety policy (e.g. harmful-content moderation); current gate is deterministic limits/rate only
+- [ ] Define and measure semantic input-safety policy (e.g. harmful-content moderation); current gate is deterministic limits/rate only. The 2026-11-12 Gemma provider-filter probe did not block three direct harmful prompts; see `docs/lab/input-safety-probe-2026-11-12.md`.
 
 ### Tier 2 — intent and route planning
 - [x] Versioned parser port and replaceable catalog exist; Bếp Mây is only a fixture
@@ -39,7 +39,7 @@ Production:
 
 ### Unfinished project gates still in force
 - G0 baseline remains open: DATA-CONTRACT review/corpus/questions approval, fix A-007/B-005/B-006, run baseline, cost/latency, runnable single command, component pages.
-- Runtime T1–T2 remain open for semantic input-safety policy, owner-approved gold, and held-out parser evaluation. The bounded Keycloak/Uvicorn HTTP integration passed; production OIDC flow and per-user attribute mapping still need separate verification.
+- Runtime T1–T2 remain open for a validated semantic input-safety policy, owner-approved gold, and held-out parser evaluation. The bounded Keycloak/Uvicorn HTTP integration passed; production OIDC flow and per-user attribute mapping still need separate verification.
 - RAG G1, tool G2, data permission/guardrail G3, and operations G4 remain open as listed below.
 
 ## Giai đoạn 1: RAG
