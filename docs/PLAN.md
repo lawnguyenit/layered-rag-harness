@@ -1,6 +1,6 @@
 # Kế hoạch layered-rag-harness
 
-Cập nhật: 2026-11-08. Trạng thái: giai đoạn 0 chưa bắt đầu. Nguồn: các phiên trao đổi giữa chủ repo và Claude ngày 2026-11-08, cộng mẫu job Upwork cùng ngày.
+Cập nhật: 2026-11-12. Trạng thái: G0 official answer baseline còn pending; Runtime Tier 1–2 có code, independent tests pass; live Keycloak, semantic input-safety policy, owner gold approval và LLM 5a score còn pending. Nguồn: quyết định chủ repo ngày 2026-11-12 và source hiện tại.
 Ký hiệu: [đã chốt] chủ repo xác nhận; [đề xuất] chờ chủ repo xác nhận; [chưa kiểm] chưa đối chiếu nguồn.
 
 ## 1. Mục tiêu: hai đường
@@ -38,13 +38,14 @@ Harness là phần điều phối quanh mô hình, không phải bản thân LLM
 | Lớp | Trách nhiệm | Giai đoạn |
 |---|---|---|
 | L0 Giao diện | Nhập câu hỏi, nhận trả lời có nguồn | 0 (CLI) |
-| L1 API và danh tính | Nhận yêu cầu, xác thực, giới hạn tần suất | 3 |
+| L1 Ingress & danh tính | HTTP envelope, giới hạn body/tần suất, OIDC, actor/access scope | Runtime Tier 1 (trước routing; triển khai song song G0) |
 | L2 Harness | Ghép chỉ dẫn, điều phối RAG/mô hình/công cụ, giới hạn số bước | 0 |
+| L2a Routing | Phân tích intent/slots/polarity/reference, clarify/unsupported, tạo route plan | Runtime Tier 2 (trước truy xuất) |
 | L3a Tri thức (RAG) | Nạp tài liệu, trích văn bản, chia đoạn, tìm đoạn phù hợp kèm nguồn | 1 |
 | L3b Công cụ (MCP) | Công cụ chỉ đọc qua giao diện chuẩn | 2 |
 | L3c Adapter mô hình | Chuyển yêu cầu sang định dạng của nhà cung cấp, chuẩn hóa phản hồi | 0 |
 | L4 Hạ tầng | Chạy dịch vụ, lưu dữ liệu, quản lý khóa | 0 (máy local) |
-| Xuyên suốt | Phân quyền, guardrails, theo dõi, đánh giá, giới hạn chi phí | 3-4 |
+| Xuyên suốt | Phân quyền, guardrails, theo dõi, đánh giá, giới hạn chi phí | Theo lỗi trong eval; access filter dữ liệu vẫn ở G3 |
 
 Luồng nạp tài liệu và luồng người dùng hỏi tách riêng:
 ```
@@ -69,7 +70,7 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 | 1 | RAG trên tài liệu công khai/tổng hợp | Điểm so với bản 0, ghi lỗi nào sửa được |
 | Điểm dừng 1 | Nhìn lại: số giờ thật, kết quả, đi tiếp không. Là cổng đánh giá, không phải hạn chót | Quyết định có chủ đích, ghi vào mục Quyết định |
 | 2 | Một công cụ MCP chỉ đọc (viết bằng hàm thường trước, rồi đưa ra MCP) | Đúng công cụ, đúng tham số; xử lý lỗi và timeout |
-| 3 | Phân quyền, guardrails, giới hạn tần suất, log kiểm toán | Tỉ lệ lộ dữ liệu bằng 0 trên bộ ca tấn công |
+| 3 | Lọc quyền dữ liệu, guardrails, audit, vận hành auth production | Tỉ lệ lộ dữ liệu bằng 0 trên bộ ca tấn công |
 | 4 | Đánh giá chạy tự động (CI), giám sát, chi phí, sao lưu/khôi phục thử thật | Số đo theo thời gian, khôi phục thành công |
 
 ## 5. Quyết định
@@ -85,6 +86,8 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 | Hướng khách hàng: người hỏi chính là khách của công ty thuê; thêm vai trò nội bộ (support, finance, manager) | [đã chốt hướng; bộ vai trò đề xuất] | Mẫu job hỏi cô lập dữ liệu giữa các khách; chủ repo muốn thể hiện cô lập tối thiểu theo vai trò |
 | Bước 0.0 hợp đồng dữ liệu và quyền trước corpus (docs/DATA-CONTRACT.md) | [đề xuất] | Chủ repo chỉ ra corpus và câu hỏi phụ thuộc vào nhãn quyền chưa được định nghĩa |
 | Mức suy nghĩ của Gemma cho đường đo: HIGH, đặt tường minh | [đã chốt] 2026-11-09 | Sau docs/lab/thinking-level.md: MINIMAL rẻ và nhanh hơn nhưng sai C-005 (không nói "không tìm thấy") và G-003 (sai ngôn ngữ). Đặt trong src/lrh/limits_table.py; mức suy nghĩ nằm trong khóa đệm. Đổi mức = chạy lại mọi bản đo |
+| HTTP API + Auth thật trong runtime Tier 1 | [đã chốt] 2026-11-12 | OIDC; Keycloak local issuer cho dev/test; production giữ cấu hình issuer/audience/JWKS trung tính nhà cung cấp. Thay đổi timeline cũ đặt Auth tại G3; lọc quyền dữ liệu vẫn phải qua gate riêng. |
+| Runtime Tier 2 | [đã chốt] 2026-11-12 | 5a parse intent/slots/polarity/references; nhiều yêu cầu tạo danh sách route tasks; hủy đơn chưa có handler => unsupported; yêu cầu thiếu target => clarify; phủ định đơn thuần => no_action; tham chiếu chọn thực thể tương thích gần nhất. Bộ đo riêng `eval/intent/`. |
 | Frontend | [đề xuất] CLI trước, web tối thiểu sau | Framework chọn theo bằng chứng job, không theo cảm tính |
 
 ## 6. Rủi ro và điểm mù chưa xử lý

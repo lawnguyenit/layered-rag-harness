@@ -1,0 +1,37 @@
+{
+  "catalog_version": "bm-fixture-v0",
+  "domain_fixture": "Bếp Mây synthetic support scenario",
+  "status": "draft; labels and required slots need independent review",
+  "slot_grammars": {
+    "order_id": "^BM-[0-9]{4}$",
+    "invoice_id": "^INV-[0-9]{4}-[0-9]{4}$",
+    "ticket_id": "^T[0-9]{2}$",
+    "mentioned_customer_id": "^c[0-9]{3}$"
+  },
+  "slot_definitions": {
+    "order_id": {"type": "string"},
+    "order_id_raw": {"type": "string"},
+    "invoice_id": {"type": "string"},
+    "ticket_id": {"type": "string"},
+    "requested_field": {"type": "string", "values": ["delivery_eta", "total", "payment_method", "fee", "schedule", "price", "pause_policy", "content", "status", "delivery_status", "deadline"]},
+    "order_total": {"type": "integer"},
+    "area": {"type": "string"},
+    "plan_name": {"type": "string", "values": ["Solo", "Family"]},
+    "delay_days": {"type": "integer"},
+    "mentioned_customer_id": {"type": "string"}
+  },
+  "intents": [
+    {"intent_id": "order.lookup", "description": "Look up an order's status or delivery information.", "supported_for_planning": true, "required_slots": ["order_id"], "entity_slots": ["order_id"]},
+    {"intent_id": "order.cancel", "description": "Request cancellation of an order; no cancellation handler is registered in this fixture.", "supported_for_planning": false, "required_slots": ["order_id"], "entity_slots": ["order_id"]},
+    {"intent_id": "invoice.lookup", "description": "Look up an invoice field such as total or payment method.", "supported_for_planning": true, "required_slots": ["invoice_id"], "entity_slots": ["invoice_id"]},
+    {"intent_id": "delivery.lookup", "description": "Look up delivery fee or schedule policy.", "supported_for_planning": true, "required_slots": [], "entity_slots": []},
+    {"intent_id": "plan.lookup", "description": "Look up a named subscription plan, such as its price.", "supported_for_planning": true, "required_slots": [], "entity_slots": []},
+    {"intent_id": "subscription.lookup", "description": "Look up subscription pause policy.", "supported_for_planning": true, "required_slots": [], "entity_slots": []},
+    {"intent_id": "ticket.lookup", "description": "Look up the contents or status of a support ticket.", "supported_for_planning": true, "required_slots": ["ticket_id"], "entity_slots": ["ticket_id"]},
+    {"intent_id": "support.late_delivery", "description": "Ask how support should handle a late delivery.", "supported_for_planning": true, "required_slots": [], "entity_slots": ["mentioned_customer_id"]},
+    {"intent_id": "refund.approval_policy", "description": "Ask about internal refund approval thresholds.", "supported_for_planning": true, "required_slots": [], "entity_slots": []},
+    {"intent_id": "meal_change.lookup", "description": "Look up the deadline for changing a meal selection.", "supported_for_planning": true, "required_slots": [], "entity_slots": []},
+    {"intent_id": "unknown", "description": "Reserved sentinel for requests outside the registered intent catalog.", "supported_for_planning": false, "required_slots": [], "entity_slots": []}
+  ],
+  "safety_boundary": "The catalog only describes parse/route candidates. It never grants identity, authorization, or data access. Those come from the verified actor and downstream policy."
+}

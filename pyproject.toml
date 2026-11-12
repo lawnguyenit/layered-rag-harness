@@ -7,11 +7,14 @@ dependencies = [
     "pydantic>=2.7,<3",
     "google-genai>=2.33,<3",  # đã kiểm tên lớp/trường trên 2.33.0
     "python-dotenv>=1.0",
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.34,<1",
+    "PyJWT[crypto]>=2.10,<3",
     "tzdata>=2024.1",  # zoneinfo trên Windows cần gói này (mốc reset hạn mức theo giờ Thái Bình Dương)
 ]
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "httpx>=0.27,<1"]
 
 [build-system]
 requires = ["hatchling"]

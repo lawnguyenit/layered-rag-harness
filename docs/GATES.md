@@ -15,6 +15,32 @@ Production:
 - [ ] Chạy bằng một lệnh, phụ thuộc ghim phiên bản (`uv sync` và live smoke test chạy được trên máy chủ repo 2026-11-08; uv.lock cũ thiếu gói, đã tạo lại: B-002; còn thiếu lệnh chạy điểm gốc)
 - [ ] Trang thành phần: adapter mô hình, harness
 
+## Runtime Tier 1–2 (lộ trình request, song song với G0 trước RAG)
+
+Đây là các lớp trong một lượt request runtime, không đổi tên các project gate G0–G4. HTTP/Auth được kéo sớm theo quyết định chủ repo 2026-11-12; data authorization/filter vẫn chỉ đóng khi gate phân quyền G3 đạt đủ bằng chứng.
+
+### Tier 1 — ingress, identity, actor/access scope
+- [x] HTTP body/field limits, whitespace handling, rate limiting, safe errors and body spoofing covered by tests
+- [x] OIDC signature, issuer, audience, expiry, role claim and secure URL policy covered with synthetic RSA/JWKS tests
+- [ ] End-to-end token acquisition and verification against local Keycloak realm/client
+- [x] Actor/customer identity comes only from validated token claims; conversation history is scoped by subject
+- [x] Rate-limit behavior is tested; single-process limitation is documented
+- [x] Component pages and local API setup instructions exist
+- [ ] Define and measure semantic input-safety policy (e.g. harmful-content moderation); current gate is deterministic limits/rate only
+
+### Tier 2 — intent and route planning
+- [x] Versioned parser port and replaceable catalog exist; Bếp Mây is only a fixture
+- [x] Required slots, ID formats, negation, references and multiple route tasks covered by contract tests
+- [x] `clarify`, `unsupported`, `no_action` return no dispatchable tasks
+- [x] Draft benchmark schema and split keys independently reviewed; owner approval of gold labels is still pending
+- [x] Scoring tool reports counts, false dispatch beside coverage, groups, error categories, latency/tokens/retries
+- [ ] Run semantic parser against owner-approved gold and record a measured held-out score
+
+### Unfinished project gates still in force
+- G0 baseline remains open: DATA-CONTRACT review/corpus/questions approval, fix A-007/B-005/B-006, run baseline, cost/latency, runnable single command, component pages.
+- Runtime T1–T2 remain open for live Keycloak check, semantic input safety policy, owner-approved gold, and a live parser evaluation.
+- RAG G1, tool G2, data permission/guardrail G3, and operations G4 remain open as listed below.
+
 ## Giai đoạn 1: RAG
 Số đo:
 - [ ] Đoạn đúng có nằm trong top-k khi truy xuất không
