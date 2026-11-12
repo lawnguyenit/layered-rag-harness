@@ -1,6 +1,6 @@
 # Kế hoạch layered-rag-harness
 
-Cập nhật: 2026-11-12. Trạng thái: G0 official answer baseline còn pending; Runtime Tier 1–2 có code, independent tests pass; bounded local Keycloak smoke pass; semantic input-safety policy, owner gold approval và held-out LLM 5a score còn pending. Per-user customer-attribute mapping và production OIDC flow chưa xác minh. Nguồn: quyết định chủ repo ngày 2026-11-12 và bằng chứng trong `docs/project-state/verification.md`.
+Cập nhật: 2026-11-12. Trạng thái: G0 official answer baseline còn pending; Runtime Tier 1–2 có code, independent tests pass; local Keycloak direct-token và Authorization Code + PKCE smokes pass; semantic input-safety policy, owner gold approval và held-out LLM 5a score còn pending. Mapper chỉ được thử với username tổng hợp; production identity mapping và deployment chưa xác minh. Nguồn: quyết định chủ repo ngày 2026-11-12 và bằng chứng trong `docs/project-state/verification.md`.
 Ký hiệu: [đã chốt] chủ repo xác nhận; [đề xuất] chờ chủ repo xác nhận; [chưa kiểm] chưa đối chiếu nguồn.
 
 ## 1. Mục tiêu: hai đường

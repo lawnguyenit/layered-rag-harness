@@ -22,7 +22,7 @@ Production:
 ### Tier 1 — ingress, identity, actor/access scope
 - [x] HTTP body/field limits, whitespace handling, rate limiting, safe errors and body spoofing covered by tests
 - [x] OIDC signature, issuer, audience, expiry, role claim and secure URL policy covered with synthetic RSA/JWKS tests
-- [x] Token acquisition and API-route verification against local Keycloak realm/client (bounded loopback HTTP smoke through Uvicorn; see `docs/project-state/verification.md` for scope and limits)
+- [x] Local Keycloak token and API-route verification (direct-token negative/positive cases plus Authorization Code + PKCE S256 loopback smoke through Uvicorn; see `docs/project-state/verification.md` for scope and limits)
 - [x] Actor/customer identity comes only from validated token claims; conversation history is scoped by subject
 - [x] Rate-limit behavior is tested; single-process limitation is documented
 - [x] Component pages and local API setup instructions exist
@@ -39,7 +39,7 @@ Production:
 
 ### Unfinished project gates still in force
 - G0 baseline remains open: DATA-CONTRACT review/corpus/questions approval, fix A-007/B-005/B-006, run baseline, cost/latency, runnable single command, component pages.
-- Runtime T1–T2 remain open for a validated semantic input-safety policy, owner-approved gold, and held-out parser evaluation. The bounded Keycloak/Uvicorn HTTP integration passed; production OIDC flow and per-user attribute mapping still need separate verification.
+- Runtime T1–T2 remain open for a validated semantic input-safety policy, owner-approved gold, and held-out parser evaluation. Local Keycloak/Uvicorn Authorization Code + PKCE integration passed with a test-only username mapper; production identity mapping and deployment still need separate verification.
 - RAG G1, tool G2, data permission/guardrail G3, and operations G4 remain open as listed below.
 
 ## Giai đoạn 1: RAG

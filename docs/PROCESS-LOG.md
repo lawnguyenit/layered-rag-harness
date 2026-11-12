@@ -130,6 +130,12 @@ A chronological record of how this repository was built: what changed, why, and 
 
 **Limit:** this was a local HTTP integration smoke, not production readiness. The temporary smoke client used the direct access grant and a hardcoded `customer_id` claim after the test user's custom attribute was not persisted; per-user attribute mapping, Authorization Code + PKCE, and production deployment remain unverified. The temporary container and generated smoke artifacts are excluded from Git. Verification state and remaining gates are recorded in `docs/project-state/verification.md` and `docs/GATES.md`.
 
+## 2026-11-12 — Local OIDC Authorization Code + PKCE smoke
+
+**Verified** a second loopback-only Keycloak/Uvicorn flow using Authorization Code + PKCE S256. The public client had direct grants disabled; returned state was checked; the API audience and customer role were present; a test-only Keycloak username property mapper produced `customer_id=c001`; the real HTTP route returned 200 with owner scope `c001`.
+
+**Limit:** the local `httpx` test client manually allowed Secure cookies over loopback HTTP because it does not mirror browser localhost trust behavior. This only exercises a local test flow; production must use HTTPS. The mapper is not a production identity design, and data-store ACL enforcement remains untested. Details: `docs/lab/auth-pkce-smoke-2026-11-12.md`.
+
 ## 2026-11-12 — Semantic input-safety probe and documentation correction
 
 **Probed** Gemini API `BLOCK_ONLY_HIGH` safety settings on the configured Gemma 4 parser call with synthetic harmful requests and benign support reports. Three direct harmful examples were not blocked and returned `NEGLIGIBLE` ratings; two benign reports were allowed; a negated-help sample encountered transient provider failures. A separate Gemini 3.8 Flash classifier probe produced only repeated `ServerError`s and no labels. These are exploratory observations, not a benchmark. The provider-native Gemma filter is therefore not accepted as the ingress enforcement gate; the semantic safety gate remains open. Details and dated official sources: `docs/lab/input-safety-probe-2026-11-12.md`.
