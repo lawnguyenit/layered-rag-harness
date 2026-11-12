@@ -123,3 +123,9 @@ A chronological record of how this repository was built: what changed, why, and 
 **Fixed** duplicate raw-ID output using catalog grammars. A model response that repeated a valid ID in both canonical and `*_raw` slots is normalized before scoring; identical malformed raw/canonical strings keep only the raw slot. Unknown sentinel outcomes now carry `out_of_scope`.
 
 **Evidence:** independent reviewer validated v3 labels/docs. Independent tests: 75 passed, 2 skipped; v3/v2/v1/v0 validators accept 22/22/35/30 rows. One Gemini call per v3 case was attempted: 20 responses matched decision, route tasks and task outcomes; two provider `TransientError`s (D-004/D-011). After deterministic output normalization and plan replay, candidate exact, route-task exact, and task-outcome exact are each 20/22; reference, plan ambiguity and missing-slot exact are 22/22; false/wrong dispatch are 0/0. This remains draft-only. Report: `eval/intent/reports/diagnostic-v3-2026-11-12.md`.
+
+## 2026-11-12 — Local Keycloak OIDC smoke
+
+**Verified** a temporary Keycloak 26.8.2 realm bound to loopback. A real RS256 access token was acquired and the API validated its signature from live JWKS, issuer, audience, and role. The route rejected a missing bearer (401), rejected a caller-supplied role (422), and accepted the valid token (200), deriving the customer role and owner scope from token claims.
+
+**Limit:** this was a local development smoke, not production readiness. The temporary smoke client used the direct access grant and a hardcoded `customer_id` claim after the test user's custom attribute was not persisted; per-user attribute mapping and Authorization Code + PKCE remain unverified. The temporary container and generated smoke artifacts are excluded from Git. Verification state and remaining gates are recorded in `docs/project-state/verification.md` and `docs/GATES.md`.

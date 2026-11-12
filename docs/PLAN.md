@@ -1,6 +1,6 @@
 # Kế hoạch layered-rag-harness
 
-Cập nhật: 2026-11-12. Trạng thái: G0 official answer baseline còn pending; Runtime Tier 1–2 có code, independent tests pass; live Keycloak, semantic input-safety policy, owner gold approval và LLM 5a score còn pending. Nguồn: quyết định chủ repo ngày 2026-11-12 và source hiện tại.
+Cập nhật: 2026-11-12. Trạng thái: G0 official answer baseline còn pending; Runtime Tier 1–2 có code, independent tests pass; bounded local Keycloak smoke pass; semantic input-safety policy, owner gold approval và held-out LLM 5a score còn pending. Per-user customer-attribute mapping và production OIDC flow chưa xác minh. Nguồn: quyết định chủ repo ngày 2026-11-12 và bằng chứng trong `docs/project-state/verification.md`.
 Ký hiệu: [đã chốt] chủ repo xác nhận; [đề xuất] chờ chủ repo xác nhận; [chưa kiểm] chưa đối chiếu nguồn.
 
 ## 1. Mục tiêu: hai đường
@@ -125,3 +125,4 @@ Cổng, số đo và việc production của từng giai đoạn: docs/GATES.md.
 |---|---|---|
 | (chưa bắt đầu) | | |
 | Runtime Tier 1–2 / 5a diagnostic iteration | 1.2 | 2026-11-12: author/review v2-v3 cases, run bounded Gemini diagnostics, implement partial per-task outcomes, canonical reference scoring, raw-ID normalization, add contract tests, update state/report docs. Rounded elapsed work for this iteration; excludes owner gold review. |
+| Runtime Tier 1 / local Keycloak smoke | 0.5 | 2026-11-12: temporary loopback Keycloak setup, token/JWKS/API smoke, and verification-state update. Rounded elapsed work; hardcoded smoke claim means dynamic per-user mapper remains unverified. |
