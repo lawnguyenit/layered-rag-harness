@@ -53,6 +53,14 @@ def test_generate_maps_text_usage_and_roles():
     assert kw["config"].system_instruction == "S"
 
 
+def test_generate_requests_json_mime_type():
+    c = FakeClient(gen=resp())
+    GeminiModel("gemma-4-31b-it", client=c).generate(
+        GenerateRequest(messages=[Message(role="user", content="parse")], response_mime_type="application/json")
+    )
+    assert c.models.calls[0][1]["config"].response_mime_type == "application/json"
+
+
 def test_usage_none_fields_are_zero():
     r = resp()
     r.usage_metadata = types.GenerateContentResponseUsageMetadata(prompt_token_count=4)

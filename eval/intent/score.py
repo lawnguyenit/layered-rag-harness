@@ -187,7 +187,8 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
             decision_confusion[expected_decision][actual_decision] = decision_confusion[expected_decision].get(actual_decision, 0) + 1
         decision_correct += int(actual_decision == expected_decision)
         routed += int(actual_decision == "route")
-        provider_errors += int(actual_decision == "provider_error")
+        is_schema_failure = pred.get("error") in {"ValidationError", "JSONDecodeError", "schema_validation"}
+        provider_errors += int(actual_decision == "provider_error" and not is_schema_failure)
         false_dispatch += int(expected_decision != "route" and actual_decision == "route")
         if expected_decision == "route":
             wrong_dispatch += int(actual_decision == "route" and not route_tasks_ok)
@@ -228,7 +229,7 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
         if expected_decision == "route" and actual_decision == "route" and not route_tasks_ok:
             categories.append("MULTI_TASK_DROPPED_OR_MERGED" if len(expected_route) != len(actual_route) else "WRONG_SLOT")
         if pred.get("error"):
-            categories.append("OUTPUT_SCHEMA_FAILURE" if pred["error"] in {"ValidationError", "JSONDecodeError"} else "PROVIDER_FAILURE")
+            categories.append("OUTPUT_SCHEMA_FAILURE" if pred["error"] in {"ValidationError", "JSONDecodeError", "schema_validation"} else "PROVIDER_FAILURE")
         categories = list(dict.fromkeys(categories))
         taxonomy_counts.update(categories)
         if categories:
@@ -262,7 +263,7 @@ def score(gold_rows: list[dict[str, Any]], prediction_rows: list[dict[str, Any]]
             "coverage": {"routed": routed, "total": count, "rate": routed / count if count else None, "wilson_95": wilson(routed, count)},
             "wrong_dispatch": wrong_dispatch,
         },
-        "serving": {"provider_errors": provider_errors, "error_types": dict(error_counts), "timeouts": sum(count for name, count in error_counts.items() if "timeout" in name.casefold()), "schema_failures": sum(count for name, count in error_counts.items() if name in {"ValidationError", "JSONDecodeError"}), "api_calls_observed": api_calls_observed, "model_latency_ms_p50": percentile(model_latency, .50), "model_latency_ms_p95": percentile(model_latency, .95), "parse_latency_ms_p50": percentile(latency, .50), "parse_latency_ms_p95": percentile(latency, .95), "prompt_tokens_total": prompt_tokens, "output_tokens_total": output_tokens, "retries_total": retries, "rate_limited_requests": rate_limited},
+        "serving": {"provider_errors": provider_errors, "error_types": dict(error_counts), "timeouts": sum(count for name, count in error_counts.items() if "timeout" in name.casefold()), "schema_failures": sum(count for name, count in error_counts.items() if name in {"ValidationError", "JSONDecodeError", "schema_validation"}), "api_calls_observed": api_calls_observed, "model_latency_ms_p50": percentile(model_latency, .50), "model_latency_ms_p95": percentile(model_latency, .95), "parse_latency_ms_p50": percentile(latency, .50), "parse_latency_ms_p95": percentile(latency, .95), "prompt_tokens_total": prompt_tokens, "output_tokens_total": output_tokens, "retries_total": retries, "rate_limited_requests": rate_limited},
         "by_group": {group: {**values, "decision_accuracy": values["decision_correct"] / values["cases"] if values["cases"] else None} for group, values in sorted(group_counts.items())},
         "errors": errors,
         "error_taxonomy": dict(taxonomy_counts),

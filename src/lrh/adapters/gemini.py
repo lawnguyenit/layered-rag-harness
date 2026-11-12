@@ -97,6 +97,8 @@ class GeminiModel:
         if not contents:
             raise ProviderError("cần ít nhất một tin nhắn user hoặc assistant")
         cfg: dict[str, Any] = {"temperature": req.temperature, "max_output_tokens": req.max_output_tokens}
+        if req.response_mime_type:
+            cfg["response_mime_type"] = req.response_mime_type
         if system:
             cfg["system_instruction"] = system
         if self._thinking_level:

@@ -31,6 +31,7 @@ class GenerateRequest(BaseModel):
     temperature: float = 0.0
     max_output_tokens: Optional[int] = 1024
     tools: Optional[list[ToolSpec]] = None
+    response_mime_type: Optional[Literal["application/json"]] = None
 
 
 class Usage(BaseModel):

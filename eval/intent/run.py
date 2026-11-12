@@ -12,7 +12,7 @@ from pathlib import Path
 from lrh.config import load_settings
 from lrh.factory import build_generator
 from lrh.request_contracts import Actor
-from lrh.routing import ModelIntentParser, RouteCatalog, RoutePlanner
+from lrh.routing import IntentOutputError, ModelIntentParser, RouteCatalog, RoutePlanner
 
 
 def _jsonl(path: Path):
@@ -96,6 +96,15 @@ def main() -> None:
                     "call": call.__dict__,
                     "parse_latency_ms": parse_latency_ms,
                     "error": None,
+                }
+            except IntentOutputError as exc:
+                result = {
+                    "id": case_id,
+                    "parsed": None,
+                    "plan": None,
+                    "call": exc.metadata.__dict__,
+                    "error": "schema_validation",
+                    "error_details": exc.issue_types,
                 }
             except Exception as exc:
                 result = {"id": case_id, "parsed": None, "plan": None, "call": None, "error": type(exc).__name__}

@@ -2,13 +2,14 @@
 
 - Giai đoạn thêm vào: 0
 - Làm gì: giữ một hợp đồng duy nhất giữa lõi và nhà cung cấp mô hình, để đổi mô hình hoặc hãng chỉ là đổi cấu hình. Ba lớp bọc quanh adapter: bộ nhớ đệm, bộ giới hạn tốc độ (RPM/TPM/RPD), trần chi tiêu.
-- Nhận gì: `GenerateRequest` (messages, temperature, max_output_tokens, tools tùy chọn); `embed(texts, task)`.
+- Nhận gì: `GenerateRequest` (messages, temperature, max_output_tokens, tools tùy chọn, `response_mime_type` tùy chọn); `embed(texts, task)`.
 - Trả gì: `GenerateResult` (text, tool_calls, usage, model_id, provider, latency_ms, cache_hit, retries, rate_limited); `EmbedResult`.
 - Phụ thuộc vào: pydantic, `google-genai` (adapter Gemini, `adapters/gemini.py`), `python-dotenv` (`config.py`). Bảng hạn mức từng mô hình ở `limits_table.py`; `factory.py` dựng Cached(Throttled(Gemini)).
 - Có thể hỏng thế nào (và hậu quả):
   - Hệ số ước lượng token `CHARS_PER_TOKEN = 2.0` (bước 0.6, đo bằng countTokens 2026-11-08, `eval/results/token-profile-2026-11-08.json`): cố ý ước cao khoảng 35% trên corpus hiện tại; văn bản nhiều chữ số (hóa đơn) đặc token hơn, 3/63 mục vẫn bị ước thấp tới 11%. Corpus đo nhỏ (5.231 ký tự), chưa đại diện cho prompt RAG dài; đo lại khi có system prompt và ngữ cảnh truy xuất. Hệ số cũ 3.0 ước thấp 36/63 mục.
   - Bộ giới hạn chỉ đếm trong một tiến trình: chạy hai bộ chạy cùng lúc sẽ cùng tiêu hạn mức project mà không biết nhau.
   - Mỗi lần thử lại tính là một lượt RPD (thận trọng); nếu nhà cung cấp không đếm lượt lỗi thì ta tiêu hao quá tay.
+- Parser 5a yêu cầu JSON MIME rồi vẫn kiểm cấu trúc ở Pydantic; adapter không gửi JSON Schema vì map `slots` có khóa động và Gemini Developer API từ chối `additionalProperties`. Một smoke case live đã trả route hợp lệ sau khi bật JSON MIME; đây chưa phải số đo accuracy.
   - Bộ đệm chỉ áp dụng khi temperature = 0; thay đổi system prompt đổi khóa đệm (đúng), nhưng đổi hành vi phía nhà cung cấp mà giữ nguyên tên mô hình thì đệm cũ vẫn trả kết quả cũ.
   - Mốc reset RPD theo giờ Thái Bình Dương là suy từ tài liệu Google (chưa quan sát thực tế).
 - Quyền được kiểm ở đâu: không kiểm ở đây. Adapter mô hình không biết người dùng; quyền do lớp truy xuất (giai đoạn 1) và guardrails (giai đoạn 3).

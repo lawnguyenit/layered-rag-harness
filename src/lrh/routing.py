@@ -89,6 +89,15 @@ class ParseCallMetadata:
     rate_limited: bool
 
 
+class IntentOutputError(ValueError):
+    """Provider returned text that failed the local parse contract; contains no raw output."""
+
+    def __init__(self, metadata: ParseCallMetadata, issue_types: list[str]):
+        super().__init__("intent output failed the parse schema")
+        self.metadata = metadata
+        self.issue_types = issue_types
+
+
 class ModelIntentParser:
     """One small structured parse call; no self-reported confidence is used."""
 
@@ -144,9 +153,9 @@ class ModelIntentParser:
                 messages=[Message(role="system", content=system), Message(role="user", content=user_payload)],
                 temperature=0.0,
                 max_output_tokens=1200,
+                response_mime_type="application/json",
             )
         )
-        parsed = ParseResult.model_validate_json(response.text)
         metadata = ParseCallMetadata(
             model_id=response.model_id,
             provider=response.provider,
@@ -156,6 +165,16 @@ class ModelIntentParser:
             retries=response.retries,
             rate_limited=response.rate_limited,
         )
+        try:
+            parsed = ParseResult.model_validate_json(response.text)
+        except Exception as exc:
+            # Retain timing/token evidence for schema failures without preserving model output.
+            from pydantic import ValidationError
+
+            if isinstance(exc, ValidationError):
+                issue_types = list(dict.fromkeys(str(error.get("type", "validation_error")) for error in exc.errors(include_url=False)))
+                raise IntentOutputError(metadata, issue_types) from exc
+            raise
         return parsed, metadata
 
 

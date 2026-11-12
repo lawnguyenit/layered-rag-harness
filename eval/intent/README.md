@@ -51,7 +51,7 @@ Log parser output separately from the later authorization and execution decision
 - Have a reviewer other than the parser author approve gold labels. Keep this suite separate from `eval/questions.jsonl`; promotion requires versioning and rerunning comparable prior evaluations.
 - Separate deterministic contract/unit tests, semantic benchmark runs, and load tests. They answer different questions.
 
-No 5a parser score exists yet. `score.py` marks draft labels `draft_preview_not_reportable_as_accuracy` and reports raw counts, Wilson intervals for selected rates, group slices, errors, latency, tokens, and retries.
+No reportable 5a parser score exists yet. One live draft-only route smoke case passed after enabling JSON MIME output; it does not estimate accuracy. `score.py` marks draft labels `draft_preview_not_reportable_as_accuracy` and reports raw counts, Wilson intervals for selected rates, group slices, errors, latency, tokens, and retries.
 
 ## Commands
 
@@ -63,4 +63,4 @@ uv run python eval/intent/run.py --split dev --out data/private/intent-v1-dev.js
 uv run python eval/intent/score.py --split dev --predictions data/private/intent-v1-dev.jsonl
 ```
 
-After prompt/catalog changes stop, use a new output filename for each run, compare on `dev`, then run `--split test` once for the candidate. The runner loads the configured model/API key from the local environment; it does not use the final-answer cache. Results belong under `data/private/` and must not be committed. Draft results are preview-only. The current environment has no Gemini key configured; live scoring remains blocked until a key is configured by the owner.
+After prompt/catalog changes stop, use a new output filename for each run, compare on `dev`, then run `--split test` once for the candidate. The runner loads the configured model/API key from the local environment; it does not use the final-answer cache. The parser requests JSON MIME output and still validates against the local Pydantic contract. It does not send the dynamic slot map as a provider JSON Schema because Gemini Developer API rejects `additionalProperties`; semantic validation stays in the harness. Results belong under `data/private/` and must not be committed. Draft results are preview-only.

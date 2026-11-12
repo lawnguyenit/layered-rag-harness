@@ -84,3 +84,19 @@ def test_score_checks_candidate_polarity_for_mixed_intents():
     result = score(gold, predictions)
     assert result["polarity"]["summary_correct"] == 1
     assert result["polarity"]["candidate_polarity_exact_correct"] == 1
+
+
+def test_score_separates_schema_failures_from_provider_errors():
+    gold = [{
+        "id": "I-schema", "gold_status": "draft", "group": "schema",
+        "expected": {"decision": "clarify", "parse_candidates": [], "route_tasks": [], "polarity": "positive", "negated_intents": [], "references": {}, "missing_slots": [], "ambiguity_type": "empty_parse"},
+    }]
+    predictions = [
+        {"_meta": True, "status": "draft_preview", "benchmark_version": "intent-v1-draft"},
+        {"id": "I-schema", "parsed": None, "plan": None, "call": {"model_id": "m", "provider": "gemini", "latency_ms": 100.0, "prompt_tokens": 10, "output_tokens": 5, "retries": 1, "rate_limited": False}, "error": "schema_validation", "error_details": ["json_invalid"]},
+    ]
+    result = score(gold, predictions)
+    assert result["serving"]["provider_errors"] == 0
+    assert result["serving"]["schema_failures"] == 1
+    assert result["serving"]["api_calls_observed"] == 1
+    assert result["serving"]["prompt_tokens_total"] == 10
