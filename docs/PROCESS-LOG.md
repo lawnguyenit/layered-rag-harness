@@ -219,3 +219,13 @@ A chronological record of how this repository was built: what changed, why, and 
 
 **Correction (same day, found by the owner):** the owner could not sign in with the Keycloak `admin` account shown by `up` and reported the login as broken. Checked with a scripted login: the admin password was correct and signs in to the Keycloak admin console, but `admin` exists only in the `master` realm, while the web UI's sign-in page belongs to the `bepmay-e2e` realm and looks identical. Not a defect in authentication; a usability gap in the demo. Fixed: the demo build of the web UI shows which accounts to use (build argument `VITE_LOGIN_HINT`, tested in a browser), and `up` now puts "start here" and the test users first and marks admin and API docs as not needed.
 
+## 2026-11-13 — Two-pane UI and permissioned list endpoints
+
+**Why (owner feedback):** the sign-in screen opened on "look up an order by id", which no real app does (users open "My orders" and see a list), so the demo looked odd and the chosen topic looked doubtful. The id lookup is a permission test tool and the thing the harness will call after extracting an id from a question; it should not be the main screen. The feedback also exposed a test gap: only single-record reads were tested, while real leaks usually appear in lists.
+
+**Changed:** host gained `GET /v1/orders|tickets|invoices` (the caller's own view, no bodies, `limit` and `truncated`), enforced by row-level security like the record reads. The web UI is now two panes: the list of what the server says the user may see (with counts, switch by kind, click to open) and a right pane with Detail, Look up by id (marked as a permission test, with one-click chips of the user's own codes) and Search documents. The first listed record opens automatically after sign-in.
+
+**Evidence:** host suite 119 passed with Postgres+pgvector; the list tests also run against the Python rule for 8 actor kinds x 3 kinds and check that list and get never disagree. Breaking the policy gave 9 and 6 failures. Web: 8 unit tests; browser suite 11 passed twice on the rebuilt demo (1 skipped: it needs the host's trace file); with RLS disabled the list and hint tests fail. Checked visually on desktop and a 390 px wide viewport.
+
+**Not done:** the "ask via harness" panel (harness phase); the architecture viewer's recorded traces do not include the new list routes; no real phone check.
+

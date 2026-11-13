@@ -126,3 +126,19 @@ def test_insecure_http_flag_comes_from_the_environment_only_when_exactly_one(mon
     monkeypatch.setenv("HOST_OIDC_ALLOW_INSECURE_HTTP", "1")
     assert AuthConfig.from_env().allow_insecure_http is True
 
+
+def test_list_routes_require_a_token_and_return_only_the_callers_records_without_bodies(client):
+    assert client.get("/v1/orders").status_code == 401
+    r = client.get("/v1/orders", headers=auth("customer:c001")).json()
+    assert [i["ref_id"] for i in r["items"]] == ["BM-1001"] and r["truncated"] is False
+    assert all(set(i) == {"kind", "ref_id", "title"} for i in r["items"])
+    assert client.get("/v1/invoices", headers=auth("support:")).json()["items"] == []  # support may not see invoices
+    assert [i["ref_id"] for i in client.get("/v1/tickets", headers=auth("customer:c002")).json()["items"]] == ["T02"]
+
+
+def test_list_limit_is_validated_and_truncation_is_reported(client):
+    assert client.get("/v1/orders?limit=0", headers=auth("manager:")).status_code == 422
+    assert client.get("/v1/orders?limit=101", headers=auth("manager:")).status_code == 422
+    r = client.get("/v1/orders?limit=2", headers=auth("manager:")).json()
+    assert len(r["items"]) == 2 and r["truncated"] is True
+

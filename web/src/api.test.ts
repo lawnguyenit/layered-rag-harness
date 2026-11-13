@@ -36,6 +36,21 @@ describe("HostClient", () => {
   });
 });
 
+describe("HostClient.list", () => {
+  it("requests the list for the kind with the bearer token and returns what the server sent", async () => {
+    const { c, calls } = client(() => new Response(JSON.stringify({ items: [{ kind: "order", ref_id: "BM-1001", title: "Đơn BM-1001" }], truncated: false }), { status: 200, headers: { "x-request-id": "rid-12345" } }));
+    const r = await c.list("order");
+    expect(calls[0].url).toBe("https://host.test/v1/orders");
+    expect((calls[0].init!.headers as Record<string, string>).Authorization).toBe("Bearer tok");
+    expect(r).toEqual({ status: "ok", items: [{ kind: "order", ref_id: "BM-1001", title: "Đơn BM-1001" }], truncated: false, requestId: "rid-12345" });
+  });
+  it("maps 401 to unauthorized and failures to unavailable", async () => {
+    expect((await client(() => new Response("", { status: 401 })).c.list("invoice")).status).toBe("unauthorized");
+    expect((await client(() => new Response("", { status: 500 })).c.list("ticket")).status).toBe("unavailable");
+    expect((await client(() => { throw new TypeError("net"); }).c.list("order")).status).toBe("unavailable");
+  });
+});
+
 describe("describeToken (display only)", () => {
   it("reads the single known role and customer id", () => {
     expect(describeToken(jwt({ realm_access: { roles: ["offline_access", "customer"] }, customer_id: "c001" }))).toEqual({ role: "customer", customerId: "c001" });

@@ -3,7 +3,8 @@
 - Giai đoạn thêm vào: H1 (kho) và H2 (RLS) trong docs/HOST-SYSTEM-PLAN.md (nhánh C1 của sơ đồ). Nằm trong `host/`, một dự án riêng với harness (`src/lrh`).
 - Làm gì: trả một đơn, phiếu hoặc hóa đơn theo mã định danh, chỉ khi người hỏi được phép xem.
 - Nhận gì: `Actor` đã xác thực, `kind` (order|ticket|invoice), `ref_id`.
-- Trả gì: `BusinessRecord` hoặc `None`. Không có quyền và không tồn tại cho cùng kết quả `None`.
+- Trả gì: `BusinessRecord` hoặc `None`; thêm `list(actor, kind, limit)` trả `RecordSummary` (loại, mã, tiêu đề, không có thân bài), qua `GET /v1/orders|tickets|invoices` (`limit` 1 đến 100, báo `truncated`). Danh sách cũng không mang điều kiện quyền trong câu lệnh: RLS lọc dòng. Test: danh sách khớp quy tắc Python cho 8 kiểu người hỏi x 3 loại, và danh sách với `get` không bao giờ mâu thuẫn (mục nào được liệt kê thì mở được, mục nào không được liệt kê thì không mở được); phá policy thì 9 và 6 test đỏ.
+- Không có quyền và không tồn tại cho cùng kết quả `None`.
 - Phụ thuộc vào: adapter `memory` (tham chiếu, lọc bằng Python) và `postgres` (bảng `records`, Alembic `0001`, RLS `0002`, `host/compose.yaml`). Dữ liệu nạp từ `data/corpus` bằng `python -m bepmay_host.seed` (chạy trong `host/`).
 - Có thể hỏng thế nào (và hậu quả): nếu server kết nối bằng role chủ bảng hoặc superuser thì RLS bị bỏ qua và truy vấn không còn WHERE quyền nên rò toàn bộ; nếu quên `set_config` thì policy đóng kín (0 dòng, lỗi dễ thấy). Cấp thêm quyền ghi cho role app cũng làm test đỏ.
 - Quyền được kiểm ở đâu: policy `records_visible` trong host/migrations/versions/0002_rls.py (Postgres), `is_visible` trong access.py cho adapter memory. Adapter chỉ đặt `app.role` và `app.customer_id` bằng `set_config(..., true)` trong transaction. Harness không áp lại quy tắc này.

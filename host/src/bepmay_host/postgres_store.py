@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from psycopg_pool import ConnectionPool
 
-from bepmay_host.access import Actor, BusinessRecord
+from bepmay_host.access import Actor, BusinessRecord, RecordSummary
 
 SET_ACTOR = "SELECT set_config('app.role', %s, true), set_config('app.customer_id', %s, true)"
 
@@ -16,6 +16,14 @@ _GET = """
 SELECT doc_id, kind, ref_id, title, body, owner_customer_id
 FROM records
 WHERE kind = %(kind)s AND ref_id = %(ref_id)s
+"""
+
+_LIST = """
+SELECT kind, ref_id, title
+FROM records
+WHERE kind = %(kind)s
+ORDER BY ref_id
+LIMIT %(limit)s
 """
 
 _ROLE_CHECK = """
@@ -64,3 +72,12 @@ class PostgresBusinessStore:
             conn.execute(SET_ACTOR, (actor.role, actor.customer_id or ""))
             row = conn.execute(_GET, {"kind": kind, "ref_id": ref_id}).fetchone()
         return BusinessRecord(*row) if row else None
+
+    def list(self, actor: Actor, kind: str, limit: int) -> list[RecordSummary]:
+        """Every record of `kind` the actor may see. Like get(), the query has no access condition: row-level security
+        removes the rows, so even a list that forgot a filter could not include someone else's records."""
+        with self.pool.connection() as conn:
+            conn.execute(SET_ACTOR, (actor.role, actor.customer_id or ""))
+            rows = conn.execute(_LIST, {"kind": kind, "limit": limit}).fetchall()
+        return [RecordSummary(*row) for row in rows]
+

@@ -9,6 +9,11 @@ export interface RecordView {
   title: string;
   body: string;
 }
+export interface Summary {
+  kind: Kind;
+  ref_id: string;
+  title: string;
+}
 export interface Hit {
   chunk_id: string;
   doc_id: string;
@@ -22,6 +27,11 @@ export interface Hit {
 export type LookupResult =
   | { status: "ok"; record: RecordView; requestId: string | null }
   | { status: "not_found"; requestId: string | null }
+  | { status: "unauthorized" }
+  | { status: "unavailable"; requestId: string | null };
+
+export type ListResult =
+  | { status: "ok"; items: Summary[]; truncated: boolean; requestId: string | null }
   | { status: "unauthorized" }
   | { status: "unavailable"; requestId: string | null };
 
@@ -40,6 +50,21 @@ export class HostClient {
   private headers(extra: Record<string, string> = {}): Record<string, string> {
     const t = this.token();
     return { ...(t ? { Authorization: `Bearer ${t}` } : {}), ...extra };
+  }
+
+  /** The records of one kind that the server says this user may see. The UI shows exactly this list and adds nothing. */
+  async list(kind: Kind): Promise<ListResult> {
+    let r: Response;
+    try {
+      r = await this.fetcher(`${this.baseUrl}/v1/${KIND_PATH[kind]}`, { headers: this.headers() });
+    } catch {
+      return { status: "unavailable", requestId: null };
+    }
+    const requestId = r.headers.get("x-request-id");
+    if (r.status === 401) return { status: "unauthorized" };
+    if (!r.ok) return { status: "unavailable", requestId };
+    const data = (await r.json()) as { items: Summary[]; truncated: boolean };
+    return { status: "ok", items: data.items, truncated: data.truncated, requestId };
   }
 
   async lookup(kind: Kind, refId: string): Promise<LookupResult> {

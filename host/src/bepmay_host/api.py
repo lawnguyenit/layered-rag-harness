@@ -6,12 +6,12 @@ import time
 import uuid
 from typing import Protocol
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
-from bepmay_host.access import Actor, BusinessRecord
+from bepmay_host.access import Actor, BusinessRecord, RecordSummary
 from bepmay_host.auth import AuthenticationError, AuthenticationUnavailable, TokenVerifier
 from bepmay_host.embeddings import Embedder, EmbeddingUnavailable
 from bepmay_host.search_store import SearchStore
@@ -26,6 +26,7 @@ _REF = {
 
 class Store(Protocol):
     def get(self, actor: Actor, kind: str, ref_id: str) -> BusinessRecord | None: ...
+    def list(self, actor: Actor, kind: str, limit: int) -> list[RecordSummary]: ...
 
 
 class SearchRequest(BaseModel):
@@ -91,9 +92,28 @@ def create_app(
             raise HTTPException(404, "not_found")
         return {"kind": record.kind, "ref_id": record.ref_id, "title": record.title, "body": record.body}
 
+    def listing(request: Request, kind: str, limit: int, actor: Actor) -> dict:
+        """The actor's own view of one record kind: a reference list so nobody has to remember or guess identifiers."""
+        rows = store.list(actor, kind, limit + 1)
+        request.state.trace.update(kind=kind, result_count=min(len(rows), limit))
+        return {"items": [{"kind": r.kind, "ref_id": r.ref_id, "title": r.title} for r in rows[:limit]],
+                "truncated": len(rows) > limit}
+
     @app.get("/healthz")
     def healthz():
         return {"status": "ok"}
+
+    @app.get("/v1/orders")
+    def list_orders(request: Request, limit: int = Query(50, ge=1, le=100), actor: Actor = Depends(actor_dep)):
+        return listing(request, "order", limit, actor)
+
+    @app.get("/v1/tickets")
+    def list_tickets(request: Request, limit: int = Query(50, ge=1, le=100), actor: Actor = Depends(actor_dep)):
+        return listing(request, "ticket", limit, actor)
+
+    @app.get("/v1/invoices")
+    def list_invoices(request: Request, limit: int = Query(50, ge=1, le=100), actor: Actor = Depends(actor_dep)):
+        return listing(request, "invoice", limit, actor)
 
     @app.get("/v1/orders/{ref_id}")
     def order(request: Request, ref_id: str, actor: Actor = Depends(actor_dep)):

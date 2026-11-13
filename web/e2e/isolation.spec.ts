@@ -20,8 +20,9 @@ async function login(page: Page, user: string) {
 }
 
 async function lookup(page: Page, kind: string, ref: string) {
-  await page.getByLabel("Loại").selectOption(kind);
-  await page.getByLabel("Mã").fill(ref);
+  await page.getByRole("tab", { name: "Tra theo mã" }).click();
+  await page.getByRole("combobox").selectOption(kind);
+  await page.getByLabel("Mã", { exact: true }).fill(ref);
   await page.getByRole("button", { name: "Tra cứu" }).click();
   const box = page.getByTestId("lookup-result");
   await expect(box.locator("article, .notice, .error")).toBeVisible();
@@ -40,7 +41,7 @@ async function search(page: Page, query: string) {
 test("signed-out visitors see only the login prompt", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("button", { name: /Đăng nhập bằng Keycloak/ })).toBeVisible();
-  await expect(page.getByLabel("Mã")).toHaveCount(0);
+  await expect(page.getByRole("tab", { name: "Tra theo mã" })).toHaveCount(0);
 });
 
 test("the demo sign-in card says which accounts to use (demo build only)", async ({ page }) => {
@@ -118,4 +119,65 @@ test("the trace id shown to the user matches a host trace line without the query
   expect([line.route, line.outcome, line.actor_role, line.kind]).toEqual(["/v1/search", "ok", "customer", "search"]);
   expect(JSON.stringify(line)).not.toContain("riêng tư");
   expect(readFileSync(TRACE_FILE, "utf-8")).not.toContain("eyJ"); // no JWT anywhere in the trace file
+});
+
+
+async function listed(page: Page, kind: "order" | "ticket" | "invoice") {
+  await page.getByRole("tab", { name: new RegExp({ order: "Đơn hàng", ticket: "Phiếu hỗ trợ", invoice: "Hóa đơn" }[kind]) }).click();
+  const empty = page.getByTestId(`empty-${kind}`);
+  const list = page.getByTestId(`list-${kind}`);
+  await expect(empty.or(list)).toBeVisible();
+  return (await list.locator("button[data-ref]").evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.ref!)));
+}
+
+test("the list shows a customer exactly their own records, and the other customer sees the mirror", async ({ browser }) => {
+  const alice = await (await browser.newContext()).newPage();
+  await login(alice, "alice");
+  expect(await listed(alice, "order")).toEqual(["BM-1001"]);
+  expect(await listed(alice, "ticket")).toEqual(["T01"]);
+  expect(await listed(alice, "invoice")).toEqual(["INV-2026-0451"]);
+  await expect(alice.getByTestId("count-order")).toHaveText("1");
+  const bob = await (await browser.newContext()).newPage();
+  await login(bob, "bob");
+  expect(await listed(bob, "order")).toEqual(["BM-1002"]);
+  expect(await listed(bob, "order")).not.toContain("BM-1001");
+});
+
+test("clicking a listed item opens its details, and every listed item can be opened", async ({ page }) => {
+  await login(page, "alice");
+  for (const kind of ["order", "ticket", "invoice"] as const) {
+    for (const ref of await listed(page, kind)) {
+      await page.getByTestId(`list-${kind}`).locator(`button[data-ref="${ref}"]`).click();
+      await expect(page.getByTestId("detail")).toContainText(ref);
+      await expect(page.getByTestId("detail").locator("article")).toBeVisible();
+    }
+  }
+});
+
+test("internal roles see what the matrix allows: support has no invoices, finance no tickets, manager everything", async ({ browser }) => {
+  const sam = await (await browser.newContext()).newPage();
+  await login(sam, "sam");
+  expect((await listed(sam, "order")).length).toBe(3);
+  expect((await listed(sam, "ticket")).length).toBe(3);
+  expect(await listed(sam, "invoice")).toEqual([]);
+  await expect(sam.getByTestId("empty-invoice")).toBeVisible();
+  const fin = await (await browser.newContext()).newPage();
+  await login(fin, "fin");
+  expect((await listed(fin, "invoice")).length).toBe(2);
+  expect(await listed(fin, "ticket")).toEqual([]);
+  const mia = await (await browser.newContext()).newPage();
+  await login(mia, "mia");
+  expect([(await listed(mia, "order")).length, (await listed(mia, "ticket")).length, (await listed(mia, "invoice")).length]).toEqual([3, 3, 2]);
+});
+
+test("the lookup tab offers the user's own codes as one-click references", async ({ page }) => {
+  await login(page, "alice");
+  await page.getByRole("tab", { name: "Tra theo mã" }).click();
+  const hints = page.getByTestId("ref-hints");
+  await expect(hints).toContainText("BM-1001");
+  await expect(hints).not.toContainText("BM-1002");
+  await hints.getByRole("button", { name: "BM-1001" }).click();
+  await expect(page.getByLabel("Mã", { exact: true })).toHaveValue("BM-1001");
+  await page.getByRole("button", { name: "Tra cứu" }).click();
+  await expect(page.getByTestId("lookup-result")).toContainText("BM-1001");
 });

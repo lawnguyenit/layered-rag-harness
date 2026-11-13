@@ -86,3 +86,46 @@ def test_internal_roles_follow_the_matrix(store, role, kind, ref, visible):
 
 def test_wrong_kind_for_reference_returns_none(store):
     assert store.get(actor("manager"), "invoice", "BM-1001") is None
+
+
+def listed(store, a, kind, limit=50):
+    return [r.ref_id for r in store.list(a, kind, limit)]
+
+
+def test_list_shows_a_customer_only_their_own_records(store):
+    assert listed(store, actor("customer", "c001"), "order") == ["BM-1001"]
+    assert listed(store, actor("customer", "c002"), "order") == ["BM-1002"]
+    assert listed(store, actor("customer", "c001"), "invoice") == ["INV-2026-0451"]
+    assert listed(store, actor("customer", "c001"), "ticket") == ["T01"]
+
+
+def test_list_is_empty_for_visitor_and_for_a_customer_without_an_id(store):
+    for who in (actor("visitor"), actor("customer", None)):
+        assert all(listed(store, who, k) == [] for k in ("order", "ticket", "invoice"))
+
+
+def test_list_matches_the_role_matrix_and_the_python_rule_for_every_actor(store):
+    docs = [d for d in load_corpus(CORPUS) if d.ref_id]
+    from bepmay_host.access import is_visible
+    for who in (actor("customer", "c001"), actor("customer", "c002"), actor("customer", "c003"), actor("support"),
+                actor("finance"), actor("manager"), actor("visitor"), actor("customer", None)):
+        for kind in ("order", "ticket", "invoice"):
+            expected = sorted(d.ref_id for d in docs if d.kind == kind and is_visible(who, d.allowed_roles, d.owner_customer_id))
+            assert listed(store, who, kind) == expected, (who, kind)
+
+
+def test_list_and_get_agree_for_every_actor_and_record(store):
+    """Whatever is listed can be opened, and nothing that is not listed can be: the two views never disagree."""
+    docs = [d for d in load_corpus(CORPUS) if d.ref_id]
+    for who in (actor("customer", "c001"), actor("customer", "c002"), actor("support"), actor("finance"), actor("manager"), actor("visitor")):
+        for d in docs:
+            assert (d.ref_id in listed(store, who, d.kind)) == (store.get(who, d.kind, d.ref_id) is not None)
+
+
+def test_list_is_ordered_limited_and_carries_no_body(store):
+    manager = actor("manager")
+    assert listed(store, manager, "order") == sorted(listed(store, manager, "order"))
+    assert len(listed(store, manager, "order", limit=2)) == 2
+    first = store.list(manager, "order", 1)[0]
+    assert set(vars(first)) == {"kind", "ref_id", "title"}
+

@@ -28,6 +28,14 @@ class BusinessRecord:
     owner_customer_id: str | None
 
 
+@dataclass(frozen=True)
+class RecordSummary:
+    """What a list shows: enough to pick a record, never the body."""
+    kind: str
+    ref_id: str
+    title: str
+
+
 def is_visible(actor: Actor, allowed_roles, owner_customer_id: str | None) -> bool:
     """A customer sees a customer-owned record only when the owner id equals their own customer id."""
     if actor.role not in allowed_roles:

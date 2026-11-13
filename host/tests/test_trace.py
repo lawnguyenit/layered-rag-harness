@@ -128,3 +128,12 @@ def test_cors_only_for_configured_origins():
     assert ok.headers.get("access-control-allow-origin") == "http://localhost:5173"
     other = c.options("/v1/orders/BM-1001", headers={"Origin": "http://evil.test", "Access-Control-Request-Method": "GET"})
     assert "access-control-allow-origin" not in other.headers
+
+
+def test_list_line_records_kind_and_count_but_no_titles(setup):
+    client, cap = setup
+    client.get("/v1/orders", headers=auth("customer:c001"))
+    line = cap.lines[-1]
+    assert (line["route"], line["kind"], line["result_count"], line["outcome"]) == ("/v1/orders", "order", 1, "ok")
+    assert "BM-1001" not in json.dumps(line)
+
