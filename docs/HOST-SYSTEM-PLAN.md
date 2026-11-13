@@ -26,6 +26,14 @@ Host nằm trong `host/` như dự án riêng (pyproject, compose, migration, AP
 ## 2c. Tiến độ host (2026-11-13)
 Đã có: Postgres + Alembic + seed, API chỉ đọc có kiểm token, connection pool, Dockerfile và `docker compose --profile api` (dựng từ trạng thái sạch, `/healthz` ok, thiếu token trả 401). Còn lại phía host: H2 (RLS, lõi), kiểm Keycloak thật, H4 (pgvector). React (H5) và vết chạy (H6) là phần sau.
 
+## 2d. H2 — việc của chủ repo (lõi, tự gõ)
+Test nghiệm thu đã có sẵn (đỏ): `host/tests/test_rls.py`, cần `HOST_TEST_DATABASE_URL` (chủ bảng) và `HOST_TEST_APP_DATABASE_URL` (role `bepmay_app`). Các việc cần viết:
+1. Migration `0002`: tạo role `bepmay_app` NOSUPERUSER NOBYPASSRLS, chỉ `GRANT SELECT ON records` (mật khẩu đặt ngoài migration); `ENABLE` + `FORCE ROW LEVEL SECURITY`; một policy `FOR SELECT TO bepmay_app`.
+2. Policy đọc chủ thể từ `current_setting('app.role', true)` và `app.customer_id` (tham số `true` để thiếu thì ra NULL, đóng kín; chuỗi rỗng coi là không có customer).
+3. Adapter: bỏ WHERE quyền, mở transaction, `set_config('app.role', ..., true)` và `app.customer_id` (tham số thứ ba `true` = chỉ trong transaction, tương đương SET LOCAL nhưng nhận tham số bind). Server kết nối bằng role app; seed/migration dùng role chủ.
+4. Compose/Dockerfile: hai URL (`DATABASE_URL` cho role app, `MIGRATE_DATABASE_URL` cho chủ).
+Xong khi cả `test_rls.py` và `test_store_contract.py` đều xanh với role app.
+
 ## 3. Bước
 Phần intent (Tầng 2, 5a) giữ như hiện tại: chờ chủ repo duyệt gold và đo held-out. Các bước dưới là phần đứng sau route plan.
 
