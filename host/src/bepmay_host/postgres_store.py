@@ -5,7 +5,7 @@ passing the same contract tests when that happens.
 """
 from __future__ import annotations
 
-import psycopg
+from psycopg_pool import ConnectionPool
 
 from bepmay_host.access import Actor, BusinessRecord
 from bepmay_host.corpus import CorpusDoc
@@ -29,12 +29,22 @@ ON CONFLICT (doc_id) DO UPDATE SET kind = EXCLUDED.kind, ref_id = EXCLUDED.ref_i
 
 
 class PostgresBusinessStore:
-    def __init__(self, database_url: str):
+    """Connections come from a small pool; a transaction per call keeps per-request state (H2 SET LOCAL) isolated."""
+
+    def __init__(self, database_url: str, *, min_size: int = 1, max_size: int = 8):
         self.database_url = database_url
+        self.pool = ConnectionPool(
+            database_url, min_size=min_size, max_size=max_size, timeout=3, open=False,
+            kwargs={"connect_timeout": 3},
+        )
+        self.pool.open()
+
+    def close(self) -> None:
+        self.pool.close()
 
     def get(self, actor: Actor, kind: str, ref_id: str) -> BusinessRecord | None:
         params = {"kind": kind, "ref_id": ref_id, "role": actor.role, "cid": actor.customer_id}
-        with psycopg.connect(self.database_url, connect_timeout=3) as conn:
+        with self.pool.connection() as conn:
             row = conn.execute(_GET, params).fetchone()
         return BusinessRecord(*row) if row else None
 
@@ -45,6 +55,6 @@ class PostgresBusinessStore:
             for d in docs
             if d.ref_id is not None
         ]
-        with psycopg.connect(self.database_url, connect_timeout=3) as conn:
+        with self.pool.connection() as conn:
             conn.cursor().executemany(_UPSERT, rows)
         return len(rows)

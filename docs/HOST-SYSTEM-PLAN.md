@@ -23,6 +23,9 @@ Postgres vì thế có hai vai: dữ liệu đơn/ticket/hóa đơn cho C1, và 
 ## 2b. Tách đôi (làm 2026-11-13)
 Host nằm trong `host/` như dự án riêng (pyproject, compose, migration, API, test riêng); harness chỉ có cổng `BusinessLookup` và client HTTP. Mỗi hệ thống tự kiểm token và tự giữ quy tắc của mình. Hệ quả cho các bước dưới: H2 (RLS) và dữ liệu thuộc host; H3 là phần harness gọi host.
 
+## 2c. Tiến độ host (2026-11-13)
+Đã có: Postgres + Alembic + seed, API chỉ đọc có kiểm token, connection pool, Dockerfile và `docker compose --profile api` (dựng từ trạng thái sạch, `/healthz` ok, thiếu token trả 401). Còn lại phía host: H2 (RLS, lõi), kiểm Keycloak thật, H4 (pgvector). React (H5) và vết chạy (H6) là phần sau.
+
 ## 3. Bước
 Phần intent (Tầng 2, 5a) giữ như hiện tại: chờ chủ repo duyệt gold và đo held-out. Các bước dưới là phần đứng sau route plan.
 

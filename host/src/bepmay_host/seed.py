@@ -13,7 +13,11 @@ def main() -> int:
     if not url:
         print("DATABASE_URL is required", file=sys.stderr)
         return 2
-    count = PostgresBusinessStore(url).seed(load_corpus(os.getenv("HOST_CORPUS_DIR", "../data/corpus")))
+    store = PostgresBusinessStore(url, min_size=1, max_size=1)
+    try:
+        count = store.seed(load_corpus(os.getenv("HOST_CORPUS_DIR", "../data/corpus")))
+    finally:
+        store.close()
     print(f"seeded {count} records")
     return 0
 

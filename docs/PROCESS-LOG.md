@@ -161,3 +161,11 @@ A chronological record of how this repository was built: what changed, why, and 
 **Evidence:** harness suite 83 passed, 2 skipped; host suite 35 passed including the Postgres adapter on a throwaway container (removed afterwards). Both `uv lock --check` pass. **Not verified:** a live Keycloak token accepted by both services (needs both audiences or token exchange), the harness calling the host over a real socket, row-level security (H2).
 
 **Removed** untracked artifacts nothing referenced: `output/` (diagram screenshots), `.playwright-cli/`, empty `scripts/data/`.
+
+## 2026-11-13 — Host: connection pool and containerised API
+
+**Added** to `host/`: a `psycopg_pool` connection pool in the Postgres adapter (one transaction per call, so the H2 per-request `SET LOCAL` will stay isolated), a `Dockerfile` (non-root, runs migrate + idempotent seed + uvicorn) and a `host-api` service under the compose profile `api`. Done in a separate worktree so harness work is unaffected.
+
+**Evidence:** host suite 35 passed against a throwaway Postgres; a clean `docker compose --profile api up --build --wait` reached healthy, `/healthz` returned ok and an unauthenticated order lookup returned 401. Harness suite 83 passed, 2 skipped.
+
+**Fixed (same session):** `${VAR:?}` on the profiled service broke plain `docker compose up` because interpolation ignores profiles; the OIDC variables now default to empty and the server reports them missing. **Not done:** H2 row-level security (core, owner to write), live Keycloak token against the host audience, pool sizing under load.

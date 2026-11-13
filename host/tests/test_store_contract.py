@@ -23,10 +23,12 @@ DB_URL = os.getenv("HOST_TEST_DATABASE_URL", "").strip()
 def store(request):
     docs = load_corpus(CORPUS)
     if request.param == "memory":
-        return MemoryBusinessStore(docs)
-    pg = PostgresBusinessStore(DB_URL)
+        yield MemoryBusinessStore(docs)
+        return
+    pg = PostgresBusinessStore(DB_URL, max_size=2)
     pg.seed(docs)
-    return pg
+    yield pg
+    pg.close()
 
 
 def actor(role, customer_id=None):

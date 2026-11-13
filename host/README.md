@@ -15,5 +15,12 @@ uv run pytest                                # thêm HOST_TEST_DATABASE_URL=$DAT
 uv run uvicorn bepmay_host.server:app --port 8020   # cần HOST_OIDC_ISSUER, HOST_OIDC_AUDIENCE, HOST_OIDC_JWKS_URL
 ```
 
+## Chạy cả API trong container
+```bash
+export HOST_OIDC_ISSUER=... HOST_OIDC_AUDIENCE=... HOST_OIDC_JWKS_URL=...   # Keycloak của bạn
+docker compose --profile api up -d --build --wait   # postgres + host-api trên 127.0.0.1:8020
+```
+Container tự `alembic upgrade head`, seed (idempotent) rồi chạy uvicorn bằng user không phải root. Context build là gốc repo vì seed đọc `data/corpus`. `docker compose up` không kèm profile vẫn chỉ chạy postgres.
+
 ## Chưa có
-Row-level security với role không bypass (H2); connection pool; chạy cả hai hệ thống trong một compose; kiểm với Keycloak thật.
+Row-level security với role không bypass (H2, phần lõi chủ repo tự viết); kiểm với Keycloak thật (token mang audience của host); chạy harness cùng compose.
