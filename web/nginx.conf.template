@@ -1,0 +1,23 @@
+server {
+    listen 80;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # The access token lives in sessionStorage, readable by any script on this origin, so scripts are limited to
+    # this origin and network calls to the identity provider and the host API only.
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; connect-src __CONNECT_SRC__; frame-ancestors 'none'; base-uri 'none'; form-action 'self'" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer" always;
+
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        # add_header in a location drops inherited headers, so repeat the security ones.
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; connect-src __CONNECT_SRC__; frame-ancestors 'none'; base-uri 'none'; form-action 'self'" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
+    location / {
+        try_files $uri /index.html;
+    }
+}

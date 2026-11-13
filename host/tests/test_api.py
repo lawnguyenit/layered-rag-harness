@@ -103,3 +103,26 @@ def test_oidc_verifier_tolerates_small_clock_skew_but_not_large_or_expired():
         verifier.actor_for(token(now - 600, now - 120))  # genuinely expired
     with pytest.raises(ValueError):
         AuthConfig(issuer=cfg.issuer, audience="a", jwks_url=cfg.jwks_url, leeway_seconds=3600)
+
+
+def test_auth_config_http_rules():
+    ok = dict(issuer="https://idp.test/r", audience="a", jwks_url="https://idp.test/jwks")
+    AuthConfig(**ok)
+    AuthConfig(issuer="http://localhost:8080/r", audience="a", jwks_url="http://127.0.0.1:8080/jwks")  # loopback HTTP is fine
+    with pytest.raises(ValueError):  # a Docker-style service name over HTTP is refused by default
+        AuthConfig(issuer="https://idp.test/r", audience="a", jwks_url="http://keycloak:8080/jwks")
+    AuthConfig(issuer="https://idp.test/r", audience="a", jwks_url="http://keycloak:8080/jwks", allow_insecure_http=True)
+    with pytest.raises(ValueError):  # the flag never allows non-HTTP schemes or a missing host
+        AuthConfig(issuer="ftp://idp.test/r", audience="a", jwks_url="https://idp.test/jwks", allow_insecure_http=True)
+
+
+def test_insecure_http_flag_comes_from_the_environment_only_when_exactly_one(monkeypatch):
+    base = {"HOST_OIDC_ISSUER": "https://idp.test/r", "HOST_OIDC_AUDIENCE": "a", "HOST_OIDC_JWKS_URL": "http://keycloak:8080/jwks"}
+    for k, v in base.items():
+        monkeypatch.setenv(k, v)
+    monkeypatch.setenv("HOST_OIDC_ALLOW_INSECURE_HTTP", "true")  # not "1": stays off
+    with pytest.raises(ValueError):
+        AuthConfig.from_env()
+    monkeypatch.setenv("HOST_OIDC_ALLOW_INSECURE_HTTP", "1")
+    assert AuthConfig.from_env().allow_insecure_http is True
+

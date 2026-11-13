@@ -4,3 +4,6 @@
 .claude
 output
 .env
+web/node_modules
+web/dist
+web/e2e-results

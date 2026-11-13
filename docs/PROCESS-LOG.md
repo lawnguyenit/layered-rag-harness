@@ -209,3 +209,11 @@ A chronological record of how this repository was built: what changed, why, and 
 
 **Not done / not verified:** CI has not run on GitHub; the real Gemini embedder was never called; HTTPS; load and RLS performance; the UI's "ask via harness" panel (harness phase); the harness still forwards the raw user token to the host and must switch to token exchange. Passwords and tokens used in the runs were throwaway and are not in the repository.
 
+## 2026-11-13 — One-command demo
+
+**Added** `python scripts/demo.py up|down|status` and `compose.demo.yaml`: PostgreSQL+pgvector, Keycloak (dev mode), the host API and the web UI (production build behind nginx with a Content-Security-Policy), plus a one-shot service that creates the realm and synthetic users. Secrets are generated per run, printed once and not stored. Reason: the owner wants to see the result, and a portfolio reader needs to run it in minutes without assembling four services by hand. New host flag `HOST_OIDC_ALLOW_INSECURE_HTTP=1` (demo only, tested, warns when on) lets the host fetch signing keys from the Keycloak container by its service name.
+
+**Evidence:** from a clean state `up` reached healthy and passed its own checks (web 200, host healthz 200, Keycloak issuer matches, unauthenticated request gets 401); the browser suite ran against that stack, 6 of 7 passed and 1 skipped because it needs the host's trace file; `down` left no containers. Host suite 8 passed in the touched test file.
+
+**Found and fixed:** rerunning `up` without `down` failed because Postgres kept an anonymous volume with the old password (now tmpfs plus a clean-start step); the launcher's own final check misread an HTTP 401 as silence (urllib raises on 4xx). **Not done:** the demo is not exercised in CI; HTTPS; the harness panel.
+

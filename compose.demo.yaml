@@ -1,0 +1,98 @@
+# One-command local demo: PostgreSQL+pgvector, Keycloak (dev mode), the host API and the web UI.
+# Start and stop it with `python scripts/demo.py up|down`, which generates throwaway secrets for each run.
+# Not a production deployment: Keycloak runs in dev mode over plain HTTP, ports are bound to loopback only, and the
+# synthetic users share one throwaway password. Data is not persisted.
+name: lrh-demo
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: lrh
+      POSTGRES_USER: lrh
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run through scripts/demo.py}
+    tmpfs:
+      - /var/lib/postgresql/data # no persistence: a recreated container never inherits an old password or old data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lrh -d lrh"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2
+    command: ["start-dev"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:?run through scripts/demo.py}
+      # Tokens always carry the address the browser uses, whichever hostname a service called Keycloak by.
+      KC_HOSTNAME: http://localhost:18080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+    ports:
+      - "127.0.0.1:18080:8080"
+
+  host-api:
+    build:
+      context: .
+      dockerfile: host/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://bepmay_app:${HOST_APP_PASSWORD:?run through scripts/demo.py}@postgres:5432/lrh
+      MIGRATE_DATABASE_URL: postgresql://lrh:${POSTGRES_PASSWORD:?run through scripts/demo.py}@postgres:5432/lrh
+      HOST_APP_PASSWORD: ${HOST_APP_PASSWORD}
+      HOST_EMBEDDER: hash # deterministic test embedder: no key needed, not semantic
+      HOST_OIDC_ISSUER: http://localhost:18080/realms/bepmay-e2e
+      HOST_OIDC_AUDIENCE: bepmay-host
+      HOST_OIDC_JWKS_URL: http://keycloak:8080/realms/bepmay-e2e/protocol/openid-connect/certs
+      HOST_OIDC_ALLOW_INSECURE_HTTP: "1" # demo only: the stack is private to this machine
+      HOST_CORS_ORIGINS: http://localhost:5173
+    ports:
+      - "127.0.0.1:8020:8020"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8020/healthz', timeout=2).status == 200 else 1)"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+      args:
+        VITE_OIDC_AUTHORITY: http://localhost:18080/realms/bepmay-e2e
+        VITE_HOST_URL: http://127.0.0.1:8020
+        CSP_CONNECT_SRC: "'self' http://localhost:18080 http://127.0.0.1:8020"
+    ports:
+      - "127.0.0.1:5173:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # One-shot, started by scripts/demo.py after Keycloak is up: creates the realm, clients and synthetic users.
+  demo-setup:
+    profiles: ["setup"]
+    image: python:3.12-slim
+    depends_on:
+      - keycloak
+    environment:
+      KC_URL: http://keycloak:8080
+      KC_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:?run through scripts/demo.py}
+      DEV_USER_PASSWORD: ${DEV_USER_PASSWORD:?run through scripts/demo.py}
+      SPA_ORIGIN: http://localhost:5173
+    volumes:
+      - ./scripts/kc_dev_realm.py:/work/kc_dev_realm.py:ro
+    working_dir: /work
+    command:
+      - sh
+      - -c
+      - |
+        pip install --quiet --no-cache-dir 'httpx>=0.27,<1' >/dev/null 2>&1
+        for i in $$(seq 1 60); do
+          python -c "import urllib.request; urllib.request.urlopen('http://keycloak:8080/realms/master', timeout=2)" 2>/dev/null && break
+          sleep 3
+        done
+        python kc_dev_realm.py

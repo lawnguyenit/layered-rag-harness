@@ -5,6 +5,7 @@ own audience). Audience here is the host's, so a token must be issued for this A
 """
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -36,13 +37,18 @@ class AuthConfig:
     # Clock skew between the identity provider and this API is normal (measured here: the IdP container ran
     # up to ~0.6 s ahead, so a freshly issued token had iat in the future and was rejected). Applies to exp/iat/nbf.
     leeway_seconds: int = 30
+    # Demo only: lets the JWKS URL use plain HTTP to a non-loopback name such as a Docker service. The signing keys
+    # are public but fetched over an unauthenticated channel, so never enable this outside a throwaway local stack.
+    allow_insecure_http: bool = False
 
     def __post_init__(self):
         if not 0 <= self.leeway_seconds <= 120:
             raise ValueError("leeway_seconds must be between 0 and 120")
         for name, value in (("issuer", self.issuer), ("jwks_url", self.jwks_url)):
             p = urlparse(value)
-            if not p.hostname or (p.scheme != "https" and not (p.scheme == "http" and p.hostname in {"localhost", "127.0.0.1", "::1"})):
+            loopback_http = p.scheme == "http" and p.hostname in {"localhost", "127.0.0.1", "::1"}
+            insecure_ok = self.allow_insecure_http and p.scheme == "http" and bool(p.hostname)
+            if not p.hostname or (p.scheme != "https" and not loopback_http and not insecure_ok):
                 raise ValueError(f"{name} must be an absolute HTTPS URL (HTTP only on loopback)")
 
     @classmethod
@@ -50,7 +56,10 @@ class AuthConfig:
         vals = {k: os.getenv(f"HOST_OIDC_{k.upper()}", "").strip() for k in ("issuer", "audience", "jwks_url")}
         if not all(vals.values()):
             raise RuntimeError("HOST_OIDC_ISSUER, HOST_OIDC_AUDIENCE and HOST_OIDC_JWKS_URL are required")
-        return cls(**vals, leeway_seconds=int(os.getenv("HOST_OIDC_LEEWAY_SECONDS", "30")))
+        insecure = os.getenv("HOST_OIDC_ALLOW_INSECURE_HTTP", "").strip() == "1"
+        if insecure:
+            logging.getLogger(__name__).warning("HOST_OIDC_ALLOW_INSECURE_HTTP=1: plain-HTTP identity provider allowed (demo only)")
+        return cls(**vals, leeway_seconds=int(os.getenv("HOST_OIDC_LEEWAY_SECONDS", "30")), allow_insecure_http=insecure)
 
 
 class TokenVerifier(Protocol):

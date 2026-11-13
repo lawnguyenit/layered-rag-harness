@@ -12,6 +12,7 @@
 - Quyền được kiểm ở đâu: không thêm quy tắc quyền mới. Bản kiểm khôi phục chạy lại 89 test RLS/hợp đồng/search của host trên cơ sở dữ liệu đã khôi phục, bằng role app với mật khẩu cũ.
 - Kiểm tra bằng cách nào (test nào): host/tests/test_trace.py (9 test: trường, mã vết khớp header, denied và missing giống nhau, không lộ truy vấn/token/đầu vào lạ, request id lạ bị thay, tệp JSONL, CORS đúng danh sách); host/tests/test_api.py (leeway); `scripts/backup_restore_check.py` (3 container tạm, 4 kiểm tra cấu trúc, 89 test, 1 ca đối chứng).
 - Lỗi nó sửa trong bộ câu hỏi đo (ID câu hỏi): chưa có.
+- Demo một lệnh: `scripts/demo.py` dựng cả hệ thống bằng compose.demo.yaml với bí mật sinh mới mỗi lần, không lưu dữ liệu (Postgres trên tmpfs). Host dùng cờ `HOST_OIDC_ALLOW_INSECURE_HTTP=1` chỉ trong demo để gọi Keycloak qua tên dịch vụ Docker bằng HTTP; cờ này có test, ghi cảnh báo khi bật, và chỉ nhận đúng giá trị `1`.
 - Chưa quyết định / chưa biết:
   - **CI chưa chạy trên GitHub**: workflow mới được viết và kiểm cú pháp YAML, các bước tương đương đã chạy cục bộ. Phiên bản action (`checkout@v4`, `setup-uv@v5`, `setup-node@v4`) chưa kiểm nguồn hôm nay.
   - Vết chỉ ghi ra tệp/logger; chưa có thu thập tập trung, chưa có cảnh báo, chưa có xoay vòng tệp.

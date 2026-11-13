@@ -5,6 +5,7 @@
 - Nhận gì: người dùng nhập mã hoặc câu hỏi. Cấu hình: `VITE_OIDC_AUTHORITY`, `VITE_OIDC_CLIENT_ID` (mặc định `bepmay-spa`), `VITE_HOST_URL`.
 - Trả gì: bản ghi hoặc đoạn tài liệu do host trả; thông báo "không tìm thấy hoặc không có quyền" giống nhau cho hai trường hợp; mã vết `x-request-id`.
 - Phụ thuộc vào: Keycloak (Authorization Code + PKCE S256, client công khai), host API (cần `HOST_CORS_ORIGINS` chứa origin của giao diện).
+- Chạy demo: `python scripts/demo.py up` (cần Docker và Python; compose.demo.yaml, web/Dockerfile, web/nginx.conf.template). Bản demo phục vụ bản build production qua nginx với Content-Security-Policy (`script-src 'self'`, `connect-src` chỉ tới Keycloak và host), nên 6 trong 7 ca trình duyệt đã chạy trên đúng bản đó (ca thứ 7 cần tệp vết của host nên chỉ chạy ở cấu hình cục bộ).
 - Có thể hỏng thế nào (và hậu quả):
   - Token nằm trong `sessionStorage` (mất khi đóng tab) nên mọi script chạy trên cùng origin đọc được; không có refresh token, hết hạn là đăng nhập lại. Chấp nhận cho bản thử; production cần CSP chặt và xem xét mô hình BFF.
   - Giao diện **không lọc gì**: nếu host quên lọc thì giao diện sẽ hiện ra. Đó là chủ ý, để test trình duyệt đo đúng host.
