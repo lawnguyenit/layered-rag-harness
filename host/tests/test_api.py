@@ -75,3 +75,31 @@ def test_oidc_verifier_checks_audience_and_role():
         verifier.actor_for(token(aud="lrh-api"))  # token issued for another API
     with pytest.raises(AuthenticationError):
         verifier.actor_for(token(realm_access={"roles": ["customer", "manager"]}))
+
+
+def test_oidc_verifier_tolerates_small_clock_skew_but_not_large_or_expired():
+    """A fresh token whose iat is a moment in the future (IdP clock ahead) must work; real expiry must not."""
+    import time
+
+    private = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    class Jwks:
+        def get_signing_key_from_jwt(self, token):
+            return type("K", (), {"key": private.public_key()})()
+
+    cfg = AuthConfig(issuer="https://idp.test/realms/x", audience="bepmay-host", jwks_url="https://idp.test/jwks", leeway_seconds=30)
+    verifier = OIDCTokenVerifier(cfg, Jwks())
+    now = int(time.time())
+
+    def token(iat, exp):
+        claims = {"iss": cfg.issuer, "aud": cfg.audience, "sub": "u1", "iat": iat, "exp": exp,
+                  "realm_access": {"roles": ["manager"]}}
+        return jwt.encode(claims, private, algorithm="RS256")
+
+    assert verifier.actor_for(token(now + 5, now + 300)).role == "manager"  # IdP clock 5 s ahead
+    with pytest.raises(AuthenticationError):
+        verifier.actor_for(token(now + 120, now + 400))  # far in the future: not skew
+    with pytest.raises(AuthenticationError):
+        verifier.actor_for(token(now - 600, now - 120))  # genuinely expired
+    with pytest.raises(ValueError):
+        AuthConfig(issuer=cfg.issuer, audience="a", jwks_url=cfg.jwks_url, leeway_seconds=3600)

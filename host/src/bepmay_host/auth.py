@@ -33,8 +33,13 @@ class AuthConfig:
     jwks_url: str
     role_claim: str = "realm_access.roles"
     customer_id_claim: str = "customer_id"
+    # Clock skew between the identity provider and this API is normal (measured here: the IdP container ran
+    # up to ~0.6 s ahead, so a freshly issued token had iat in the future and was rejected). Applies to exp/iat/nbf.
+    leeway_seconds: int = 30
 
     def __post_init__(self):
+        if not 0 <= self.leeway_seconds <= 120:
+            raise ValueError("leeway_seconds must be between 0 and 120")
         for name, value in (("issuer", self.issuer), ("jwks_url", self.jwks_url)):
             p = urlparse(value)
             if not p.hostname or (p.scheme != "https" and not (p.scheme == "http" and p.hostname in {"localhost", "127.0.0.1", "::1"})):
@@ -45,7 +50,7 @@ class AuthConfig:
         vals = {k: os.getenv(f"HOST_OIDC_{k.upper()}", "").strip() for k in ("issuer", "audience", "jwks_url")}
         if not all(vals.values()):
             raise RuntimeError("HOST_OIDC_ISSUER, HOST_OIDC_AUDIENCE and HOST_OIDC_JWKS_URL are required")
-        return cls(**vals)
+        return cls(**vals, leeway_seconds=int(os.getenv("HOST_OIDC_LEEWAY_SECONDS", "30")))
 
 
 class TokenVerifier(Protocol):
@@ -76,6 +81,7 @@ class OIDCTokenVerifier:
         try:
             payload = jwt.decode(
                 token, key, algorithms=["RS256"], issuer=self.config.issuer, audience=self.config.audience,
+                leeway=self.config.leeway_seconds,
                 options={"require": ["exp", "iat", "iss", "aud", "sub"]},
             )
         except jwt.InvalidTokenError as exc:

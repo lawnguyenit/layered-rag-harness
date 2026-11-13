@@ -15,3 +15,9 @@ dist/
 build/
 output/
 .playwright-cli/
+
+# web
+web/node_modules/
+web/dist/
+web/e2e-results/
+web/.env.local
