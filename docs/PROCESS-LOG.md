@@ -198,3 +198,14 @@ A chronological record of how this repository was built: what changed, why, and 
 **Found:** the first container build crashed because `httpx` was only a dev dependency while the embedder needs it at runtime; unit tests could not see this, the container run did. Moved to runtime dependencies. Printing Vietnamese on a Windows console raised a cp1252 error in the e2e script (it now sets UTF-8).
 
 **Not verified:** the Gemini REST embedder against the real API (only a mock server), and any retrieval quality: the hash embedder is not semantic and no evaluation set has run through this path. H4's gate (score against the H0 baseline) is therefore "not measured".
+
+## 2026-11-13 — Host completed: web UI, operations, token exchange
+
+**Added** (all in one worktree, merged together): `web/` React/TypeScript UI (Keycloak PKCE, lookup by id, document search, trace ids) with 7 real-Chrome tests; structured per-request trace with request ids and a CORS allowlist; `scripts/backup_restore_check.py` (real dump/restore into empty containers, then the host's 89 RLS/contract/search tests on the restored database, plus a negative control); `.github/workflows/ci.yml` (harness, host with pgvector, backup drill, web build); `scripts/record_host_traces.py` feeding real traces into the architecture viewer (nine "Thật" scenarios) and corrected the viewer's node statuses for the parts that now exist in the host; token exchange (RFC 8693) between harness client and host, decided as the way the two systems share a user token.
+
+**Evidence:** host suite with Postgres+pgvector, harness suite and web unit tests pass (see the counts in the commit message of this change); browser suite 7/7, three consecutive runs; with RLS disabled mid-run 4 of 7 fail, restored 7/7. End-to-end with real Keycloak: 29/29 including token exchange and its negative case (a host-audience-only token cannot be exchanged, 403). Backup drill PASS. Viewer checked in a browser: 9 real scenarios render with measured status, outcome, latency and request id.
+
+**Found and fixed during the work** (see BUG-LEDGER B-012 to B-014): StrictMode replaying the single-use login code; zero clock-skew tolerance rejecting just-issued tokens (measured 0.4–0.6 s skew); a runtime dependency missing from the container. **Open:** the same zero-leeway defect exists in the harness verifier (`src/lrh/oidc.py`).
+
+**Not done / not verified:** CI has not run on GitHub; the real Gemini embedder was never called; HTTPS; load and RLS performance; the UI's "ask via harness" panel (harness phase); the harness still forwards the raw user token to the host and must switch to token exchange. Passwords and tokens used in the runs were throwaway and are not in the repository.
+

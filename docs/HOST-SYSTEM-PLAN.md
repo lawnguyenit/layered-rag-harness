@@ -34,6 +34,9 @@ Xong: migration `0002`, adapter dùng `set_config`, hai URL (chủ/app), `provis
 4. Compose/Dockerfile: hai URL (`DATABASE_URL` cho role app, `MIGRATE_DATABASE_URL` cho chủ).
 Xong khi cả `test_rls.py` và `test_store_contract.py` đều xanh với role app.
 
+## 2e. Hoàn tất host (2026-11-13)
+H5 (web/: PKCE, tra cứu, tìm kiếm, 7 ca Chrome khách A/B), H6 (vết có cấu trúc, kiểm sao lưu/khôi phục thật, CI, vết thật trong viewer) và token exchange (harness đổi token người dùng lấy token cho host, 29/29 e2e) đã làm. Quyết định token: **token exchange** (RFC 8693), vì mỗi hệ thống chỉ nhận token gửi cho nó và `azp` cho host biết harness là bên gọi. Chưa làm ở host: ô hỏi đáp qua harness trong giao diện (chờ harness), CI chưa chạy trên GitHub, embedder Gemini thật chưa gọi, HTTPS, đo tải.
+
 ## 3. Bước
 Phần intent (Tầng 2, 5a) giữ như hiện tại: chờ chủ repo duyệt gold và đo held-out. Các bước dưới là phần đứng sau route plan.
 

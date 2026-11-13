@@ -15,6 +15,7 @@ import httpx
 KC = os.environ.get("KC_URL", "").rstrip("/")
 REALM = "bepmay-e2e"
 HOST_AUD = "bepmay-host"
+HARNESS_CLIENT = "lrh-api"  # audience of tokens meant for the harness; also the client that exchanges them
 ROLES = ["visitor", "customer", "support", "finance", "manager"]
 USERS = {  # username -> (role, customer_id)
     "alice": ("customer", "c001"),
@@ -59,8 +60,14 @@ def provision(admin: httpx.Client, passwords: dict[str, str], spa_origin: str = 
     for role in ROLES:
         ok(admin.post(f"/{REALM}/roles", json={"name": role}))
     # APIs are registered as clients (resource servers): Keycloak only issues a custom audience for a known client.
-    for api in (HOST_AUD, "lrh-api"):
-        ok(admin.post(f"/{REALM}/clients", json={"clientId": api, "bearerOnly": True, "protocol": "openid-connect"}))
+    ok(admin.post(f"/{REALM}/clients", json={"clientId": HOST_AUD, "bearerOnly": True, "protocol": "openid-connect"}))
+    # The harness API is a confidential client allowed to exchange a user token addressed to it for one addressed to
+    # the host (RFC 8693 standard token exchange). It needs the same claim mapper so the exchanged token keeps customer_id.
+    ok(admin.post(f"/{REALM}/clients", json={
+        "clientId": HARNESS_CLIENT, "publicClient": False, "standardFlowEnabled": False, "directAccessGrantsEnabled": False,
+        "serviceAccountsEnabled": False, "protocol": "openid-connect",
+        "attributes": {"standard.token.exchange.enabled": "true"},
+        "protocolMappers": _mappers(HOST_AUD)}))  # the aud mapper declares the host audience as available to this client
     ok(admin.post(f"/{REALM}/clients", json={
         "clientId": "bepmay-web", "publicClient": True, "directAccessGrantsEnabled": True, "standardFlowEnabled": False,
         "protocol": "openid-connect", "protocolMappers": _mappers(HOST_AUD)}))
@@ -81,6 +88,19 @@ def provision(admin: httpx.Client, passwords: dict[str, str], spa_origin: str = 
         ok(admin.put(f"/{REALM}/users/{uid}/reset-password", json={"type": "password", "value": passwords[name], "temporary": False}))
         rep = admin.get(f"/{REALM}/roles/{role}").json()
         ok(admin.post(f"/{REALM}/users/{uid}/role-mappings/realm", json=[rep]))
+
+
+def harness_client_secret(admin: httpx.Client) -> str:
+    cid = admin.get(f"/{REALM}/clients", params={"clientId": HARNESS_CLIENT}).json()[0]["id"]
+    return admin.get(f"/{REALM}/clients/{cid}/client-secret").json()["value"]
+
+
+def exchange_for_host(user_token: str, secret: str) -> httpx.Response:
+    """What the harness would do before calling the host: trade the user's token for one addressed to the host."""
+    return httpx.post(f"{KC}/realms/{REALM}/protocol/openid-connect/token", data={
+        "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange", "client_id": HARNESS_CLIENT, "client_secret": secret,
+        "subject_token": user_token, "subject_token_type": "urn:ietf:params:oauth:token-type:access_token",
+        "requested_token_type": "urn:ietf:params:oauth:token-type:access_token", "audience": HOST_AUD})
 
 
 def make_passwords() -> dict[str, str]:

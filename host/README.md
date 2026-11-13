@@ -30,6 +30,9 @@ Container tự `alembic upgrade head`, đặt mật khẩu role app, seed và in
 ## Kiểm đầu-cuối với Keycloak
 `scripts/e2e_host_keycloak.py` (chạy từ gốc repo) dựng realm thử, lấy token thật và gọi host bằng client của harness: 17/17 đạt, xem docs/lab/host-keycloak-e2e-2026-11-13.md. Server từ chối khởi động nếu kết nối bằng role chủ bảng/superuser hoặc bảng chưa bật RLS.
 
+## Vết chạy, CORS, sai lệch đồng hồ
+`HOST_TRACE_FILE` bật tệp JSONL, mỗi request một dòng (không có token, câu hỏi, thân bản ghi). `HOST_CORS_ORIGINS` (danh sách phân cách bằng dấu phẩy) cho phép giao diện web gọi từ trình duyệt; mặc định không cho origin nào. `HOST_OIDC_LEEWAY_SECONDS` (mặc định 30, tối đa 120) bù lệch đồng hồ với Keycloak. Sao lưu/khôi phục: `scripts/backup_restore_check.py`. Xem docs/components/host-operations.md và `web/README.md`.
+
 ## Tìm kiếm (H4)
 `POST /v1/search {"query": "...", "top_k": 5}` với bearer token. Mặc định `HOST_EMBEDDER=hash` (xác định, không cần khóa, chỉ để thử đường ống và quyền). Embedding thật: `HOST_EMBEDDER=gemini` và `HOST_EMBEDDING_API_KEY` (khóa chỉ trong .env cục bộ), rồi chạy lại `ingest`. Xem docs/components/host-search.md.
 

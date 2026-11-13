@@ -13,8 +13,9 @@ import os
 import sys
 
 import httpx
+import jwt
 
-from kc_dev_realm import USERS, admin_client, make_passwords, provision, token_for
+from kc_dev_realm import USERS, admin_client, exchange_for_host, harness_client_secret, make_passwords, provision, token_for
 from lrh.business import HostAuthError, HostHttpBusinessLookup
 
 HOST = os.environ["HOST_URL"].rstrip("/")
@@ -81,7 +82,34 @@ def main() -> int:
     rejected("token for another API (aud=lrh-api)", token_for("other-web", "alice", passwords["alice"]))
     rejected("tampered signature", tokens["alice"][:-4] + ("AAAA" if not tokens["alice"].endswith("AAAA") else "BBBB"))
     rejected("garbage token", "not-a-jwt")
-    total = len(cases) + len(search_cases) + 4
+    # Production pattern for harness -> host: the user's token is addressed to the harness (aud=lrh-api); the harness
+    # exchanges it (RFC 8693) for one addressed to the host. The host never sees the harness-audience token.
+    with admin_client() as admin:
+        secret = harness_client_secret(admin)
+    exchange_cases = [
+        ("alice", "order", "BM-1001", True), ("alice", "order", "BM-1002", False), ("bob", "order", "BM-1002", True),
+        ("fin", "invoice", "INV-2026-0451", True), ("sam", "invoice", "INV-2026-0451", False),
+    ]
+    for user, kind, ref, expected in exchange_cases:
+        r = exchange_for_host(token_for("other-web", user, passwords[user]), secret)
+        if r.status_code != 200:
+            print(f"FAIL exchange for {user}: {r.status_code}")
+            failures.append(("exchange", user))
+            continue
+        claims = jwt.decode(r.json()["access_token"], options={"verify_signature": False})
+        got = lookup.get(r.json()["access_token"], kind, ref) is not None
+        good = got == expected and claims.get("azp") == "lrh-api" and claims.get("aud") == "bepmay-host"
+        print(f"{'ok ' if good else 'FAIL'} exchanged {user:5} {kind:8} {ref:14} expected={'record' if expected else 'none  '} "
+              f"got={'record' if got else 'none'} aud={claims.get('aud')} azp={claims.get('azp')}")
+        if not good:
+            failures.append(("exchange", user, kind, ref))
+    # A token that only carries the host audience cannot be exchanged by the harness client: it was not issued for it.
+    wrong = exchange_for_host(tokens["alice"], secret)
+    refused = wrong.status_code >= 400
+    print(f"{'ok ' if refused else 'FAIL'} exchange of a host-audience-only token is refused: {wrong.status_code}")
+    if not refused:
+        failures.append(("exchange-wrong-audience",))
+    total = len(cases) + len(search_cases) + len(exchange_cases) + 5
     print(f"\n{total - len(failures)}/{total} checks passed")
     return 1 if failures else 0
 

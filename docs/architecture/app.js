@@ -13,38 +13,38 @@ const nodeDetails = {
   },
   a2: {
     id: "NODE A2",
-    status: "◌ KẾ HOẠCH G1",
-    statusClass: "status-plan",
+    status: "● CÓ Ở HOST (H4) · CHƯA NỐI HARNESS",
+    statusClass: "status-g0",
     title: "A2 · Parse & Chunk (Chia đoạn kèm quyền)",
-    desc: "Đọc tài liệu gốc, tách frontmatter và chia văn bản thành các đoạn (chunk) để phục vụ tìm kiếm.",
+    desc: "Đọc tài liệu gốc, tách frontmatter và chia văn bản thành các đoạn (chunk) để phục vụ tìm kiếm. Phần này đã chạy thật ở host/ (hệ thống chủ), nhưng harness chưa gọi nó.",
     input: "Bản ghi tài liệu từ A1",
     output: "Danh sách chunk kế thừa nguyên vẹn allowed_roles và owner_customer_id",
     owner: "Code nạp dữ liệu (Ingestion pipeline)",
-    source: "docs/PLAN.md (Lớp L3a) · Giai đoạn 1",
+    source: "host/src/bepmay_host/chunking.py · docs/components/host-search.md",
     rule: "Mỗi chunk bắt buộc mang theo nhãn quyền của tài liệu cha; không tạo chunk thiếu metadata quyền."
   },
   a3: {
     id: "NODE A3",
-    status: "◌ KẾ HOẠCH G1",
-    statusClass: "status-plan",
+    status: "● CÓ Ở HOST (H4) · BẢNG chunks",
+    statusClass: "status-g0",
     title: "A3 · Chunk Records (Bản ghi đoạn văn)",
-    desc: "Cấu trúc bản ghi chuẩn hóa của từng đoạn văn trước khi ghi vào chỉ mục tìm kiếm.",
+    desc: "Cấu trúc bản ghi chuẩn hóa của từng đoạn văn trước khi ghi vào chỉ mục tìm kiếm. Phần này đã chạy thật ở host/ (hệ thống chủ), nhưng harness chưa gọi nó.",
     input: "Các đoạn văn đã cắt từ A2",
     output: "Record {chunk_id, doc_id, position, text, allowed_roles, owner_customer_id}",
     owner: "Hợp đồng dữ liệu (Data contract)",
-    source: "docs/DATA-CONTRACT.md (Mục 4)",
+    source: "host/migrations/versions/0003_chunks.py",
     rule: "Cập nhật hoặc xóa tài liệu gốc phải phản ánh tương ứng vào các chunk trong chỉ mục (kiểm bằng test ở G1)."
   },
   a4: {
     id: "NODE A4",
-    status: "◌ KẾ HOẠCH G1",
-    statusClass: "status-plan",
+    status: "● CÓ Ở HOST (H4) · PGVECTOR + RLS",
+    statusClass: "status-g0",
     title: "A4 · Search Index & Store (Kho chỉ mục)",
-    desc: "Lưu trữ bản ghi để tra cứu chính xác theo mã (Exact ID) và tìm kiếm tương đồng ngữ nghĩa (Vector/RAG) qua adapter.",
+    desc: "Lưu trữ bản ghi để tra cứu chính xác theo mã (Exact ID) và tìm kiếm tương đồng ngữ nghĩa (Vector/RAG) qua adapter. Phần này đã chạy thật ở host/ (hệ thống chủ), nhưng harness chưa gọi nó.",
     input: "Chunk records từ A3",
     output: "Chỉ mục sẵn sàng truy xuất có điều kiện lọc quyền (WHERE / pre-filter)",
     owner: "Index Adapter (PostgreSQL + pgvector ở Đường 1)",
-    source: "docs/PLAN.md (Mục 3)",
+    source: "host/src/bepmay_host/postgres_search.py · docs/components/host-search.md",
     rule: "Thay đổi CSDL chỉ qua adapter; mỗi adapter phải vượt qua cùng bộ test hợp đồng, bao gồm ca không có quyền."
   },
   b1: {
@@ -73,7 +73,7 @@ const nodeDetails = {
   },
   b3: {
     id: "NODE 3",
-    status: "● OIDC CODE TESTED · LIVE KEYCLOAK PENDING",
+    status: "● OIDC TESTED · KEYCLOAK THẬT: PKCE (HARNESS) + E2E (HOST)",
     statusClass: "status-g0",
     title: "3 · Auth & actor_context (Xác thực phiên)",
     desc: "Xác minh bearer JWT qua OIDC/JWKS; actor lấy từ claims đã xác thực. Unit test dùng JWKS/RSA tổng hợp; chưa chạy với Keycloak thật.",
@@ -85,10 +85,10 @@ const nodeDetails = {
   },
   b4: {
     id: "NODE 4",
-    status: "● ACTOR SCOPE BUILT · NO DATA ACL FILTER",
+    status: "● ACTOR SCOPE · HOST ÁP RLS · HARNESS CHƯA GỌI",
     statusClass: "status-g0",
     title: "4 · access_scope (Phạm vi quyền truy cập)",
-    desc: "Tạo access_scope từ actor đã xác thực để gắn vào route plan. Đây mới là metadata phạm vi; chưa có truy vấn dữ liệu hay bộ lọc ACL.",
+    desc: "Tạo access_scope từ actor đã xác thực để gắn vào route plan. Đây mới là metadata phạm vi; chưa có truy vấn dữ liệu hay bộ lọc ACL. Ở host, actor được đặt vào từng giao dịch Postgres và policy RLS đọc nó.",
     input: "actor_context đã xác thực từ Khối 3",
     output: "access_scope {role, owner_customer_id?} trong RoutePlan",
     owner: "src/lrh/routing.py · RoutePlanner",
@@ -133,26 +133,26 @@ const nodeDetails = {
   },
   b6a: {
     id: "NODE 6a",
-    status: "◌ KẾ HOẠCH G1 / G3",
-    statusClass: "status-plan",
+    status: "● CÓ Ở HOST (API + RLS) · HARNESS CHƯA GỌI",
+    statusClass: "status-g0",
     title: "6a · Exact ID Query (Tra cứu mã có gắn Scope)",
-    desc: "Tra cứu trực tiếp bản ghi theo mã định danh (đơn hàng, phiếu hỗ trợ, hóa đơn) kèm điều kiện chủ sở hữu.",
+    desc: "Tra cứu trực tiếp bản ghi theo mã định danh (đơn hàng, phiếu hỗ trợ, hóa đơn) kèm điều kiện chủ sở hữu. Host thực thi bằng row-level security: câu SELECT không mang điều kiện quyền, Postgres tự lọc.",
     input: "Mã định danh (slot) + điều kiện (allowed_roles, owner_customer_id = actor.customer_id)",
     output: "Bản ghi hợp lệ (vào 7b) hoặc rỗng nếu không tồn tại / không thuộc quyền (sang 6c)",
     owner: "Adapter kho dữ liệu (Code query)",
-    source: "docs/DATA-CONTRACT.md (Mục 2 & 3)",
+    source: "host/src/bepmay_host/postgres_store.py · host/migrations/versions/0002_rls.py",
     rule: "Khách c001 tra mã đơn của c002 sẽ nhận kết quả rỗng ngay ở tầng truy vấn, giống hệt trường hợp mã không tồn tại."
   },
   b6b: {
     id: "NODE 6b",
-    status: "◌ KẾ HOẠCH G1 / G3",
-    statusClass: "status-plan",
+    status: "● CÓ Ở HOST (PGVECTOR + RLS) · CHƯA ĐO CHẤT LƯỢNG",
+    statusClass: "status-g0",
     title: "6b · RAG Retriever (Lọc ACL trước Top-K)",
-    desc: "Truy xuất các đoạn tài liệu liên quan nhất nhưng chỉ tìm trên tập các chunk mà người hỏi có quyền xem.",
+    desc: "Truy xuất các đoạn tài liệu liên quan nhất nhưng chỉ tìm trên tập các chunk mà người hỏi có quyền xem. Đã kiểm: quyền áp trước khi xếp hạng. Chưa đo chất lượng tìm kiếm (embedder thử nghiệm không phải ngữ nghĩa).",
     input: "Câu hỏi + access_scope + chỉ mục từ A4",
     output: "Top-K đoạn văn đã qua kiểm tra quyền kèm doc_id (hoặc 0 kết quả sang 6c)",
     owner: "Retriever Adapter (PostgreSQL + pgvector)",
-    source: "docs/PLAN.md (Mục 3) · docs/GATES.md (G1, G3)",
+    source: "host/src/bepmay_host/postgres_search.py · host/migrations/versions/0003_chunks.py",
     rule: "Bắt buộc lọc quyền TRƯỚC khi lấy top-k (Pre-filter). Không lấy top-k toàn cục rồi mới cắt bỏ để tránh rỗng kết quả hoặc lộ thông tin."
   },
   b6c: {
@@ -526,6 +526,55 @@ function renderTrace(traceKey) {
     selectNode(trace.steps[0][0]);
   }
 }
+
+// ---- Real host traces (docs/architecture/host-traces.js, written by scripts/record_host_traces.py) ----
+function buildHostTrace(s, env) {
+  const r = s.response, a = s.actor, isSearch = s.request.path === "/v1/search";
+  const authFailed = r.status === 401;
+  const retrieval = isSearch ? "b6b" : "b6a";
+  const empty = r.outcome === "not_found" || (isSearch && r.result_count === 0);
+  const who = a.role ? `role = ${a.role}${a.customer_id ? ` · customer_id = ${a.customer_id}` : ""}` : "không có danh tính hợp lệ";
+  const steps = [];
+  steps.push(["b3", "3 · HOST KIỂM TOKEN", authFailed
+    ? `${r.outcome === "unauthenticated" ? "Không có header Authorization" : "Chữ ký / issuer / audience không hợp lệ"} → HTTP 401, dừng ngay (${r.latency_ms} ms). Không chạm tới cơ sở dữ liệu.`
+    : `Host tự kiểm token RS256 của Keycloak (issuer, audience bepmay-host, hạn dùng) → ${who}.`]);
+  if (!authFailed) {
+    steps.push(["b4", "4 · ĐẶT ACTOR VÀO GIAO DỊCH", "role và customer_id được đặt bằng set_config trong giao dịch Postgres; policy RLS đọc đúng hai giá trị này."]);
+    steps.push([retrieval, isSearch ? "6b · TÌM TRONG TẬP ĐƯỢC PHÉP" : "6a · TRA THEO MÃ",
+      isSearch
+        ? `pgvector xếp hạng chỉ trong các đoạn actor được xem; trả ${r.result_count} đoạn: ${(r.doc_ids || []).join(", ") || "(không có)"}.`
+        : `SELECT theo mã, không mang điều kiện quyền trong câu lệnh; Postgres tự lọc dòng. Kết quả: ${empty ? "0 dòng" : "1 bản ghi"} (outcome = ${r.outcome}).`]);
+    if (empty) steps.push(["b6c", "6c · NOT_FOUND", "0 dòng → HTTP 404 not_found. Host không phân biệt được 'không có quyền' với 'không tồn tại' nên hai trường hợp trả giống hệt nhau."]);
+  }
+  return {
+    badge: "ĐÃ CHẠY THẬT · HOST",
+    prompt: `${s.request.method} ${s.request.path}${s.request.query_chars ? ` · câu hỏi ${s.request.query_chars} ký tự (nội dung không được ghi lại)` : ""}`,
+    actor: `${who} · gọi trực tiếp API host, chưa đi qua harness`,
+    blocked: authFailed || empty,
+    nodes: authFailed ? ["b3"] : ["b3", "b4", retrieval, ...(empty ? ["b6c"] : [])],
+    edges: authFailed ? [] : [["b3", "b4"], ...(empty && isSearch ? [["b6b", "b6c"]] : [])],
+    steps,
+    result: `HTTP ${r.status} · outcome ${r.outcome} · ${r.latency_ms} ms · mã vết ${r.request_id}. Đo thật ngày ${env.recorded_at.slice(0, 10)}: ${env.environment}.`,
+  };
+}
+
+function installHostTraces() {
+  const data = window.HOST_TRACES;
+  const row = document.getElementById("host-trace-row");
+  if (!data || !row) return;
+  row.hidden = false;
+  data.scenarios.forEach((s) => {
+    const key = `host:${s.key}`;
+    traces[key] = buildHostTrace(s, data);
+    const color = s.response.status === 200 ? "#10b981" : s.response.status === 404 ? "#f43f5e" : "#f59e0b";
+    const btn = document.createElement("button");
+    btn.className = "trace-button";
+    btn.dataset.trace = key;
+    btn.innerHTML = `<span class="dot" style="background:${color}"></span>Thật: ${s.label}`;
+    row.appendChild(btn);
+  });
+}
+installHostTraces();
 
 $$(".view-tab").forEach((btn) => {
   btn.addEventListener("click", () => setView(btn.dataset.view));

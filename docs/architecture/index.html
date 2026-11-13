@@ -8,6 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <title>Kiến trúc &amp; Luồng hoạt động — Layered RAG Harness</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="host-traces.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -40,7 +41,7 @@
           </p>
           <div class="hero-tags">
             <span class="tag tag-g0">● Runtime T1–T2: API/Auth/route plan có contract tests</span>
-            <span class="tag tag-proposed">◌ Còn mở: live Keycloak, semantic score, RAG/ACL/MCP</span>
+            <span class="tag tag-proposed">● Host đã chạy thật: Keycloak, RLS, pgvector · ◌ Còn mở: harness gọi host, semantic score, MCP</span>
             <span class="tag tag-muted">Mỗi lớp mới chỉ thêm khi bộ câu hỏi đo chỉ ra lỗi</span>
           </div>
         </div>
@@ -111,7 +112,10 @@
                 <span class="dot" style="background:#f59e0b"></span>Mô phỏng: vượt quyền / injection
               </button>
             </div>
-            <p class="trace-disclaimer">Đường G0 là CLI → Gemini đã chạy. Các kịch bản khác mô phỏng hành vi đích; chúng chưa chạy qua retrieval/ACL/refusal thật.</p>
+            <div class="scenario-row" id="host-trace-row" role="group" aria-label="Vết chạy thật từ host" hidden>
+              <span class="scenario-label">VẾT CHẠY THẬT (HOST):</span>
+            </div>
+            <p class="trace-disclaimer">Đường G0 là CLI → Gemini đã chạy. Các kịch bản “Mô phỏng” mô tả hành vi đích và chưa chạy thật. Các kịch bản “Thật” là yêu cầu HTTP đã chạy vào host (Keycloak, Postgres RLS), ghi lại bằng scripts/record_host_traces.py; chúng chưa đi qua harness.</p>
 
             <div class="legend-row">
               <div class="legend-group">
@@ -220,7 +224,7 @@
                     <text class="head" x="356" y="114">A2 · Parse &amp; Chunk</text>
                     <text class="body" x="356" y="135">Trích xuất văn bản và chia đoạn</text>
                     <text class="small" x="356" y="154">Chunk kế thừa nguyên vẹn ACL gốc</text>
-                    <text class="chip chip-plan" x="356" y="174">◌ PLANNED · G1</text>
+                    <text class="chip chip-g0" x="356" y="174">● CÓ Ở HOST · H4</text>
                   </g>
                   <g class="svg-edge" data-from="a2" data-to="a3">
                     <path class="edge-trusted" d="M580 137H634"/>
@@ -232,7 +236,7 @@
                     <text class="head" x="652" y="114">A3 · Chunk Records</text>
                     <text class="body mono" x="652" y="135">chunk_id · doc_id · text</text>
                     <text class="small mono" x="652" y="154">allowed_roles · owner_customer_id</text>
-                    <text class="chip chip-plan" x="652" y="174">◌ ACL METADATA · G1</text>
+                    <text class="chip chip-g0" x="652" y="174">● ACL TRÊN CHUNK · H4</text>
                   </g>
                   <g class="svg-edge" data-from="a3" data-to="a4">
                     <path class="edge-trusted" d="M876 137H930"/>
@@ -244,7 +248,7 @@
                     <text class="head" x="948" y="114">A4 · Search Index &amp; Store</text>
                     <text class="body" x="948" y="135">Kho bản ghi ID + Vector / Chunk</text>
                     <text class="small" x="948" y="154">PostgreSQL + pgvector (qua adapter)</text>
-                    <text class="chip chip-plan" x="948" y="174">◌ PLANNED · G1</text>
+                    <text class="chip chip-g0" x="948" y="174">● PGVECTOR + RLS · H4</text>
                   </g>
 
                   <!-- ==================== LUỒNG B: ONLINE REQUEST LIFECYCLE ==================== -->
@@ -369,7 +373,7 @@
                     <text class="head" x="60" y="690">6a · Exact ID Query (Có gắn Scope)</text>
                     <text class="body mono" x="60" y="711">WHERE id = :slot AND owner = actor.id</text>
                     <text class="small" x="60" y="730">Tra trực tiếp bản ghi; không dùng embedding</text>
-                    <text class="chip chip-plan" x="60" y="751">◌ PLANNED · G1 / G3</text>
+                    <text class="chip chip-g0" x="60" y="751">● CÓ Ở HOST · RLS</text>
                   </g>
 
                   <g class="svg-node" data-node="b6b">
@@ -377,7 +381,7 @@
                     <text class="head" x="430" y="690">6b · RAG Retriever (Lọc ACL trước Top-K)</text>
                     <text class="body mono" x="430" y="711">allowed_roles ∩ actor.role &amp; owner_id</text>
                     <text class="small" x="430" y="730">Lọc quyền trước khi lấy top-k đoạn văn phù hợp</text>
-                    <text class="chip chip-plan" x="430" y="751">◌ PRE-FILTER TOP-K · G1 / G3</text>
+                    <text class="chip chip-g0" x="430" y="751">● CÓ Ở HOST · PRE-FILTER</text>
                   </g>
                   <g class="svg-edge" data-from="b6b" data-to="b6c">
                     <path class="edge-block" d="M774 716H832"/>

@@ -4,6 +4,10 @@ This is a dependency-free static architecture viewer for the request lifecycle. 
 
 `flow.svg` is the source diagram, mirrored inline in `index.html` for interactive highlighting. Solid arrows carry data, dashed arrows carry configuration or control, and coral branches stop or divert requests. Node labels distinguish code with contract tests from live integration and target-design work. The trace view includes the current G0 answer path as well as target-design examples.
 
+## Real host traces
+
+The "Thật" scenarios in the trace toolbar come from `host-traces.js`, written by `scripts/record_host_traces.py` from real HTTP requests to the host (Keycloak token, PostgreSQL row-level security). It is a snapshot taken at the time shown in the file, not a live feed; rerun the script to refresh it. These traces call the host directly and do not pass through the harness.
+
 ## Preview locally
 
 Open `index.html` directly in a browser, or serve the repository root with any static file server and visit `/docs/architecture/`.
