@@ -6,9 +6,12 @@ from typing import Protocol
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel, Field
 
 from bepmay_host.access import Actor, BusinessRecord
 from bepmay_host.auth import AuthenticationError, AuthenticationUnavailable, TokenVerifier
+from bepmay_host.embeddings import Embedder, EmbeddingUnavailable
+from bepmay_host.search_store import SearchStore
 
 _REF = {
     "order": re.compile(r"^BM-\d{4}$"),
@@ -21,7 +24,15 @@ class Store(Protocol):
     def get(self, actor: Actor, kind: str, ref_id: str) -> BusinessRecord | None: ...
 
 
-def create_app(*, token_verifier: TokenVerifier, store: Store) -> FastAPI:
+class SearchRequest(BaseModel):
+    query: str = Field(min_length=1, max_length=1000)
+    top_k: int = Field(default=5, ge=1, le=10)
+
+
+def create_app(
+    *, token_verifier: TokenVerifier, store: Store,
+    search_store: SearchStore | None = None, embedder: Embedder | None = None,
+) -> FastAPI:
     app = FastAPI(title="Bếp Mây host (synthetic)", version="0.0.1")
     bearer = HTTPBearer(auto_error=False)
 
@@ -56,5 +67,19 @@ def create_app(*, token_verifier: TokenVerifier, store: Store) -> FastAPI:
     @app.get("/v1/invoices/{ref_id}")
     def invoice(ref_id: str, actor: Actor = Depends(actor_dep)):
         return lookup("invoice", ref_id, actor)
+
+    if search_store is not None and embedder is not None:
+        @app.post("/v1/search")
+        def search(body: SearchRequest, actor: Actor = Depends(actor_dep)):
+            """Semantic search over document chunks the actor may see. Ranking never sees other chunks."""
+            try:
+                qvec = embedder.embed_query(body.query)
+            except EmbeddingUnavailable as exc:
+                raise HTTPException(503, "embedding_unavailable") from exc
+            hits = search_store.search(actor, embedder.model_id, qvec, body.top_k)
+            return {"results": [
+                {"chunk_id": h.chunk_id, "doc_id": h.doc_id, "title": h.title, "kind": h.kind,
+                 "text": h.text, "score": round(h.score, 6)} for h in hits
+            ]}
 
     return app

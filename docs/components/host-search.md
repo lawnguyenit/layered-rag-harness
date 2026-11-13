@@ -1,0 +1,21 @@
+# Host: tìm kiếm tài liệu có phân quyền (pgvector)
+
+- Giai đoạn thêm vào: H4 trong docs/HOST-SYSTEM-PLAN.md (nhánh C2 của sơ đồ). Nằm trong `host/`.
+- Làm gì: trả các đoạn tài liệu gần nghĩa nhất với câu hỏi, chỉ trong số đoạn người hỏi được phép xem.
+- Nhận gì: `POST /v1/search` với `{query, top_k<=10}` và bearer token. Harness gửi chữ, không gửi vector.
+- Trả gì: `{results: [{chunk_id, doc_id, title, kind, text, score}]}`; 401 khi token sai; 503 `embedding_unavailable` khi nhà cung cấp embedding lỗi.
+- Phụ thuộc vào: bảng `chunks` (migration `0003`, extension `vector`, image `pgvector/pgvector:pg16`), bộ embedding (`hash` cho test, `gemini` qua REST), ingest `python -m bepmay_host.ingest`.
+- Quyết định chính:
+  - Host giữ cả chỉ mục lẫn embedding câu hỏi, nên harness không phải khớp mô hình embedding. Mỗi chunk ghi `embedding_model`; câu hỏi chỉ khớp chunk cùng mô hình, đổi mô hình = nạp lại, không đổi schema.
+  - Quyền áp trước khi xếp hạng: `chunks` mang ACL riêng và chịu RLS giống `records`, nên top-k lấy trong tập được phép (hậu lọc trên top-k toàn cục có thể trả thiếu hoặc lộ qua điểm số).
+  - Không có chỉ mục vector: 23 chunk, quét chính xác nhanh và chính xác hơn xấp xỉ. Xét lại khi dữ liệu lớn.
+  - Ingest idempotent: chỉ embed lại chunk khi nội dung hoặc mô hình đổi (so hash), để không tốn hạn mức API; embed xong mới ghi, nên nhà cung cấp lỗi thì chỉ mục không đổi.
+- Có thể hỏng thế nào (và hậu quả): kết nối bằng role chủ bảng làm RLS vô hiệu (server tự từ chối khởi động, có test); đổi mô hình mà quên nạp lại thì tìm ra rỗng; embedding lỗi giữa chừng thì API trả 503 chứ không trả kết quả sai; chất lượng tìm kiếm chưa đo.
+- Quyền được kiểm ở đâu: policy `chunks_visible` (host/migrations/versions/0003_chunks.py); adapter chỉ đặt `app.role`/`app.customer_id` (`postgres_search.py`). Adapter memory dùng `is_visible`.
+- Kiểm tra bằng cách nào (test nào): host/tests/test_search.py: tính chất "không bao giờ rò" cho 7 kiểu người hỏi x 6 câu, khách không tìm được hóa đơn người khác dù trích nguyên văn, top-k vẫn đầy khi có tài liệu bị chặn, Postgres trùng adapter memory (thứ tự và điểm), ingest chạy lại không embed gì, đổi quyền không cần embed lại, lỗi nhà cung cấp không đổi chỉ mục, embedder REST gửi một yêu cầu mỗi văn bản và không lộ khóa trong lỗi. Phá policy `chunks`: bỏ điều kiện chủ sở hữu 8 test đỏ, `USING (true)` 17 đỏ, tắt RLS 18 đỏ. Đầu-cuối với Keycloak thật: scripts/e2e_host_keycloak.py (23/23).
+- Lỗi nó sửa trong bộ câu hỏi đo (ID câu hỏi): chưa có. Chưa chạy bộ câu hỏi nào qua nhánh này; không tính là đã sửa lỗi nào.
+- Chưa quyết định / chưa biết:
+  - **Embedder Gemini REST chưa kiểm thật**: dạng yêu cầu `:embedContent` viết theo trí nhớ về tài liệu, mới thử bằng máy chủ giả. Chỉ đánh dấu đã kiểm sau một lần gọi thật.
+  - Bản `hash` chứng minh quyền và đường ống, **không** chứng minh chất lượng tìm kiếm. Cần embedding thật và bộ đánh giá (G1).
+  - Chunking theo đoạn (tối đa 800 ký tự) vì corpus ngắn; chưa thử chiến lược khác.
+  - Chưa có xếp hạng lại, kết hợp từ khóa, hay trích nguồn ở mức câu.

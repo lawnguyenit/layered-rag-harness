@@ -85,6 +85,7 @@ def token_for(client_id: str, username: str, password: str) -> str:
 
 
 def main() -> int:
+    sys.stdout.reconfigure(encoding="utf-8")  # Vietnamese queries are printed; Windows consoles default to cp1252
     passwords = {name: secrets.token_urlsafe(18) for name in USERS}
     with admin_client() as admin:
         provision(admin, passwords)
@@ -122,10 +123,35 @@ def main() -> int:
             print(f"FAIL {label}: host accepted it")
             failures.append((label,))
 
+    def search(user: str, query: str) -> set[str]:
+        r = httpx.post(f"{HOST}/v1/search", json={"query": query, "top_k": 10}, headers={"Authorization": f"Bearer {tokens[user]}"}, timeout=15)
+        r.raise_for_status()
+        return {h["doc_id"] for h in r.json()["results"]}
+
+    # (user, query, doc that must / must not appear)
+    search_cases = [
+        ("alice", "hóa đơn INV-2026-0451", "invoice-c001-inv01", True),
+        ("bob", "hóa đơn INV-2026-0451", "invoice-c001-inv01", False),
+        ("bob", "hóa đơn tổng tiền thanh toán", "invoice-c002-inv02", True),
+        ("sam", "kế hoạch nhân sự", "mgmt-staffing-plan", False),
+        ("mia", "kế hoạch nhân sự", "mgmt-staffing-plan", True),
+    ]
+    for user, query, doc, expected in search_cases:
+        got = doc in search(user, query)
+        flag = "ok " if got == expected else "FAIL"
+        print(f"{flag} search {user:5} {query[:28]:28} {doc:20} expected={'seen' if expected else 'hidden'} got={'seen' if got else 'hidden'}")
+        if got != expected:
+            failures.append((user, query, doc))
+    anon = httpx.post(f"{HOST}/v1/search", json={"query": "x"})
+    print(f"{'ok ' if anon.status_code == 401 else 'FAIL'} search without token: {anon.status_code}")
+    if anon.status_code != 401:
+        failures.append(("search-anon",))
+
     rejected("token for another API (aud=lrh-api)", token_for("other-web", "alice", passwords["alice"]))
     rejected("tampered signature", tokens["alice"][:-4] + ("AAAA" if not tokens["alice"].endswith("AAAA") else "BBBB"))
     rejected("garbage token", "not-a-jwt")
-    print(f"\n{len(cases) + 3 - len(failures)}/{len(cases) + 3} checks passed")
+    total = len(cases) + len(search_cases) + 4
+    print(f"\n{total - len(failures)}/{total} checks passed")
     return 1 if failures else 0
 
 

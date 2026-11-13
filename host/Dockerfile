@@ -13,5 +13,5 @@ ENV PATH="/app/host/.venv/bin:$PATH" HOST_CORPUS_DIR=/app/data/corpus
 RUN useradd --system --uid 10001 app && chown -R app /app
 USER app
 EXPOSE 8020
-# Migrate, set the app role password and seed (all idempotent, as the table owner); then serve as the app role.
-CMD ["sh", "-c", "alembic upgrade head && python -m bepmay_host.provision && python -m bepmay_host.seed && exec uvicorn bepmay_host.server:app --host 0.0.0.0 --port 8020"]
+# Migrate, set the app role password, seed and ingest chunks (all idempotent, as the table owner); then serve as the app role.
+CMD ["sh", "-c", "alembic upgrade head && python -m bepmay_host.provision && python -m bepmay_host.seed && python -m bepmay_host.ingest && exec uvicorn bepmay_host.server:app --host 0.0.0.0 --port 8020"]

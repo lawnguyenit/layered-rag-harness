@@ -10,7 +10,7 @@ from psycopg_pool import ConnectionPool
 
 from bepmay_host.access import Actor, BusinessRecord
 
-_SET_ACTOR = "SELECT set_config('app.role', %s, true), set_config('app.customer_id', %s, true)"
+SET_ACTOR = "SELECT set_config('app.role', %s, true), set_config('app.customer_id', %s, true)"
 
 _GET = """
 SELECT doc_id, kind, ref_id, title, body, owner_customer_id
@@ -18,13 +18,28 @@ FROM records
 WHERE kind = %(kind)s AND ref_id = %(ref_id)s
 """
 
-
 _ROLE_CHECK = """
 SELECT r.rolsuper, r.rolbypassrls,
-       EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'records' AND tableowner = current_user),
-       COALESCE((SELECT c.relrowsecurity AND c.relforcerowsecurity FROM pg_class c WHERE c.relname = 'records'), false)
+       EXISTS (SELECT 1 FROM pg_tables WHERE tablename = %(t)s AND tableowner = current_user),
+       COALESCE((SELECT c.relrowsecurity AND c.relforcerowsecurity FROM pg_class c WHERE c.relname = %(t)s), false)
 FROM pg_roles r WHERE r.rolname = current_user
 """
+
+
+def check_least_privilege(pool: ConnectionPool, table: str) -> None:
+    """Refuse to run as a role that would silently defeat RLS on `table`. Called once at server start."""
+    with pool.connection() as conn:
+        superuser, bypass, owner, rls_on = conn.execute(_ROLE_CHECK, {"t": table}).fetchone()
+    problems = [
+        name for name, bad in (
+            ("role is a superuser", superuser),
+            ("role has BYPASSRLS", bypass),
+            (f"role owns the {table} table", owner),
+            (f"RLS is not enabled and forced on {table} (run migrations)", not rls_on),
+        ) if bad
+    ]
+    if problems:
+        raise RuntimeError("refusing to start, row-level security would not protect data: " + "; ".join(problems))
 
 
 class PostgresBusinessStore:
@@ -39,25 +54,13 @@ class PostgresBusinessStore:
         self.pool.open()
 
     def assert_least_privilege(self) -> None:
-        """Refuse to run as a role that would silently defeat RLS. Called once at server start."""
-        with self.pool.connection() as conn:
-            superuser, bypass, owner, rls_on = conn.execute(_ROLE_CHECK).fetchone()
-        problems = [
-            name for name, bad in (
-                ("role is a superuser", superuser),
-                ("role has BYPASSRLS", bypass),
-                ("role owns the records table", owner),
-                ("RLS is not enabled and forced on records (run migrations)", not rls_on),
-            ) if bad
-        ]
-        if problems:
-            raise RuntimeError("refusing to start, row-level security would not protect data: " + "; ".join(problems))
+        check_least_privilege(self.pool, "records")
 
     def close(self) -> None:
         self.pool.close()
 
     def get(self, actor: Actor, kind: str, ref_id: str) -> BusinessRecord | None:
         with self.pool.connection() as conn:
-            conn.execute(_SET_ACTOR, (actor.role, actor.customer_id or ""))
+            conn.execute(SET_ACTOR, (actor.role, actor.customer_id or ""))
             row = conn.execute(_GET, {"kind": kind, "ref_id": ref_id}).fetchone()
         return BusinessRecord(*row) if row else None

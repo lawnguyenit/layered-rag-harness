@@ -188,3 +188,13 @@ A chronological record of how this repository was built: what changed, why, and 
 
 **Found:** the first real token was rejected (`aud=account`): Keycloak issues a custom audience only when that API is registered as a client. Fixed in the script. **Open:** the host-audience token fails the harness's own verifier; token exchange or a two-audience token is an undecided design choice. **Not done:** H3 (harness dispatches C1; waits on the owner's intent gold review), HTTPS, a restore-from-backup test.
 
+
+## 2026-11-13 — Host H4: permissioned vector search (pgvector)
+
+**Added** `POST /v1/search` and the `chunks` table (migration `0003`, pgvector, same row-level security as `records`), chunking, an idempotent owner-side ingest, and two embedders: a deterministic `hash` one for tests and a Gemini REST one. The host owns index and query embedding so the harness only sends text. Compose image changed to `pgvector/pgvector:pg16` (pulled and run today; this resolves the PLAN note that no pgvector image had been checked).
+
+**Evidence:** host suite 94 passed against Postgres+pgvector (memory and Postgres adapters give identical rankings; across 7 actor kinds x 6 queries no actor received a chunk it may not see). Breaking the `chunks` policy gave 8, 17 and 18 failures for three mutations; restored by downgrade/upgrade and re-ingest. End-to-end with a real Keycloak token: 23/23. A clean container build reached healthy and ingested 23 chunks. Harness suite 83 passed, 2 skipped.
+
+**Found:** the first container build crashed because `httpx` was only a dev dependency while the embedder needs it at runtime; unit tests could not see this, the container run did. Moved to runtime dependencies. Printing Vietnamese on a Windows console raised a cp1252 error in the e2e script (it now sets UTF-8).
+
+**Not verified:** the Gemini REST embedder against the real API (only a mock server), and any retrieval quality: the hash embedder is not semantic and no evaluation set has run through this path. H4's gate (score against the H0 baseline) is therefore "not measured".

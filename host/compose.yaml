@@ -1,7 +1,7 @@
 services:
   postgres:
-    # postgres:16-alpine was already present on the repo host. pgvector arrives with H4 (image not yet checked).
-    image: postgres:16-alpine
+    # pgvector/pgvector:pg16 (Postgres 16 + the vector extension): pulled and run 2026-11-13; plain postgres images lack pgvector.
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_DB: lrh
       POSTGRES_USER: lrh
@@ -28,6 +28,9 @@ services:
       DATABASE_URL: postgresql://bepmay_app:${HOST_APP_PASSWORD:-}@postgres:5432/lrh
       MIGRATE_DATABASE_URL: postgresql://lrh:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the local .env}@postgres:5432/lrh
       HOST_APP_PASSWORD: ${HOST_APP_PASSWORD:-}
+      # hash = deterministic test embedder (no key). gemini = real embeddings (needs HOST_EMBEDDING_API_KEY).
+      HOST_EMBEDDER: ${HOST_EMBEDDER:-hash}
+      HOST_EMBEDDING_API_KEY: ${HOST_EMBEDDING_API_KEY:-}
       HOST_OIDC_ISSUER: ${HOST_OIDC_ISSUER:-}
       HOST_OIDC_AUDIENCE: ${HOST_OIDC_AUDIENCE:-}
       HOST_OIDC_JWKS_URL: ${HOST_OIDC_JWKS_URL:-}
