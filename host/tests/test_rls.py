@@ -1,6 +1,6 @@
 """H2 acceptance tests: row-level security enforced by the database, not by the query text.
 
-These tests are written first and are RED until migration 0002 (policy + app role) exists.
+Written first (red), then made green by migration 0002 (policy + app role).
 They deliberately run *raw* SQL with no WHERE clause as the app role: if the database is
 doing the filtering, a forgotten condition in a future query cannot leak rows.
 
@@ -17,7 +17,7 @@ import psycopg
 import pytest
 
 from bepmay_host.corpus import load_corpus
-from bepmay_host.postgres_store import PostgresBusinessStore
+from bepmay_host.seed import seed_records
 
 OWNER_URL = os.getenv("HOST_TEST_DATABASE_URL", "").strip()
 APP_URL = os.getenv("HOST_TEST_APP_DATABASE_URL", "").strip()
@@ -30,9 +30,7 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture(scope="module", autouse=True)
 def seeded():
-    store = PostgresBusinessStore(OWNER_URL, max_size=1)
-    store.seed(load_corpus(CORPUS))
-    store.close()
+    seed_records(OWNER_URL, load_corpus(CORPUS))
 
 
 def as_actor(conn, role, customer_id=""):

@@ -24,7 +24,10 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://lrh:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the local .env}@postgres:5432/lrh
+      # The server connects as the non-bypass app role; migrate/provision/seed use the table owner.
+      DATABASE_URL: postgresql://bepmay_app:${HOST_APP_PASSWORD:-}@postgres:5432/lrh
+      MIGRATE_DATABASE_URL: postgresql://lrh:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the local .env}@postgres:5432/lrh
+      HOST_APP_PASSWORD: ${HOST_APP_PASSWORD:-}
       HOST_OIDC_ISSUER: ${HOST_OIDC_ISSUER:-}
       HOST_OIDC_AUDIENCE: ${HOST_OIDC_AUDIENCE:-}
       HOST_OIDC_JWKS_URL: ${HOST_OIDC_JWKS_URL:-}

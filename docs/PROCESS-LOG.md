@@ -169,3 +169,13 @@ A chronological record of how this repository was built: what changed, why, and 
 **Evidence:** host suite 35 passed against a throwaway Postgres; a clean `docker compose --profile api up --build --wait` reached healthy, `/healthz` returned ok and an unauthenticated order lookup returned 401. Harness suite 83 passed, 2 skipped.
 
 **Fixed (same session):** `${VAR:?}` on the profiled service broke plain `docker compose up` because interpolation ignores profiles; the OIDC variables now default to empty and the server reports them missing. **Not done:** H2 row-level security (core, owner to write), live Keycloak token against the host audience, pool sizing under load.
+
+## 2026-11-13 — Host H2: row-level security under a non-bypass role
+
+**Added** migration `0002` (role `bepmay_app`: not superuser, no BYPASSRLS, not the table owner, SELECT only; RLS enabled and forced; policy `records_visible`). The adapter no longer carries the access condition: it sets `app.role` / `app.customer_id` with `set_config(..., true)` per transaction and the database filters. Migrations, password provisioning and seeding use the table owner (`MIGRATE_DATABASE_URL`); the server uses the app role. The role has no password in any migration; `bepmay_host.provision` sets it from an env var.
+
+**Honesty note:** AGENTS.md says the access-filter core should be typed by the repo owner with agent guidance. The owner asked the agent to write it in full, so this is agent-written; the owner should still read `0002_rls.py` and the adapter until they can explain them.
+
+**Evidence:** acceptance tests were written first (red), a throwaway reference solution validated them (14/14), then the real implementation: host suite 49 passed (adapter contract + RLS + API) against a throwaway Postgres. Mutations: dropping the customer-owner condition → 6 failures; policy `USING (true)` → 14 failures. `alembic downgrade 0001` then `upgrade head` restores a green suite. A clean `docker compose --profile api up --build --wait` reached healthy with the app role. **Not verified:** a live Keycloak token against the host audience, RLS performance, a restore-from-backup keeping role and policy (H6).
+
+**Changed** seeding: it moved out of the adapter (the app role cannot write) into `seed.py`.

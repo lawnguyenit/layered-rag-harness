@@ -6,9 +6,9 @@ from sqlalchemy import create_engine
 
 
 def _url() -> str:
-    url = os.getenv("DATABASE_URL", "").strip()
+    url = (os.getenv("MIGRATE_DATABASE_URL") or os.getenv("DATABASE_URL") or "").strip()
     if not url:
-        raise RuntimeError("DATABASE_URL is required to run migrations")
+        raise RuntimeError("MIGRATE_DATABASE_URL (table owner) is required to run migrations")
     return url.replace("postgresql://", "postgresql+psycopg://", 1)
 
 

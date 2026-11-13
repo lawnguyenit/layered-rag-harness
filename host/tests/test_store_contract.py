@@ -1,7 +1,8 @@
 """Contract tests for BusinessStore adapters, including the "actor without access" cases.
 
-The Postgres adapter runs only when HOST_TEST_DATABASE_URL points at a migrated database
-(`alembic upgrade head`); it is seeded from the synthetic corpus by the fixture.
+The Postgres adapter runs only when both URLs are set against a migrated database: the table owner
+(HOST_TEST_DATABASE_URL, used to seed) and the non-bypass app role (HOST_TEST_APP_DATABASE_URL, used by
+the adapter). Authorisation is row-level security, so the adapter must be tested as the app role.
 """
 import os
 from pathlib import Path
@@ -11,22 +12,24 @@ import pytest
 from bepmay_host.corpus import load_corpus
 from bepmay_host.memory_store import MemoryBusinessStore
 from bepmay_host.postgres_store import PostgresBusinessStore
+from bepmay_host.seed import seed_records
 from bepmay_host.access import Actor
 
 CORPUS = Path(__file__).resolve().parents[2] / "data" / "corpus"
 DB_URL = os.getenv("HOST_TEST_DATABASE_URL", "").strip()
+APP_URL = os.getenv("HOST_TEST_APP_DATABASE_URL", "").strip()
 
 
 @pytest.fixture(
-    params=["memory", pytest.param("postgres", marks=pytest.mark.skipif(not DB_URL, reason="HOST_TEST_DATABASE_URL not set"))]
+    params=["memory", pytest.param("postgres", marks=pytest.mark.skipif(not (DB_URL and APP_URL), reason="HOST_TEST_DATABASE_URL / HOST_TEST_APP_DATABASE_URL not set"))]
 )
 def store(request):
     docs = load_corpus(CORPUS)
     if request.param == "memory":
         yield MemoryBusinessStore(docs)
         return
-    pg = PostgresBusinessStore(DB_URL, max_size=2)
-    pg.seed(docs)
+    seed_records(DB_URL, docs)
+    pg = PostgresBusinessStore(APP_URL, max_size=2)
     yield pg
     pg.close()
 
