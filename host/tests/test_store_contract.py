@@ -1,6 +1,6 @@
 """Contract tests for BusinessStore adapters, including the "actor without access" cases.
 
-The Postgres adapter runs only when LRH_TEST_DATABASE_URL points at a migrated database
+The Postgres adapter runs only when HOST_TEST_DATABASE_URL points at a migrated database
 (`alembic upgrade head`); it is seeded from the synthetic corpus by the fixture.
 """
 import os
@@ -8,17 +8,17 @@ from pathlib import Path
 
 import pytest
 
-from lrh.datastore.corpus import load_corpus
-from lrh.datastore.memory import MemoryBusinessStore
-from lrh.datastore.postgres import PostgresBusinessStore
-from lrh.request_contracts import Actor
+from bepmay_host.corpus import load_corpus
+from bepmay_host.memory_store import MemoryBusinessStore
+from bepmay_host.postgres_store import PostgresBusinessStore
+from bepmay_host.access import Actor
 
-CORPUS = Path(__file__).resolve().parents[1] / "data" / "corpus"
-DB_URL = os.getenv("LRH_TEST_DATABASE_URL", "").strip()
+CORPUS = Path(__file__).resolve().parents[2] / "data" / "corpus"
+DB_URL = os.getenv("HOST_TEST_DATABASE_URL", "").strip()
 
 
 @pytest.fixture(
-    params=["memory", pytest.param("postgres", marks=pytest.mark.skipif(not DB_URL, reason="LRH_TEST_DATABASE_URL not set"))]
+    params=["memory", pytest.param("postgres", marks=pytest.mark.skipif(not DB_URL, reason="HOST_TEST_DATABASE_URL not set"))]
 )
 def store(request):
     docs = load_corpus(CORPUS)

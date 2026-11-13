@@ -1,9 +1,9 @@
 """In-memory reference adapter: same contract as Postgres, filtering in Python."""
 from __future__ import annotations
 
-from lrh.datastore.contracts import BusinessRecord, is_visible
-from lrh.datastore.corpus import CorpusDoc
-from lrh.request_contracts import Actor
+from bepmay_host.access import Actor, BusinessRecord, is_visible
+from bepmay_host.corpus import CorpusDoc
+ 
 
 
 class MemoryBusinessStore:

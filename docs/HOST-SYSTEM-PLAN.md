@@ -20,6 +20,9 @@ Soạn: 2026-11-13, thay bản "PIVOT-PLAN" trước đó (hiểu sai ý chủ r
 
 Postgres vì thế có hai vai: dữ liệu đơn/ticket/hóa đơn cho C1, và đoạn tài liệu cho C2. Cả hai đứng sau adapter, qua cùng test hợp đồng gồm ca "người không có quyền".
 
+## 2b. Tách đôi (làm 2026-11-13)
+Host nằm trong `host/` như dự án riêng (pyproject, compose, migration, API, test riêng); harness chỉ có cổng `BusinessLookup` và client HTTP. Mỗi hệ thống tự kiểm token và tự giữ quy tắc của mình. Hệ quả cho các bước dưới: H2 (RLS) và dữ liệu thuộc host; H3 là phần harness gọi host.
+
 ## 3. Bước
 Phần intent (Tầng 2, 5a) giữ như hiện tại: chờ chủ repo duyệt gold và đo held-out. Các bước dưới là phần đứng sau route plan.
 

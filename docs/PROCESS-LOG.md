@@ -153,3 +153,11 @@ A chronological record of how this repository was built: what changed, why, and 
 **Fixed** the three question-set defects flagged before the baseline: A-007 now accepts "300.000|300.001" (the policy text says 300.001), B-005 expects the third-complaint fact instead of a phrase already in the question, B-006 drops the unneeded date. Regenerated `eval/questions.jsonl`; validator passes. Baseline run and hand grading are still pending (needs the provider key, which the agent does not read).
 
 **Added** H1 of `docs/HOST-SYSTEM-PLAN.md`: `BusinessStore` contract with in-memory and PostgreSQL adapters, Alembic migration `0001`, synthetic corpus seeding, `compose.db.yaml` (postgres:16-alpine, loopback port 55432). Both adapters pass the same contract tests including the no-access cases (30 passed); breaking the owner condition in the SQL makes 3 tests fail. Full suite with Postgres enabled: 108 passed, 2 skipped. Not done: wiring into the API, a role separated from the database owner and row-level security (H2, owner to write), connection pooling. No credentials stored; the test database password was generated per run.
+
+## 2026-11-13 — Host system split from the harness
+
+**Changed** the layout: the business-record store, Alembic migration, compose file, token verification and read-only API now live in `host/`, a separate uv project (`bepmay-host`) with its own dependencies, tests and README. The harness keeps only a port and an HTTP client (`src/lrh/business.py`) that forwards the caller's bearer token; it no longer depends on psycopg or Alembic. Reason (owner direction): show readers that the host system is a separate thing the harness plugs into, rather than building as if one team controlled everything. The host verifies tokens for its own audience, owns the access rule, and returns the same 404 for denied and nonexistent records.
+
+**Evidence:** harness suite 83 passed, 2 skipped; host suite 35 passed including the Postgres adapter on a throwaway container (removed afterwards). Both `uv lock --check` pass. **Not verified:** a live Keycloak token accepted by both services (needs both audiences or token exchange), the harness calling the host over a real socket, row-level security (H2).
+
+**Removed** untracked artifacts nothing referenced: `output/` (diagram screenshots), `.playwright-cli/`, empty `scripts/data/`.

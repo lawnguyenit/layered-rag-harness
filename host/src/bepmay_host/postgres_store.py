@@ -7,9 +7,9 @@ from __future__ import annotations
 
 import psycopg
 
-from lrh.datastore.contracts import BusinessRecord
-from lrh.datastore.corpus import CorpusDoc
-from lrh.request_contracts import Actor
+from bepmay_host.access import Actor, BusinessRecord
+from bepmay_host.corpus import CorpusDoc
+ 
 
 _GET = """
 SELECT doc_id, kind, ref_id, title, body, owner_customer_id
