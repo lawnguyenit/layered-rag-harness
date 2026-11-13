@@ -8,6 +8,7 @@ from bepmay_host.auth import AuthConfig, OIDCTokenVerifier
 from bepmay_host.embeddings import embedder_from_env
 from bepmay_host.postgres_search import PostgresSearchStore
 from bepmay_host.postgres_store import PostgresBusinessStore
+from bepmay_host.trace import TraceRecorder
 
 
 def _build():
@@ -24,8 +25,10 @@ def _build():
         store.close()
         search.close()
         raise
+    origins = [o.strip() for o in os.getenv("HOST_CORS_ORIGINS", "").split(",") if o.strip()]
     return create_app(token_verifier=OIDCTokenVerifier(AuthConfig.from_env()), store=store,
-                      search_store=search, embedder=embedder)
+                      search_store=search, embedder=embedder,
+                      trace=TraceRecorder(os.getenv("HOST_TRACE_FILE")), cors_origins=origins)
 
 
 app = _build()
