@@ -179,3 +179,12 @@ A chronological record of how this repository was built: what changed, why, and 
 **Evidence:** acceptance tests were written first (red), a throwaway reference solution validated them (14/14), then the real implementation: host suite 49 passed (adapter contract + RLS + API) against a throwaway Postgres. Mutations: dropping the customer-owner condition → 6 failures; policy `USING (true)` → 14 failures. `alembic downgrade 0001` then `upgrade head` restores a green suite. A clean `docker compose --profile api up --build --wait` reached healthy with the app role. **Not verified:** a live Keycloak token against the host audience, RLS performance, a restore-from-backup keeping role and policy (H6).
 
 **Changed** seeding: it moved out of the adapter (the app role cannot write) into `seed.py`.
+
+## 2026-11-13 — Host: startup guard and real-Keycloak end-to-end
+
+**Added** a boot-time check (`assert_least_privilege`): the host refuses to start if its database role is a superuser, has BYPASSRLS, owns the `records` table, or RLS is not enabled and forced. Reason: a wrong connection string would otherwise disable the access rule silently, so the failure should be loud and early. Added `scripts/e2e_host_keycloak.py` (real Keycloak token → harness client → host → Postgres RLS) and a lab note.
+
+**Evidence:** host suite 51 passed; booting as the table owner raised the intended error. End-to-end 17/17 against Keycloak 26.8.2 (see `docs/lab/host-keycloak-e2e-2026-11-13.md`). Keycloak ran on port 18080 in a temporary container because 8080 was in use by another local project; nothing of that project was touched.
+
+**Found:** the first real token was rejected (`aud=account`): Keycloak issues a custom audience only when that API is registered as a client. Fixed in the script. **Open:** the host-audience token fails the harness's own verifier; token exchange or a two-audience token is an undecided design choice. **Not done:** H3 (harness dispatches C1; waits on the owner's intent gold review), HTTPS, a restore-from-backup test.
+

@@ -19,6 +19,14 @@ WHERE kind = %(kind)s AND ref_id = %(ref_id)s
 """
 
 
+_ROLE_CHECK = """
+SELECT r.rolsuper, r.rolbypassrls,
+       EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'records' AND tableowner = current_user),
+       COALESCE((SELECT c.relrowsecurity AND c.relforcerowsecurity FROM pg_class c WHERE c.relname = 'records'), false)
+FROM pg_roles r WHERE r.rolname = current_user
+"""
+
+
 class PostgresBusinessStore:
     """Small pool; one transaction per call so the actor settings cannot outlive the request."""
 
@@ -29,6 +37,21 @@ class PostgresBusinessStore:
             kwargs={"connect_timeout": 3},
         )
         self.pool.open()
+
+    def assert_least_privilege(self) -> None:
+        """Refuse to run as a role that would silently defeat RLS. Called once at server start."""
+        with self.pool.connection() as conn:
+            superuser, bypass, owner, rls_on = conn.execute(_ROLE_CHECK).fetchone()
+        problems = [
+            name for name, bad in (
+                ("role is a superuser", superuser),
+                ("role has BYPASSRLS", bypass),
+                ("role owns the records table", owner),
+                ("RLS is not enabled and forced on records (run migrations)", not rls_on),
+            ) if bad
+        ]
+        if problems:
+            raise RuntimeError("refusing to start, row-level security would not protect data: " + "; ".join(problems))
 
     def close(self) -> None:
         self.pool.close()

@@ -134,3 +134,23 @@ def test_control_table_owner_bypasses_without_force_proves_why_role_matters():
     with psycopg.connect(OWNER_URL) as owner:
         assert len(refs(owner)) >= 8
     assert OWNER_URL != APP_URL
+
+
+def test_startup_guard_accepts_the_app_role():
+    from bepmay_host.postgres_store import PostgresBusinessStore
+    store = PostgresBusinessStore(APP_URL, max_size=1)
+    try:
+        store.assert_least_privilege()
+    finally:
+        store.close()
+
+
+def test_startup_guard_refuses_the_owner_role():
+    from bepmay_host.postgres_store import PostgresBusinessStore
+    store = PostgresBusinessStore(OWNER_URL, max_size=1)
+    try:
+        with pytest.raises(RuntimeError, match="refusing to start"):
+            store.assert_least_privilege()
+    finally:
+        store.close()
+

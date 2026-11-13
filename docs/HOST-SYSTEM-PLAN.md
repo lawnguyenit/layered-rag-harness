@@ -24,7 +24,7 @@ Postgres vì thế có hai vai: dữ liệu đơn/ticket/hóa đơn cho C1, và 
 Host nằm trong `host/` như dự án riêng (pyproject, compose, migration, API, test riêng); harness chỉ có cổng `BusinessLookup` và client HTTP. Mỗi hệ thống tự kiểm token và tự giữ quy tắc của mình. Hệ quả cho các bước dưới: H2 (RLS) và dữ liệu thuộc host; H3 là phần harness gọi host.
 
 ## 2c. Tiến độ host (2026-11-13)
-Đã có: Postgres + Alembic + seed, API chỉ đọc có kiểm token, connection pool, Dockerfile và `docker compose --profile api` (dựng từ trạng thái sạch, `/healthz` ok, thiếu token trả 401). Đã xong H2 (RLS). Còn lại phía host: kiểm Keycloak thật, H4 (pgvector). React (H5) và vết chạy (H6) là phần sau.
+Đã có: Postgres + Alembic + seed, API chỉ đọc có kiểm token, connection pool, Dockerfile và `docker compose --profile api` (dựng từ trạng thái sạch, `/healthz` ok, thiếu token trả 401). Đã xong H2 (RLS), kiểm Keycloak thật (17/17) và chốt chặn khởi động. Còn lại phía host: quyết cách một token dùng cho cả hai hệ thống, H4 (pgvector). React (H5) và vết chạy (H6) là phần sau.
 
 ## 2d. H2 — RLS (làm 2026-11-13, agent viết theo yêu cầu chủ repo)
 Xong: migration `0002`, adapter dùng `set_config`, hai URL (chủ/app), `provision`. Thiết kế ban đầu, giữ để đối chiếu. Test nghiệm thu: `host/tests/test_rls.py`, cần `HOST_TEST_DATABASE_URL` (chủ bảng) và `HOST_TEST_APP_DATABASE_URL` (role `bepmay_app`). Các việc cần viết:

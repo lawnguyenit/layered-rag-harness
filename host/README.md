@@ -27,5 +27,8 @@ docker compose --profile api up -d --build --wait   # postgres + host-api trên 
 ```
 Container tự `alembic upgrade head`, đặt mật khẩu role app, seed (idempotent), rồi chạy uvicorn bằng user không phải root và kết nối bằng role app. Context build là gốc repo vì seed đọc `data/corpus`. `docker compose up` không kèm profile vẫn chỉ chạy postgres.
 
+## Kiểm đầu-cuối với Keycloak
+`scripts/e2e_host_keycloak.py` (chạy từ gốc repo) dựng realm thử, lấy token thật và gọi host bằng client của harness: 17/17 đạt, xem docs/lab/host-keycloak-e2e-2026-11-13.md. Server từ chối khởi động nếu kết nối bằng role chủ bảng/superuser hoặc bảng chưa bật RLS.
+
 ## Chưa có
-Kiểm với Keycloak thật (token mang audience của host); chạy harness cùng compose.
+Một token dùng được cho cả harness và host (cần token exchange hoặc hai audience); chạy harness cùng compose; harness thực thi nhánh C1 (H3).

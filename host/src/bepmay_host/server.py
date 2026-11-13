@@ -12,7 +12,13 @@ def _build():
     url = os.getenv("DATABASE_URL", "").strip()
     if not url:
         raise RuntimeError("DATABASE_URL is required")
-    return create_app(token_verifier=OIDCTokenVerifier(AuthConfig.from_env()), store=PostgresBusinessStore(url))
+    store = PostgresBusinessStore(url)
+    try:
+        store.assert_least_privilege()  # fail at boot, not silently at request time
+    except Exception:
+        store.close()
+        raise
+    return create_app(token_verifier=OIDCTokenVerifier(AuthConfig.from_env()), store=store)
 
 
 app = _build()
