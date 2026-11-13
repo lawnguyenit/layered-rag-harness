@@ -63,6 +63,7 @@ services:
       args:
         VITE_OIDC_AUTHORITY: http://localhost:18080/realms/bepmay-e2e
         VITE_HOST_URL: http://127.0.0.1:8020
+        VITE_LOGIN_HINT: "Demo: đăng nhập bằng alice, bob, sam, fin hoặc mia, mật khẩu chung do lệnh demo in ra. Tài khoản admin không dùng được ở đây, nó chỉ dành cho trang quản trị Keycloak."
         CSP_CONNECT_SRC: "'self' http://localhost:18080 http://127.0.0.1:8020"
     ports:
       - "127.0.0.1:5173:80"

@@ -48,6 +48,7 @@ export function App() {
         <section className="card">
           <h2>Đăng nhập</h2>
           <p>Mọi quyết định xem hay không xem một bản ghi do máy chủ quyết định theo vai trò trong token của bạn. Giao diện này không lọc gì.</p>
+          {import.meta.env.VITE_LOGIN_HINT && <p className="notice" data-testid="login-hint">{import.meta.env.VITE_LOGIN_HINT}</p>}
           {authError && <p role="alert" className="error">{authError}</p>}
           <button onClick={() => void mgr.signinRedirect()}>Đăng nhập bằng Keycloak</button>
         </section>

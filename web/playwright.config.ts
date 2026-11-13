@@ -9,5 +9,5 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"]],
   outputDir: "e2e-results",
-  use: { baseURL: "http://localhost:5173", channel: "chrome", headless: true, screenshot: "only-on-failure", trace: "off" },
+  use: { baseURL: process.env.E2E_BASE_URL ?? "http://localhost:5173", channel: "chrome", headless: true, screenshot: "only-on-failure", trace: "off" },
 });

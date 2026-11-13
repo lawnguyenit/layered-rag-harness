@@ -217,3 +217,5 @@ A chronological record of how this repository was built: what changed, why, and 
 
 **Found and fixed:** rerunning `up` without `down` failed because Postgres kept an anonymous volume with the old password (now tmpfs plus a clean-start step); the launcher's own final check misread an HTTP 401 as silence (urllib raises on 4xx). **Not done:** the demo is not exercised in CI; HTTPS; the harness panel.
 
+**Correction (same day, found by the owner):** the owner could not sign in with the Keycloak `admin` account shown by `up` and reported the login as broken. Checked with a scripted login: the admin password was correct and signs in to the Keycloak admin console, but `admin` exists only in the `master` realm, while the web UI's sign-in page belongs to the `bepmay-e2e` realm and looks identical. Not a defect in authentication; a usability gap in the demo. Fixed: the demo build of the web UI shows which accounts to use (build argument `VITE_LOGIN_HINT`, tested in a browser), and `up` now puts "start here" and the test users first and marks admin and API docs as not needed.
+

@@ -91,16 +91,19 @@ def up(password: str | None) -> int:
     print(f"""
 Demo is running.
 
-  Web UI           {UI}
-  Host API         {HOST}/docs   (needs a bearer token)
-  Keycloak admin   {KEYCLOAK}   user: admin   password: {secrets_env['KC_ADMIN_PASSWORD']}
+  Web UI           {UI}     <- start here
 
-Sign in on the web UI with any of these users. They share one throwaway password: {pw}
+To see the demo, click "Đăng nhập bằng Keycloak" on the web UI and sign in with one of these users.
+They share one throwaway password: {pw}
 
 """ + "\n".join(f"  {u:6} {role:18} {what}" for u, role, what in USERS) + f"""
 
 Try: sign in as alice and look up order BM-1001, then BM-1002; sign in as bob and compare; search "staffing plan"
 as mia (manager) and as sam (support). The "ask via harness" panel is not connected yet.
+
+Not needed to see the demo (the `admin` account does NOT work on the web UI sign-in page):
+  Keycloak admin console   {KEYCLOAK}   user: admin   password: {secrets_env['KC_ADMIN_PASSWORD']}
+  Host API docs            {HOST}/docs   (needs a bearer token)
 
 Stop and remove everything:  python scripts/demo.py down
 (Secrets are generated per run and are not stored. Rerun `up` for a new set.)""")

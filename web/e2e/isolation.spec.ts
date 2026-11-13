@@ -43,6 +43,14 @@ test("signed-out visitors see only the login prompt", async ({ page }) => {
   await expect(page.getByLabel("Mã")).toHaveCount(0);
 });
 
+test("the demo sign-in card says which accounts to use (demo build only)", async ({ page }) => {
+  test.skip(!process.env.EXPECT_LOGIN_HINT, "set EXPECT_LOGIN_HINT=1 when testing a build made with VITE_LOGIN_HINT");
+  await page.goto("/");
+  const hint = page.getByTestId("login-hint");
+  await expect(hint).toContainText("alice");
+  await expect(hint).toContainText("admin");
+});
+
 test("login uses authorization code + PKCE S256 and keeps tokens out of localStorage", async ({ page }) => {
   const authRequests: string[] = [];
   page.on("request", (r) => { if (r.url().includes("/protocol/openid-connect/auth")) authRequests.push(r.url()); });
