@@ -229,3 +229,11 @@ A chronological record of how this repository was built: what changed, why, and 
 
 **Not done:** the "ask via harness" panel (harness phase); the architecture viewer's recorded traces do not include the new list routes; no real phone check.
 
+
+## 2026-11-27 — README rewritten as a landing page
+
+**Changed:** `README.md` now has a plain-English summary with a Vietnamese block, a works-today / not-done split, a Mermaid flow, quick start and an honest "how it was built" section. No code changed.
+
+**Why:** the README is the first page a reviewer reads from the owner's CV; the old text did not separate what runs from what is pending.
+
+**Evidence:** re-run on Linux without Docker/Postgres/keys: harness 83 passed, 2 skipped; host 59 passed, 60 skipped (Postgres-dependent); `eval/validate.py` OK; `python -m lrh ask` works with the stub adapter. Demo, Postgres/RLS tests and browser tests were not re-run.
